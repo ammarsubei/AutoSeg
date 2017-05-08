@@ -76,9 +76,7 @@ def getModel():
 
 	trans_conv4 = Conv2DTranspose(11, (3,3), padding='same', activation='softmax')(ref3)
 
-	classify = Conv2D(1, (1,1))(trans_conv4)
-
-	model = Model(inputs=i, outputs=classify)
+	model = Model(inputs=i, outputs=trans_conv4)
 
 	return model
 
