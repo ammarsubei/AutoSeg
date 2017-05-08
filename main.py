@@ -74,7 +74,7 @@ def getModel():
 	trans_conv3 = Conv2DTranspose(num_filters, (3,3), padding='same', activation='elu', strides=2)(ref2)
 	ref3 = addBypassRefinementModule(trans_conv3, convI)
 
-	trans_conv4 = Conv2DTranspose(1, (3,3), padding='same', activation='elu')(ref3)
+	trans_conv4 = Conv2DTranspose(11, (3,3), padding='same', activation='softmax')(ref3)
 
 	model = Model(inputs=i, outputs=trans_conv4)
 
@@ -151,7 +151,7 @@ tb = TensorBoard(
 early = EarlyStopping(patience=batch_size, verbose=1)
 
 model = getModel()
-model.compile(loss='mean_squared_error', optimizer='adadelta', metrics=['accuracy'])
+model.compile(loss='sparse_categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
 
 model.fit_generator(
 	train_generator,
