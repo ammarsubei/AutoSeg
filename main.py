@@ -1,11 +1,18 @@
 import keras
 from keras.models import Model, load_model
+from keras.utils import plot_model
 from keras.layers import Conv2D, MaxPooling2D, Conv2DTranspose, concatenate
+from keras.preprocessing.image import ImageDataGenerator
+from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
 from keras import backend as K
 import numpy as np
 
 num_filters = 64
-input_size = #TODO
+image_size = (480,360,3)
+input_size = image_size
+mask_size = image_size
+batch_size = 2
+seed = 1
 
 def addFireModule(x):
 	squeeze = Conv2D(num_filters, (3,3), padding='same', activation='elu')(x)
@@ -66,3 +73,64 @@ def getModel():
 
 	return model
 
+data_gen_args = dict(rotation_range=30.,
+                    width_shift_range=0.2,
+                    height_shift_range=0.2,
+                    zoom_range=0.2,
+             		fill_mode='constant',
+                    horizontal_flip=True,
+                    rescale=1./255)
+
+train_image_datagen = ImageDataGenerator(**data_gen_args)
+train_mask_datagen = ImageDataGenerator(**data_gen_args)
+
+train_image_generator = train_image_datagen.flow_from_directory('data/training/images/',
+            													target_size=image_size,
+            													batch_size=batch_size,
+													            class_mode=None,
+													            seed=seed)
+train_mask_generator = train_image_datagen.flow_from_directory('data/training/masks/',
+            													target_size=image_size,
+            													batch_size=batch_size,
+													            class_mode=None,
+													            seed=seed)
+
+val_image_datagen = ImageDataGenerator(resize=1./255)
+val_mask_datagen = ImageDataGenerator(resize=1./255)
+
+train_image_generator = train_image_datagen.flow_from_directory('data/validation/images/',
+            													target_size=image_size,
+            													batch_size=batch_size,
+													            class_mode=None,
+													            seed=seed)
+
+train_mask_generator = train_image_datagen.flow_from_directory('data/training/masks/',
+            													target_size=image_size,
+            													batch_size=batch_size,
+													            class_mode=None,
+													            seed=seed)
+
+checkpoint = ModelCheckpoint(
+        model_name,
+        monitor='val_loss',
+        verbose=0,
+        save_best_only=True)
+
+tb = TensorBoard(
+        log_dir='./logs',
+        histogram_freq=0,
+        write_graph=True,
+        write_images=True)
+
+early = EarlyStopping(patience=batch_size, verbose=1)
+
+model = getModel()
+model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
+
+model.fit_generator(
+	train_generator,
+	steps_per_epoch=steps_per_epoch,
+	epochs=epochs,
+	callbacks=[checkpoint, tb, early],
+	validation_data=val_generator,
+	validation_steps=validation_steps)
