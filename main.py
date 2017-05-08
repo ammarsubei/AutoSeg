@@ -76,7 +76,9 @@ def getModel():
 
 	trans_conv4 = Conv2DTranspose(11, (3,3), padding='same', activation='softmax')(ref3)
 
-	model = Model(inputs=i, outputs=trans_conv4)
+	classify = Conv2D(1, (1,1))(trans_conv4)
+
+	model = Model(inputs=i, outputs=classify)
 
 	return model
 
@@ -151,7 +153,7 @@ tb = TensorBoard(
 early = EarlyStopping(patience=batch_size, verbose=1)
 
 model = getModel()
-model.compile(loss='sparse_categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
+model.compile(loss='mean_squared_error', optimizer='adadelta', metrics=['accuracy'])
 
 model.fit_generator(
 	train_generator,
