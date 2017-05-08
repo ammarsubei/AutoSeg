@@ -1,18 +1,25 @@
 import keras
 from keras.models import Model, load_model
 from keras.utils import plot_model
-from keras.layers import Conv2D, MaxPooling2D, Conv2DTranspose, concatenate
+from keras.layers import Input, Conv2D, MaxPooling2D, Conv2DTranspose, concatenate
 from keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
 from keras import backend as K
 import numpy as np
+import sys
 
 num_filters = 64
-image_size = (480,360,3)
-input_size = image_size
-mask_size = image_size
+img_height = 480
+img_width = 360
+img_size = (img_height, img_width)
+mask_size = img_size
+input_shape = (img_height, img_width, 3)
 batch_size = 2
+epochs = 500
+steps_per_epoch = int(600/batch_size) + 1
+validation_steps = int(101/batch_size) + 1
 seed = 1
+model_name= sys.argv[1]
 
 def addFireModule(x):
 	squeeze = Conv2D(num_filters, (3,3), padding='same', activation='elu')(x)
@@ -39,8 +46,8 @@ def addBypassRefinementModule(high, low):
 	return postConv
 
 def getModel():
-	i = Input(input_size)
-	convI = conv2D(num_filters, (3,3), padding='same', activation='elu')(i)
+	i = Input(input_shape)
+	convI = Conv2D(num_filters, (3,3), padding='same', activation='elu')(i)
 
 	pool1 = MaxPooling2D((2,2))(convI)
 	fire1_1 = addFireModule(pool1)
@@ -58,20 +65,33 @@ def getModel():
 
 	pdc = addParallelDilatedConvolution(fire3_4)
 
-	trans_conv1 = Conv2DTranspose(num_filters, (3,3), padding='same', activation='elu')(pdc)
+	trans_conv1 = Conv2DTranspose(num_filters, (3,3), padding='same', activation='elu', strides=2)(pdc)
 	ref1 = addBypassRefinementModule(trans_conv1, fire2_2)
 
-	trans_conv2 = Conv2DTranspose(num_filters, (3,3), padding='same', activation='elu')(ref1)
+	trans_conv2 = Conv2DTranspose(num_filters, (3,3), padding='same', activation='elu', strides=2)(ref1)
 	ref2 = addBypassRefinementModule(trans_conv2, fire1_2)
 
-	trans_conv3 = Conv2DTranspose(num_filters, (3,3), padding='same', activation='elu')(ref2)
+	trans_conv3 = Conv2DTranspose(num_filters, (3,3), padding='same', activation='elu', strides=2)(ref2)
 	ref3 = addBypassRefinementModule(trans_conv3, convI)
 
-	trans_conv4 = Conv2DTranspose(num_filters, (3,3), padding='same', activation='elu')(ref3)
+	trans_conv4 = Conv2DTranspose(1, (3,3), padding='same', activation='elu')(ref3)
 
 	model = Model(inputs=i, outputs=trans_conv4)
 
 	return model
+
+def zip3(*iterables):
+    # zip('ABCD', 'xy') --> Ax By
+    sentinel = object()
+    iterators = [iter(it) for it in iterables]
+    while iterators:
+        result = []
+        for it in iterators:
+            elem = next(it, sentinel)
+            if elem is sentinel:
+                return
+            result.append(elem)
+        yield tuple(result)
 
 data_gen_args = dict(rotation_range=30.,
                     width_shift_range=0.2,
@@ -85,30 +105,36 @@ train_image_datagen = ImageDataGenerator(**data_gen_args)
 train_mask_datagen = ImageDataGenerator(**data_gen_args)
 
 train_image_generator = train_image_datagen.flow_from_directory('data/training/images/',
-            													target_size=image_size,
+            													target_size=img_size,
             													batch_size=batch_size,
 													            class_mode=None,
 													            seed=seed)
-train_mask_generator = train_image_datagen.flow_from_directory('data/training/masks/',
-            													target_size=image_size,
-            													batch_size=batch_size,
-													            class_mode=None,
-													            seed=seed)
-
-val_image_datagen = ImageDataGenerator(resize=1./255)
-val_mask_datagen = ImageDataGenerator(resize=1./255)
-
-train_image_generator = train_image_datagen.flow_from_directory('data/validation/images/',
-            													target_size=image_size,
+train_mask_generator = train_mask_datagen.flow_from_directory('data/training/masks/',
+            													target_size=img_size,
+            													color_mode='grayscale',
             													batch_size=batch_size,
 													            class_mode=None,
 													            seed=seed)
 
-train_mask_generator = train_image_datagen.flow_from_directory('data/training/masks/',
-            													target_size=image_size,
+train_generator = zip(train_image_generator, train_mask_generator)
+
+val_image_datagen = ImageDataGenerator(rescale=1./255)
+val_mask_datagen = ImageDataGenerator(rescale=1./255)
+
+val_image_generator = val_image_datagen.flow_from_directory('data/validation/images/',
+            													target_size=img_size,
             													batch_size=batch_size,
 													            class_mode=None,
 													            seed=seed)
+
+val_mask_generator = val_mask_datagen.flow_from_directory('data/validation/masks/',
+            													target_size=img_size,
+            													color_mode='grayscale',
+            													batch_size=batch_size,
+													            class_mode=None,
+													            seed=seed)
+
+val_generator = zip(val_image_generator, val_mask_generator)
 
 checkpoint = ModelCheckpoint(
         model_name,
@@ -125,7 +151,7 @@ tb = TensorBoard(
 early = EarlyStopping(patience=batch_size, verbose=1)
 
 model = getModel()
-model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
+model.compile(loss='mean_squared_error', optimizer='adadelta', metrics=['accuracy'])
 
 model.fit_generator(
 	train_generator,
