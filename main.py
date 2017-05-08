@@ -116,7 +116,7 @@ train_mask_generator = train_mask_datagen.flow_from_directory('data/training/mas
 													            class_mode=None,
 													            seed=seed)
 
-train_generator = zip(train_image_generator, train_mask_generator)
+train_generator = zip3(train_image_generator, train_mask_generator)
 
 val_image_datagen = ImageDataGenerator(rescale=1./255)
 val_mask_datagen = ImageDataGenerator(rescale=1./255)
@@ -134,7 +134,7 @@ val_mask_generator = val_mask_datagen.flow_from_directory('data/validation/masks
 													            class_mode=None,
 													            seed=seed)
 
-val_generator = zip(val_image_generator, val_mask_generator)
+val_generator = zip3(val_image_generator, val_mask_generator)
 
 checkpoint = ModelCheckpoint(
         model_name,
