@@ -14,7 +14,7 @@ img_width = 360
 img_size = (img_height, img_width)
 mask_size = img_size
 input_shape = (img_height, img_width, 3)
-batch_size = 2
+batch_size = 8
 epochs = 500
 steps_per_epoch = int(600/batch_size) + 1
 validation_steps = int(101/batch_size) + 1
@@ -151,7 +151,7 @@ tb = TensorBoard(
 early = EarlyStopping(patience=batch_size, verbose=1)
 
 model = getModel()
-model.compile(loss='mean_squared_error', optimizer='adadelta', metrics=['accuracy'])
+model.compile(loss='mean_squared_logarithmic_error', optimizer='adadelta', metrics=['accuracy'])
 
 model.fit_generator(
 	train_generator,
