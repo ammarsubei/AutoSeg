@@ -1,9 +1,10 @@
 import keras
 from keras.models import Model, load_model
-from keras.utils import plot_model
+from keras.utils import plot_model, to_categorical
 from keras.layers import Input, Conv2D, MaxPooling2D, Conv2DTranspose, concatenate
 from keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
+from keras.engine.topology import Layer
 from keras import backend as K
 import numpy as np
 import sys
@@ -14,7 +15,7 @@ img_width = 360
 img_size = (img_height, img_width)
 mask_size = img_size
 input_shape = (img_height, img_width, 3)
-batch_size = 8
+batch_size = 1
 epochs = 500
 steps_per_epoch = int(600/batch_size) + 1
 validation_steps = int(101/batch_size) + 1
@@ -98,10 +99,9 @@ data_gen_args = dict(rotation_range=30.,
                     height_shift_range=0.2,
                     zoom_range=0.2,
              		fill_mode='constant',
-                    horizontal_flip=True,
-                    rescale=1./255)
+                    horizontal_flip=True)
 
-train_image_datagen = ImageDataGenerator(**data_gen_args)
+train_image_datagen = ImageDataGenerator(**data_gen_args, rescale=1.255)
 train_mask_datagen = ImageDataGenerator(**data_gen_args)
 
 train_image_generator = train_image_datagen.flow_from_directory('data/training/images/',
@@ -119,7 +119,7 @@ train_mask_generator = train_mask_datagen.flow_from_directory('data/training/mas
 train_generator = zip3(train_image_generator, train_mask_generator)
 
 val_image_datagen = ImageDataGenerator(rescale=1./255)
-val_mask_datagen = ImageDataGenerator(rescale=1./255)
+val_mask_datagen = ImageDataGenerator()
 
 val_image_generator = val_image_datagen.flow_from_directory('data/validation/images/',
             													target_size=img_size,
@@ -153,10 +153,23 @@ early = EarlyStopping(patience=batch_size, verbose=1)
 model = getModel()
 model.compile(loss='mean_squared_error', optimizer='adadelta', metrics=['accuracy'])
 
-model.fit_generator(
+'''model.fit_generator(
 	train_generator,
 	steps_per_epoch=steps_per_epoch,
 	epochs=epochs,
 	callbacks=[checkpoint, tb, early],
 	validation_data=val_generator,
-	validation_steps=validation_steps)
+	validation_steps=validation_steps)'''
+
+for e in range(epochs):
+    print('Epoch', e)
+    batches = 0
+    for x_batch, y_batch in train_generator:
+        one_hot = K.one_hot(y_batch, 11)
+        y_batch = K.eval(K.squeeze(one_hot, 3))
+        model.fit(x_batch, y_batch)
+        batches += 1
+        if batches >= 600 / batch_size:
+            # we need to break the loop by hand because
+            # the generator loops indefinitely
+            break
