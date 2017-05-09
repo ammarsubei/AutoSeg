@@ -94,15 +94,19 @@ def zip3(*iterables):
             result.append(elem)
         yield tuple(result)
 
-data_gen_args = dict(rotation_range=30.,
-                    width_shift_range=0.2,
-                    height_shift_range=0.2,
-                    zoom_range=0.2,
-             		fill_mode='constant',
-                    horizontal_flip=True)
-
-train_image_datagen = ImageDataGenerator(**data_gen_args, rescale=1.255)
-train_mask_datagen = ImageDataGenerator(**data_gen_args)
+train_image_datagen = ImageDataGenerator(rotation_range=30.,
+                    						width_shift_range=0.2,
+                    						height_shift_range=0.2,
+                    						zoom_range=0.2,
+             								fill_mode='constant',
+                    						horizontal_flip=True,
+                    						rescale=1./255)
+train_mask_datagen = ImageDataGenerator(rotation_range=30.,
+                    						width_shift_range=0.2,
+                    						height_shift_range=0.2,
+                    						zoom_range=0.2,
+             								fill_mode='constant',
+                    						horizontal_flip=True)
 
 train_image_generator = train_image_datagen.flow_from_directory('data/training/images/',
             													target_size=img_size,
