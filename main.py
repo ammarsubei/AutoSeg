@@ -9,13 +9,13 @@ from keras import backend as K
 import numpy as np
 import sys
 
-num_filters = 64
+num_filters = 16
 img_height = 480
 img_width = 360
 img_size = (img_height, img_width)
 mask_size = img_size
 input_shape = (img_height, img_width, 3)
-batch_size = 1
+batch_size = 16
 epochs = 500
 steps_per_epoch = int(600/batch_size) + 1
 validation_steps = int(101/batch_size) + 1
