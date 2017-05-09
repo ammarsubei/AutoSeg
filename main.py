@@ -9,13 +9,13 @@ from keras import backend as K
 import numpy as np
 import sys
 
-num_filters = 16
+num_filters = 64
 img_height = 480
 img_width = 360
 img_size = (img_height, img_width)
 mask_size = img_size
 input_shape = (img_height, img_width, 3)
-batch_size = 16
+batch_size = 2
 epochs = 500
 steps_per_epoch = int(600/batch_size) + 1
 validation_steps = int(101/batch_size) + 1
@@ -110,13 +110,13 @@ train_mask_datagen = ImageDataGenerator(rotation_range=30.,
 
 train_image_generator = train_image_datagen.flow_from_directory('data/training/images/',
             													target_size=img_size,
-            													batch_size=batch_size,
+            													batch_size=50,
 													            class_mode=None,
 													            seed=seed)
 train_mask_generator = train_mask_datagen.flow_from_directory('data/training/masks/',
             													target_size=img_size,
             													color_mode='grayscale',
-            													batch_size=batch_size,
+            													batch_size=50,
 													            class_mode=None,
 													            seed=seed)
 
@@ -171,7 +171,7 @@ for e in range(epochs):
     for x_batch, y_batch in train_generator:
         one_hot = K.one_hot(y_batch, 11)
         y_batch = K.eval(K.squeeze(one_hot, 3))
-        model.fit(x_batch, y_batch)
+        model.fit(x_batch, y_batch, batch_size=batch_size)
         batches += 1
         if batches >= 600 / batch_size:
             # we need to break the loop by hand because
