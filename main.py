@@ -115,7 +115,7 @@ for e in range(epochs):
         one_hot = K.one_hot(y_batch, 11)
         y_batch = K.eval(K.squeeze(one_hot, 3))
         model.fit(x_batch, y_batch, batch_size=batch_size)
-        pred = model.predict(sample_img)
+        #pred = model.predict(sample_img)
         print(pred.shape)
         pred_img = np.zeros((img_height,img_width))
         batches += 1
