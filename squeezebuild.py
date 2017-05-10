@@ -6,7 +6,7 @@ def addFireModule(x, num_filters):
 	expand1 = Conv2D(num_filters, (1,1), padding='same', activation='elu')(squeeze)
 	expand3 = Conv2D(num_filters, (3,3), padding='same', activation='elu')(squeeze)
 	c = concatenate([expand1, expand3])
-	
+
 	return c
 
 def addParallelDilatedConvolution(x, num_filters):
@@ -54,7 +54,7 @@ def getModel(input_shape, num_filters):
 	trans_conv3 = Conv2DTranspose(num_filters, (3,3), padding='same', activation='elu', strides=2)(ref2)
 	ref3 = addBypassRefinementModule(trans_conv3, convI, num_filters)
 
-	trans_conv4 = Conv2DTranspose(11, (3,3), padding='same', activation='softmax')(ref3)
+	trans_conv4 = Conv2DTranspose(1, (3,3), padding='same', activation='softmax')(ref3)
 
 	model = Model(inputs=i, outputs=trans_conv4)
 

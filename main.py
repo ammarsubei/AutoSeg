@@ -14,7 +14,7 @@ img_width = 360
 img_size = (img_height, img_width)
 mask_size = img_size
 input_shape = (img_height, img_width, 3)
-batch_size = 1
+batch_size = 8
 epochs = 500
 steps_per_epoch = int(600/batch_size) + 1
 validation_steps = int(101/batch_size) + 1
@@ -53,13 +53,13 @@ train_mask_datagen = ImageDataGenerator(rotation_range=30.,
 
 train_image_generator = train_image_datagen.flow_from_directory('data/training/images/',
             													target_size=img_size,
-            													batch_size=50,
+            													batch_size=batch_size,
 													            class_mode=None,
 													            seed=seed)
 train_mask_generator = train_mask_datagen.flow_from_directory('data/training/masks/',
             													target_size=img_size,
             													color_mode='grayscale',
-            													batch_size=50,
+            													batch_size=batch_size,
 													            class_mode=None,
 													            seed=seed)
 
@@ -100,14 +100,14 @@ early = EarlyStopping(patience=batch_size, verbose=1)
 #sample_img = mpimg.imread('data/validation/images/imgs/0016E5_08151.png')
 
 
-'''model.fit_generator(
+model.fit_generator(
 	train_generator,
 	steps_per_epoch=steps_per_epoch,
 	epochs=epochs,
 	callbacks=[checkpoint, tb, early],
 	validation_data=val_generator,
-	validation_steps=validation_steps)'''
-
+	validation_steps=validation_steps)
+'''
 for e in range(epochs):
     print('Epoch', e)
     batches = 0
@@ -122,4 +122,4 @@ for e in range(epochs):
         if batches >= 600 / batch_size:
             # we need to break the loop by hand because
             # the generator loops indefinitely
-            break
+            break'''
