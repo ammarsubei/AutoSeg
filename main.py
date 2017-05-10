@@ -22,7 +22,7 @@ seed = 1
 model_name= sys.argv[1]
 
 model = squeezebuild.getModel(input_shape, num_filters)
-model.compile(loss='mean_squared_error', optimizer='adadelta', metrics=['accuracy'])
+model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
 
 def zip3(*iterables):
     # zip('ABCD', 'xy') --> Ax By
