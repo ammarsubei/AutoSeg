@@ -42,3 +42,4 @@ CamVid/*
 data/*
 *.h5
 logs/*
+*.pickle
