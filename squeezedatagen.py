@@ -13,9 +13,9 @@ class SegGen(object):
 
     def __init__(self, data_dir, num_classes, reinitialize=False):
         self.data_dir = os.getcwd() + data_dir
+        self.num_classes = num_classes
         self.image_path = self.data_dir + 'images/'
         self.label_path = self.data_dir + 'labels/'
-        self.num_classes = num_classes
         self.file_list = os.listdir(self.data_dir + 'images/')
         cwd_contents = os.listdir(os.getcwd())
         # Sort the data into training and validation sets, or load already sorted sets.
@@ -39,16 +39,17 @@ class SegGen(object):
     def trainingGenerator(self, batch_size):
         i = 0
         while True:
-            if i == len(self.training_file_list):
-                i = 0
             image_batch = []
             label_batch = []
             for b in range(batch_size):
+                if i == len(self.training_file_list):
+                    i = 0
                 sample = self.training_file_list[i]
                 i += 1
                 image = cv2.imread(self.image_path + sample) / 255
                 label = cv2.imread(self.label_path + sample, 0)
-                cv2.waitKey(10000)
+                image = image.swapaxes(0,1)
+                label = label.swapaxes(0,1)
                 one_hot = self.labelToOneHot(label)
                 image_batch.append(image)
                 label_batch.append(one_hot)
@@ -59,8 +60,7 @@ class SegGen(object):
 
     # Accepts and returns a numpy array.
     def labelToOneHot(self, label):
-        n_values = np.max(label) + 1
-        return np.eye(n_values)[label]
+        return np.eye(self.num_classes)[label]
 
     # Accepts and returns a numpy array.
     def oneHotToLabel(self,one_hot):

@@ -19,12 +19,12 @@ model_name= 'test.h5'
 model = squeezebuild.getModel(input_shape, num_filters)
 model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
 
-generator = SegGen(data_dir='/data/', num_classes=11)
+generator = SegGen(data_dir='/data/', num_classes=12, reinitialize=True)
 
 callbacks = squeezecallbacks.getCallbacks(model_name, patience=batch_size)
 
 model.fit_generator(
     generator.trainingGenerator(batch_size),
     steps_per_epoch=len(generator.training_file_list) / batch_size,
-    epochs=epochs,
-    callbacks=callbacks)
+    epochs=epochs)
+    #callbacks=callbacks)

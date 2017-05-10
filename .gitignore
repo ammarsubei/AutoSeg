@@ -43,3 +43,4 @@ data/*
 *.h5
 logs/*
 *.pickle
+__MACOSX/*
