@@ -20,9 +20,14 @@ class SegGen(object):
         for i in self.file_list:
             print(i)
 
+    # Accepts and returns a numpy array.
     def labelToOneHot(self, label):
         one_hot = K.one_hot(label, self.num_classes)
         return K.eval(one_hot)
+
+    # Accepts and returns a numpy array.
+    def oneHotToLabel(self,one_hot):
+        return one_hot.argmax(2)
 
 
 
