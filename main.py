@@ -53,34 +53,35 @@ train_mask_datagen = ImageDataGenerator(    rotation_range=30.,
                                             horizontal_flip=True)
 
 train_image_generator = train_image_datagen.flow_from_directory('data/training/images/',
-            													target_size=img_size,
-            													batch_size=batch_size,
-													            class_mode=None,
-													            seed=seed)
-train_mask_generator = train_mask_datagen.flow_from_directory('data/training/masks/',
-            													target_size=img_size,
-            													color_mode='grayscale',
-            													batch_size=batch_size,
-													            class_mode=None,
-													            seed=seed)
+                                                                target_size=img_size,
+                                                                batch_size=batch_size,
+                                                                class_mode=None,
+                                                                seed=seed)
+
+train_mask_generator = train_mask_datagen.flow_from_directory(  'data/training/masks/',
+                                                                target_size=img_size,
+                                                                color_mode='grayscale',
+                                                                batch_size=batch_size,
+                                                                class_mode=None,
+                                                                seed=seed)
 
 train_generator = zip3(train_image_generator, train_mask_generator)
 
 val_image_datagen = ImageDataGenerator(rescale=1./255)
 val_mask_datagen = ImageDataGenerator()
 
-val_image_generator = val_image_datagen.flow_from_directory('data/validation/images/',
-            													target_size=img_size,
-            													batch_size=batch_size,
-													            class_mode=None,
-													            seed=seed)
+val_image_generator = val_image_datagen.flow_from_directory(    'data/validation/images/',
+                                                                target_size=img_size,
+                                                                batch_size=batch_size,
+                                                                class_mode=None,
+                                                                seed=seed)
 
-val_mask_generator = val_mask_datagen.flow_from_directory('data/validation/masks/',
-            													target_size=img_size,
-            													color_mode='grayscale',
-            													batch_size=batch_size,
-													            class_mode=None,
-													            seed=seed)
+val_mask_generator = val_mask_datagen.flow_from_directory(      'data/validation/masks/',
+                                                                target_size=img_size,
+                                                                color_mode='grayscale',
+                                                                batch_size=batch_size,
+                                                                class_mode=None,
+                                                                seed=seed)
 
 val_generator = zip3(val_image_generator, val_mask_generator)
 
@@ -102,12 +103,12 @@ early = EarlyStopping(patience=batch_size, verbose=1)
 
 
 model.fit_generator(
-	train_generator,
-	steps_per_epoch=steps_per_epoch,
-	epochs=epochs,
-	callbacks=[checkpoint, tb, early],
-	validation_data=val_generator,
-	validation_steps=validation_steps)
+    train_generator,
+    steps_per_epoch=steps_per_epoch,
+    epochs=epochs,
+    callbacks=[checkpoint, tb, early],
+    validation_data=val_generator,
+    validation_steps=validation_steps)
 '''
 for e in range(epochs):
     print('Epoch', e)
