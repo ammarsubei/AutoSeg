@@ -116,8 +116,8 @@ for e in range(epochs):
         y_batch = K.eval(K.squeeze(one_hot, 3))
         model.fit(x_batch, y_batch, batch_size=batch_size)
         #pred = model.predict(sample_img)
-        print(pred.shape)
-        pred_img = np.zeros((img_height,img_width))
+        #print(pred.shape)
+        #pred_img = np.zeros((img_height,img_width))
         batches += 1
         if batches >= 600 / batch_size:
             # we need to break the loop by hand because
