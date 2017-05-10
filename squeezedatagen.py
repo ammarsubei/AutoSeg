@@ -13,6 +13,8 @@ class SegGen(object):
 
     def __init__(self, data_dir, num_classes, reinitialize=False):
         self.data_dir = os.getcwd() + data_dir
+        self.image_path = data_dir + 'images/'
+        self.label_path = data_dir + 'labels/'
         self.num_classes = num_classes
         self.file_list = os.listdir(self.data_dir + 'images/')
         cwd_contents = os.listdir(self.data_dir)
@@ -32,8 +34,24 @@ class SegGen(object):
             with open('validation_file_list.pickle', 'rb') as f:
                 self.validation_file_list = pickle.load(f)
 
-    #def trainingGenerator(self, batch_size):
-        
+    def trainingGenerator(self, batch_size):
+        i = 0
+        while True:
+            if i == len(self.training_file_list):
+                i = 0
+            image_batch = []
+            label_batch = []
+            for b in range(batch_size):
+                sample = self.training_file_list[i]
+                image = cv2.imread(self.image_path + sample) / 255
+                label = cv2.imread(self.label_path + sample, 0)
+                one_hot = labelToOneHot(label)
+                image_batch.append(image)
+                label_batch.append(one_hot)
+            image_batch = np.array(image_batch)
+            label_batch = np.array(label_batch)
+            yield (image_batch, label_batch)
+
 
     # Accepts and returns a numpy array.
     def labelToOneHot(self, label):
