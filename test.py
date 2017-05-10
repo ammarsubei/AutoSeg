@@ -7,11 +7,10 @@ test = [[1,2,3],
 		[1,1,1]]
 test = np.array(test)
 
-K_img = K.one_hot(test,4)
+K_img = K.eval(K.one_hot(test,4))
 
-print(K.eval(K_img))
+print(K_img)
 
-recover = np.zeros(test.shape)
-recover 
+recover = K_img.argmax(2)
 
-print(r)
+print(recover)
