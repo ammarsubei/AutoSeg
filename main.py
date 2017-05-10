@@ -101,7 +101,7 @@ early = EarlyStopping(patience=batch_size, verbose=1)
 
 #sample_img = mpimg.imread('data/validation/images/imgs/0016E5_08151.png')
 
-
+'''
 model.fit_generator(
     train_generator,
     steps_per_epoch=steps_per_epoch,
@@ -124,4 +124,4 @@ for e in range(epochs):
         if batches >= 600 / batch_size:
             # we need to break the loop by hand because
             # the generator loops indefinitely
-            break'''
+            break
