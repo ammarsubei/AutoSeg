@@ -1,11 +1,5 @@
-l = iter([1,2,3])
-
-def function(iterable):
-	sentinel = object()
-	print(next(iterable))
-
-function(l)
-function(l)
-function(l)
-function(l)
-function(l)
+import cv2
+print(cv2.__version__)
+sample_img = cv2.imread('data/images/0016E5_08151.png')
+cv2.imshow('Help', sample_img)
+cv2.waitKey(0)
