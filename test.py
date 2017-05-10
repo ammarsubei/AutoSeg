@@ -1,5 +1,17 @@
-import cv2
-print(cv2.__version__)
-sample_img = cv2.imread('data/images/0016E5_08151.png')
-cv2.imshow('Help', sample_img)
-cv2.waitKey(0)
+from keras import backend as K
+from keras.utils import to_categorical
+import numpy as np
+
+test = [[1,2,3],
+		[3,2,1],
+		[1,1,1]]
+test = np.array(test)
+
+K_img = K.one_hot(test,4)
+
+print(K.eval(K_img))
+
+recover = np.zeros(test.shape)
+recover 
+
+print(r)

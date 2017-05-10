@@ -21,18 +21,11 @@ class SegGen(object):
             print(i)
 
     def labelToOneHot(self, label):
-        start = time.clock()
-        img_K = K.one_hot(label, 11)
-        end = time.clock()
-        print(end-start)
-        start = time.clock()
-        b = np.zeros((label.size, label.max()+1))
-        b[np.arange(label.size),label] = 1
-        end = time.clock()
-        print(end-start)
+        one_hot = K.one_hot(label, self.num_classes)
+        return K.eval(one_hot)
 
 
 
 sg = SegGen('/data/', 11)
-img = cv2.imread('data/images/0016E5_08151.png')
+img = cv2.imread('data/labels/0016E5_08151.png',0)
 sg.labelToOneHot(img)
