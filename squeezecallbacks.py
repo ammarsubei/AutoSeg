@@ -1,17 +1,18 @@
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
 
-checkpoint = ModelCheckpoint(
+def getCallbacks(model_name, patience=12):
+    checkpoint = ModelCheckpoint(
         model_name,
         monitor='val_loss',
         verbose=0,
         save_best_only=True)
 
-tb = TensorBoard(
+    tb = TensorBoard(
         log_dir='./logs',
         histogram_freq=0,
         write_graph=True,
         write_images=True)
 
-early = EarlyStopping(patience=batch_size, verbose=1)
+    early = EarlyStopping(patience=patience, verbose=1)
 
-callbacks = [checkpoint, tb, early]
+    return [checkpoint, tb, early]
