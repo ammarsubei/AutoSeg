@@ -24,12 +24,12 @@ model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['a
 
 backend = BackendHandler(data_dir='/data/', num_classes=num_classes, reinitialize=True)
 
-callbacks = autoseg_callbacks.getCallbacks(model_name, patience=batch_size)
+callbacks = backend.getCallbacks(model_name, patience=batch_size)
 
 model.fit_generator(
-    generator.generateData(batch_size),
-    steps_per_epoch=len(generator.training_file_list) / batch_size,
+    backend.generateData(batch_size),
+    steps_per_epoch=len(backend.training_file_list) / batch_size,
     epochs=epochs,
     callbacks=callbacks,
-    validation_data=generator.generateData(batch_size, validating=True),
-    validation_steps=len(generator.validation_file_list) / batch_size)
+    validation_data=backend.generateData(batch_size, validating=True),
+    validation_steps=len(backend.validation_file_list) / batch_size)
