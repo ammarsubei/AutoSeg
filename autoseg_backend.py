@@ -110,8 +110,7 @@ class BackendHandler(object):
             for b in range(batch_size):
                 if i == len(data):
                     i = 0
-                    random.shuffle(training_file_list)
-                    random.shuffle(validation_file_list)
+                    random.shuffle(self.training_file_list)
                 sample = data[i]
                 i += 1
                 image = cv2.imread(self.image_path + sample) / 255
