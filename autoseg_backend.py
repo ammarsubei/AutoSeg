@@ -31,7 +31,7 @@ class VisualizeResult(Callback):
         cv2.moveWindow('Sample Image', 10, 10)
         self.ground_truth = self.makeLabelPretty( cv2.imread(os.getcwd() + '/sample_label.png', 0) )
         cv2.imshow('Ground Truth', self.ground_truth)
-        cv2.imwrite('Sample Ground Truth.png', self.ground_truth)
+        cv2.imwrite('sample_ground_truth.png', self.ground_truth)
         cv2.moveWindow('Ground Truth', 510, 10)
         cv2.waitKey(1)
         self.image_path = image_path
@@ -77,7 +77,7 @@ class VisualizeResult(Callback):
         print("Training ended!")
         seg_result = oneHotToLabel( self.model.predict( np.array( [self.image] ) ).squeeze(0) )
         pl = self.makeLabelPretty(seg_result)
-        cv2.imwrite('Sample Output.png', pl)
+        cv2.imwrite('sample_output.png', pl)
         # TODO: Run predict over test set and write results to files in "results" dir.
 
 class BackendHandler(object):

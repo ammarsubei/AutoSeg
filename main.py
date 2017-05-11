@@ -13,7 +13,7 @@ img_size = (img_width, img_height)
 mask_size = img_size
 input_shape = (img_width, img_height, 3)
 batch_size = 8
-epochs = 1
+epochs = 10000
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
 else:
