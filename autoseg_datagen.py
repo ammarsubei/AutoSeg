@@ -9,6 +9,14 @@ import pickle
 # Create a generator method that yields a tuple of two tensors of shape (batch_size, img_height, img_width, num_channels).
 # This method should also imshow() the segmentation of the sample image after each batch.
 
+# Accepts and returns a numpy array.
+def labelToOneHot(label, num_classes):
+    return np.eye(num_classes)[label]
+
+# Accepts and returns a numpy array.
+def oneHotToLabel(self,one_hot):
+    return one_hot.argmax(2)
+
 class SegGen(object):
 
     def __init__(self, data_dir, num_classes, reinitialize=False):
@@ -54,20 +62,16 @@ class SegGen(object):
                 label = cv2.imread(self.label_path + sample, 0)
                 image = image.swapaxes(0,1)
                 label = label.swapaxes(0,1)
-                one_hot = self.labelToOneHot(label)
+                one_hot = labelToOneHot(label, self.num_classes)
                 image_batch.append(image)
                 label_batch.append(one_hot)
             image_batch = np.array(image_batch)
             label_batch = np.array(label_batch)
             yield (image_batch, label_batch)
 
-    # Accepts and returns a numpy array.
-    def labelToOneHot(self, label):
-        return np.eye(self.num_classes)[label]
+    
 
-    # Accepts and returns a numpy array.
-    def oneHotToLabel(self,one_hot):
-        return one_hot.argmax(2)
+    
 
 #sg = SegGen('/data/', 11)
 #print(next(sg.trainingGenerator(11)))
