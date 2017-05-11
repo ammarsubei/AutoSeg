@@ -25,7 +25,7 @@ def addBypassRefinementModule(high, low, num_filters):
 
 	return postConv
 
-def getModel(input_shape, num_filters):
+def getModel(input_shape, num_classes, num_filters):
 	i = Input(input_shape)
 	convI = Conv2D(num_filters, (3,3), padding='same', activation='elu')(i)
 
@@ -54,7 +54,7 @@ def getModel(input_shape, num_filters):
 	trans_conv3 = Conv2DTranspose(num_filters, (3,3), padding='same', activation='elu', strides=2)(ref2)
 	ref3 = addBypassRefinementModule(trans_conv3, convI, num_filters)
 
-	trans_conv4 = Conv2DTranspose(12, (3,3), padding='same', activation='softmax')(ref3)
+	trans_conv4 = Conv2DTranspose(num_classes, (3,3), padding='same', activation='softmax')(ref3)
 
 	model = Model(inputs=i, outputs=trans_conv4)
 
