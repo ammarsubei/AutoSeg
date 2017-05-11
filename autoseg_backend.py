@@ -81,11 +81,11 @@ class BackendHandler(object):
         self.label_path = self.data_dir + 'labels/'
         self.file_list = os.listdir(self.data_dir + 'images/')
         self.cwd_contents = os.listdir(os.getcwd())
-        splitData()
-        getClassWeights()
+        self.splitData(reinitialize)
+        self.getClassWeights(reinitialize)
 
     # Sort the data into training and validation sets, or load already sorted sets.
-    def splitData(self):
+    def splitData(self, reinitialize):
         if reinitialize or 'training_file_list.pickle' not in self.cwd_contents or 'validation_file_list.pickle' not in self.cwd_contents:
             print("Splitting training/validation data 80/20...")
             random.shuffle(self.file_list)
@@ -102,28 +102,28 @@ class BackendHandler(object):
                 self.training_file_list =  pickle.load(f)
             with open('validation_file_list.pickle', 'rb') as f:
                 self.validation_file_list = pickle.load(f)
+        print("Train on " + str(len(self.training_file_list)) + " images, validate on " + str(len(self.validation_file_list)) + " images.")
 
-    def getClassWeights(self):
+    def getClassWeights(self, reinitialize):
         if reinitialize or 'class_weights.pickle' not in self.cwd_contents:
-            print("Calculating class weights, this may take a while...")
+            print("Calculating class weights for " + str(len(self.file_list)) + " images, this may take a while...")
             classcounts = [0]*self.num_classes
             for f in self.file_list:
-                print(".",end="")
                 lbl = cv2.imread(self.label_path + f, 0)
                 for i in range(self.num_classes):
                     classcounts[i] += len(np.where(lbl == i)[0])
             total = sum(classcounts)
-            self.class_weights = []
+            self.class_weights = [0]*self.num_classes
             for i in range(self.num_classes):
                 self.class_weights[i] = classcounts[i] / total
-            print("")
-            print(self.class_weights)
             with open('class_weights.pickle', 'wb') as f:
                 pickle.dump(self.class_weights, f, protocol=pickle.HIGHEST_PROTOCOL)
         else:
             print("Class weights found, loading...")
             with open('class_weights.pickle', 'rb') as f:
                 self.class_weights = pickle.load(f)
+        print("Class weights: ", end="")
+        print(self.class_weights)
 
     def generateData(self, batch_size, validating=False):
         if validating:
