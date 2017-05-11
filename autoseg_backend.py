@@ -82,6 +82,7 @@ class BackendHandler(object):
         self.file_list = os.listdir(self.data_dir + 'images/')
         self.cwd_contents = os.listdir(os.getcwd())
         splitData()
+        getClassWeights()
 
     # Sort the data into training and validation sets, or load already sorted sets.
     def splitData(self):
@@ -107,7 +108,7 @@ class BackendHandler(object):
             print("Calculating class weights, this may take a while...")
             classcounts = [0]*self.num_classes
             for f in self.file_list:
-                print(".",)
+                print(".",end="")
                 lbl = cv2.imread(self.label_path + f, 0)
                 for i in range(self.num_classes):
                     classcounts[i] += len(np.where(lbl == i)[0])
@@ -115,7 +116,7 @@ class BackendHandler(object):
             self.class_weights = []
             for i in range(self.num_classes):
                 self.class_weights[i] = classcounts[i] / total
-            print()
+            print("")
             print(self.class_weights)
             with open('class_weights.pickle', 'wb') as f:
                 pickle.dump(self.class_weights, f, protocol=pickle.HIGHEST_PROTOCOL)
