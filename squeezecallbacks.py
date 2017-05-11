@@ -3,7 +3,7 @@ from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
 def getCallbacks(model_name, patience=12):
     checkpoint = ModelCheckpoint(
         model_name,
-        monitor='val_loss',
+        monitor='loss',
         verbose=0,
         save_best_only=True)
 
@@ -15,4 +15,4 @@ def getCallbacks(model_name, patience=12):
 
     early = EarlyStopping(patience=patience, verbose=1)
 
-    return [checkpoint, tb, early]
+    return [checkpoint]

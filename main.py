@@ -26,5 +26,5 @@ callbacks = squeezecallbacks.getCallbacks(model_name, patience=batch_size)
 model.fit_generator(
     generator.trainingGenerator(batch_size),
     steps_per_epoch=len(generator.training_file_list) / batch_size,
-    epochs=epochs)
-    #callbacks=callbacks)
+    epochs=epochs,
+    callbacks=callbacks)
