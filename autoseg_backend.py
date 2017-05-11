@@ -57,7 +57,6 @@ class VisualizeResult(Callback):
         ]
 
         assert self.num_classes <= len(colors)
-        print
 
         for i in range(self.num_classes):
             prettyLabel[np.where( (label==[i]) )] = colors[i]
@@ -79,7 +78,7 @@ class BackendHandler(object):
 
     def __init__(self, data_dir, num_classes, reinitialize=False):
         self.data_dir = os.getcwd() + data_dir
-        # TODO: Calculate num_classes automatically.
+        # TODO: Calculate num_classes automatically by iterating over the entire dataset and calculating len(uniques).
         self.num_classes = num_classes
         self.image_path = self.data_dir + 'images/'
         self.label_path = self.data_dir + 'labels/'
@@ -119,7 +118,7 @@ class BackendHandler(object):
             total = sum(classcounts)
             self.class_weights = {}
             for i in range(self.num_classes):
-                self.class_weights.update = {i : float(math.log( total / classcounts[i] ))}
+                self.class_weights.update( {i : float(math.log( total / classcounts[i] ))} )
             with open('class_weights.pickle', 'wb') as f:
                 pickle.dump(self.class_weights, f, protocol=pickle.HIGHEST_PROTOCOL)
         else:
