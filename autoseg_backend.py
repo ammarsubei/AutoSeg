@@ -38,20 +38,20 @@ class VisualizeResult(Callback):
     def makeLabelPretty(self, label):
         prettyLabel = cv2.cvtColor(label, cv2.COLOR_GRAY2RGB)
         colors = [
-        [255,102,102],  # light red
-        [255,255,102],  # light yellow
-        [102,255,102],  # light green
-        [102,255,255],  # light blue
-        [102,102,255],  # light indigo
-        [255,102,255],  # light pink
-        [255,178,102],  # light orange
-        [153,51,255],   # violet
-        [153,0,0],      # dark red
-        [153,153,0],    # dark yellow
-        [0,102,0],      # dark green
-        [0,76,153],     # dark blue
-        [102,0,51],     # dark pink
-        [0,153,153],    # dark turquoise
+        [255,102,102],  # 0: light red
+        [255,255,102],  # 1: light yellow
+        [102,255,102],  # 2: light green
+        [102,255,255],  # 3: light blue
+        [102,102,255],  # 4: light indigo
+        [255,102,255],  # 5: light pink
+        [255,178,102],  # 6: light orange
+        [153,51,255],   # 7: violet
+        [153,0,0],      # 8: dark red
+        [153,153,0],    # 9: dark yellow
+        [0,102,0],      # 10: dark green
+        [0,76,153],     # 11: dark blue
+        [102,0,51],     # 12: dark pink
+        [0,153,153],    # 13: dark turquoise
         ]
 
         assert self.num_classes <= len(colors)
@@ -110,6 +110,8 @@ class BackendHandler(object):
             for b in range(batch_size):
                 if i == len(data):
                     i = 0
+                    random.shuffle(training_file_list)
+                    random.shuffle(validation_file_list)
                 sample = data[i]
                 i += 1
                 image = cv2.imread(self.image_path + sample) / 255
