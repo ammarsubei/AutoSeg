@@ -36,15 +36,19 @@ class SegGen(object):
             with open('validation_file_list.pickle', 'rb') as f:
                 self.validation_file_list = pickle.load(f)
 
-    def trainingGenerator(self, batch_size):
+    def generateData(self, batch_size, validating=False):
+        if validating:
+            data = self.validation_file_list
+        else:
+            data = self.training_file_list
         i = 0
         while True:
             image_batch = []
             label_batch = []
             for b in range(batch_size):
-                if i == len(self.training_file_list):
+                if i == len(data):
                     i = 0
-                sample = self.training_file_list[i]
+                sample = data[i]
                 i += 1
                 image = cv2.imread(self.image_path + sample) / 255
                 label = cv2.imread(self.label_path + sample, 0)
@@ -56,7 +60,6 @@ class SegGen(object):
             image_batch = np.array(image_batch)
             label_batch = np.array(label_batch)
             yield (image_batch, label_batch)
-
 
     # Accepts and returns a numpy array.
     def labelToOneHot(self, label):

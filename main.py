@@ -25,7 +25,9 @@ generator = SegGen(data_dir='/data/', num_classes=num_classes, reinitialize=True
 callbacks = squeezecallbacks.getCallbacks(model_name, patience=batch_size)
 
 model.fit_generator(
-    generator.trainingGenerator(batch_size),
+    generator.generateData(batch_size),
     steps_per_epoch=len(generator.training_file_list) / batch_size,
     epochs=epochs,
-    callbacks=callbacks)
+    callbacks=callbacks,
+    validation_data=generator.generateData(batch_size, validating=True),
+    validation_steps=len(generator.validation_file_list) / batch_size)
