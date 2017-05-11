@@ -1,5 +1,5 @@
 from keras.callbacks import Callback, TensorBoard, ModelCheckpoint, EarlyStopping
-import os, random
+import os, random, math
 import numpy as np
 import cv2
 import pickle
@@ -113,9 +113,9 @@ class BackendHandler(object):
                 for i in range(self.num_classes):
                     classcounts[i] += len(np.where(lbl == i)[0])
             total = sum(classcounts)
-            self.class_weights = [0]*self.num_classes
+            self.class_weights = {}
             for i in range(self.num_classes):
-                self.class_weights[i] = classcounts[i] / total
+                self.class_weights.update = {i : float(math.log( total / classcounts[i] ))}
             with open('class_weights.pickle', 'wb') as f:
                 pickle.dump(self.class_weights, f, protocol=pickle.HIGHEST_PROTOCOL)
         else:
