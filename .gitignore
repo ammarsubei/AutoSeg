@@ -44,3 +44,5 @@ data/*
 logs/*
 *.pickle
 __MACOSX/*
+*.png
+*.jpg
