@@ -12,7 +12,7 @@ img_width = 360
 img_size = (img_width, img_height)
 mask_size = img_size
 input_shape = (img_width, img_height, 3)
-batch_size = 1
+batch_size = 8
 epochs = 500
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
@@ -32,4 +32,5 @@ model.fit_generator(
     epochs=epochs,
     callbacks=callbacks,
     validation_data=backend.generateData(batch_size, validating=True),
-    validation_steps=len(backend.validation_file_list) / batch_size)
+    validation_steps=len(backend.validation_file_list) / batch_size
+    class_weight=)
