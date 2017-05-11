@@ -1,5 +1,5 @@
 from keras.callbacks import Callback, TensorBoard, ModelCheckpoint, EarlyStopping
-import os, random, math
+import os, random, math, string
 import numpy as np
 import cv2
 import pickle
@@ -19,6 +19,8 @@ def labelToOneHot(label, num_classes):
 def oneHotToLabel(one_hot):
     return one_hot.argmax(2).astype('uint8')
 
+def getID(size=6, chars=string.ascii_lowercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
 
 class VisualizeResult(Callback):
     def __init__(self, num_classes, image_path, label_path, validation_file_list):
@@ -70,8 +72,12 @@ class VisualizeResult(Callback):
         cv2.moveWindow('Segmentation Result', 1010, 10)
         cv2.waitKey(1)
 
-    def on_train_end(self):
+    def on_train_end(self, logs={}):
         print("Training ended!")
+        i = getID()
+        seg_result = oneHotToLabel( self.model.predict( np.array( [self.image] ) ).squeeze(0) )
+        pl = self.makeLabelPretty(seg_result)
+        cv2.imwrite(i + '.png', pl)
         # TODO: Run predict over test set and write results to files in "results" dir.
 
 class BackendHandler(object):
