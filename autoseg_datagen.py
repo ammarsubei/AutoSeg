@@ -1,4 +1,4 @@
-from keras import backend as K
+from keras.callbacks import Callback, TensorBoard, ModelCheckpoint, EarlyStopping
 import os, random
 import numpy as np
 import cv2
@@ -14,10 +14,55 @@ def labelToOneHot(label, num_classes):
     return np.eye(num_classes)[label]
 
 # Accepts and returns a numpy array.
-def oneHotToLabel(self,one_hot):
+def oneHotToLabel(one_hot):
     return one_hot.argmax(2)
 
-class SegGen(object):
+# Accepts and returns a numpy array.
+def makeLabelPretty(label):
+    prettyLabel = cv2.cvtColor(label, cv2.COLOR_GRAY2RGB)
+    colors = [
+    [255,102,102],  # light red
+    [255,255,102],  # light yellow
+    [102,255,102],  # light green
+    [102,255,255],  # light blue
+    [102,102,255],  # light indigo
+    [255,102,255],  # light pink
+    [255,178,102],  # light orange
+    [153,51,255],   # violet
+    [153,0,0],      # dark red
+    [153,153,0],    # dark yellow
+    [0,102,0],      # dark green
+    [0,76,153],     # dark blue
+    [102,0,51],     # dark pink
+    [0,153,153],    # dark turquoise
+    ]
+
+    assert self.num_classes <= len(colors)
+
+    for i in range(self.num_classes):
+        prettyLabel[np.where( (label==[i]).all(axis=1) )] = colors[i]
+
+    return prettyLabel
+
+class VisualizeResult(Callback):
+    def __init__(self, num_classes, image_path, label_path, validation_file_list):
+        self.num_classes = num_classes
+        # Randomly select and create these if not present.
+        self.image = cv2.imread('sample_image.png')
+        cv2.imshow('Sample Image', self.image)
+        self.ground_truth = makeLabelPretty( cv2.imread('sample_label.png') )
+        cv2.imshow('Ground Truth', self.ground_truth)
+        self.image_path = image_path
+        self.label_path = label_path
+        self.validation_file_list = validation_file_list
+
+    def on_batch_end(self, batch):
+        seg_result = makeLabelPretty( oneHotToLabel( self.model.predict( image.swapaxes(0,1) ) ) )
+        cv2.imshow('Segmentation Result', seg_result)
+
+    #def on_train_end(self):
+
+class BackendHandler(object):
 
     def __init__(self, data_dir, num_classes, reinitialize=False):
         self.data_dir = os.getcwd() + data_dir
@@ -69,9 +114,24 @@ class SegGen(object):
             label_batch = np.array(label_batch)
             yield (image_batch, label_batch)
 
-    
+    def getCallbacks(model_name='test.h5', num_classes=12, patience=12):
+        checkpoint = ModelCheckpoint(
+            model_name,
+            monitor='val_loss',
+            verbose=0,
+            save_best_only=True)
 
-    
+        tb = TensorBoard(
+            log_dir='./logs',
+            histogram_freq=0,
+            write_graph=True,
+            write_images=True)
+
+        early = EarlyStopping(monitor='val_loss', patience=patience, verbose=1)
+
+        vis = VisualizeResult(self.num_classes, self.image_path, self.label_path, self.validation_file_list)
+
+        return [checkpoint, early, vis]
 
 #sg = SegGen('/data/', 11)
 #print(next(sg.trainingGenerator(11)))
