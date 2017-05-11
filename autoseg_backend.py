@@ -9,6 +9,8 @@ import pickle
 # Create a generator method that yields a tuple of two tensors of shape (batch_size, img_height, img_width, num_channels).
 # This method should also imshow() the segmentation of the sample image after each batch.
 
+random.seed(1) # For reproducability.
+
 # Accepts and returns a numpy array.
 def labelToOneHot(label, num_classes):
     return np.eye(num_classes)[label]
@@ -69,7 +71,9 @@ class VisualizeResult(Callback):
         cv2.moveWindow('Segmentation Result', 1010, 10)
         cv2.waitKey(1)
 
-    #def on_train_end(self):
+    def on_train_end(self):
+        print("Training ended!")
+        # TODO: Run predict over test set and write results to files in "results" dir.
 
 class BackendHandler(object):
 

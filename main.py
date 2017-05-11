@@ -22,7 +22,7 @@ else:
 model = autoseg_models.getModel(input_shape, num_classes, num_filters)
 model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
 
-backend = BackendHandler(data_dir='/data/', num_classes=num_classes, reinitialize=False)
+backend = BackendHandler(data_dir='/data/', num_classes=num_classes, reinitialize=True)
 
 callbacks = backend.getCallbacks(model_name, patience=batch_size)
 
