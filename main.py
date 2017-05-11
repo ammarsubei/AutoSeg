@@ -2,8 +2,8 @@ import keras
 from keras import backend as K
 import numpy as np
 import sys
-import squeezebuild, squeezecallbacks
-from squeezedatagen import SegGen
+import autoseg_models, autoseg_callbacks
+from autoseg_datagen import SegGen
 
 num_classes = 12
 num_filters = 64
@@ -17,12 +17,12 @@ epochs = 500
 #model_name = sys.argv[1]
 model_name= 'test.h5'
 
-model = squeezebuild.getModel(input_shape, num_classes, num_filters)
+model = autoseg_models.getModel(input_shape, num_classes, num_filters)
 model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
 
 generator = SegGen(data_dir='/data/', num_classes=num_classes, reinitialize=True)
 
-callbacks = squeezecallbacks.getCallbacks(model_name, patience=batch_size)
+callbacks = autoseg_callbacks.getCallbacks(model_name, patience=batch_size)
 
 model.fit_generator(
     generator.generateData(batch_size),
