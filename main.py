@@ -9,10 +9,10 @@ num_classes = 12
 num_filters = 64
 img_height = 480
 img_width = 360
-img_size = (img_height, img_width)
+img_size = (img_width, img_height)
 mask_size = img_size
-input_shape = (img_height, img_width, 3)
-batch_size = 8
+input_shape = (img_width, img_height, 3)
+batch_size = 1
 epochs = 500
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
@@ -22,7 +22,7 @@ else:
 model = autoseg_models.getModel(input_shape, num_classes, num_filters)
 model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
 
-backend = BackendHandler(data_dir='/data/', num_classes=num_classes, reinitialize=True)
+backend = BackendHandler(data_dir='/data/', num_classes=num_classes, reinitialize=False)
 
 callbacks = backend.getCallbacks(model_name, patience=batch_size)
 

@@ -15,7 +15,7 @@ def labelToOneHot(label, num_classes):
 
 # Accepts and returns a numpy array.
 def oneHotToLabel(one_hot):
-    return one_hot.argmax(2).astype(int)
+    return one_hot.argmax(2).astype('uint8')
 
 
 class VisualizeResult(Callback):
@@ -24,8 +24,11 @@ class VisualizeResult(Callback):
         # TODO: Randomly select and create these if not present.
         self.image = cv2.imread(os.getcwd() + '/sample_image.png')
         cv2.imshow('Sample Image', self.image)
+        cv2.moveWindow('Sample Image', 10, 10)
         self.ground_truth = self.makeLabelPretty( cv2.imread(os.getcwd() + '/sample_label.png', 0) )
         cv2.imshow('Ground Truth', self.ground_truth)
+        cv2.moveWindow('Ground Truth', 510, 10)
+        cv2.waitKey(1)
         self.image_path = image_path
         self.label_path = label_path
         self.validation_file_list = validation_file_list
@@ -52,15 +55,19 @@ class VisualizeResult(Callback):
         ]
 
         assert self.num_classes <= len(colors)
+        print
 
         for i in range(self.num_classes):
-            prettyLabel[np.where( (label==[i]).all(axis=1) )] = colors[i]
+            prettyLabel[np.where( (label==[i]) )] = colors[i]
 
         return prettyLabel
 
     def on_batch_end(self, batch, logs={}):
-        seg_result = self.makeLabelPretty( oneHotToLabel( self.model.predict( np.array( [self.image.swapaxes(0,1)] ) ).squeeze(0) ) )
-        cv2.imshow('Segmentation Result', seg_result.swapaxes(0,1))
+        seg_result = oneHotToLabel( self.model.predict( np.array( [self.image] ) ).squeeze(0) )
+        pl = self.makeLabelPretty(seg_result)
+        cv2.imshow('Segmentation Result', pl)
+        cv2.moveWindow('Segmentation Result', 1010, 10)
+        cv2.waitKey(1)
 
     #def on_train_end(self):
 
@@ -107,8 +114,8 @@ class BackendHandler(object):
                 i += 1
                 image = cv2.imread(self.image_path + sample) / 255
                 label = cv2.imread(self.label_path + sample, 0)
-                image = image.swapaxes(0,1)
-                label = label.swapaxes(0,1)
+                image = image
+                label = label
                 one_hot = labelToOneHot(label, self.num_classes)
                 image_batch.append(image)
                 label_batch.append(one_hot)
