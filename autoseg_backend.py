@@ -196,7 +196,7 @@ class BackendHandler(object):
 
         vis = VisualizeResult(self.num_classes, self.image_path, self.label_path, self.validation_file_list)
 
-        return [checkpoint, early, vis]
+        return [checkpoint, vis]
 
 #sg = SegGen('/data/', 11)
 #print(next(sg.trainingGenerator(11)))
