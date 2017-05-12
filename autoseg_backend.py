@@ -1,5 +1,6 @@
 from keras.callbacks import Callback, TensorBoard, ModelCheckpoint, EarlyStopping
 from keras import backend as K
+import tensorflow as tf
 import os, random, math, string
 import numpy as np
 import cv2
@@ -23,7 +24,7 @@ def oneHotToLabel(one_hot):
 def getID(size=6, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
-def pixelwise_crossentropy(y_true, y_pred):
+def pixelwise_crossentropy(target, output):
     # scale preds so that the class probas of each sample sum to 1
     '''
     output /= tf.reduce_sum(output,
@@ -33,7 +34,7 @@ def pixelwise_crossentropy(y_true, y_pred):
     # manual computation of crossentropy
     #epsilon = _to_tensor(_EPSILON, output.dtype.base_dtype)
     #output = tf.clip_by_value(output, epsilon, 1. - epsilon)
-    return - tf.reduce_sum(target * tf.log(output), 2)
+    return - tf.reduce_sum(target * tf.log(output))
 
 def pixelwise_accuracy(y_true, y_pred):
     return K.cast(K.equal(K.argmax(y_true, axis=2),
