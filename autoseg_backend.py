@@ -24,7 +24,13 @@ def getID(size=6, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
 def pixelwise_crossentropy(y_true, y_pred):
-    return K.categorical_crossentropy(K.flatten(y_pred), K.flatten(y_true))
+    y_true_flat = K.reshape(y_true, (360*480,12))
+    y_pred_flat = K.reshape(y_pred, (360*480,12))
+    entropies = []
+    for i in range(368*480):
+        entropies.append(K.categorical_crossentropy(y_pred_flat,y_true_flat))
+    entropies = np.array(entropies)
+    return np.mean(entropies)
 
 
 def pixelwise_accuracy(y_true, y_pred):
