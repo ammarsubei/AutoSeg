@@ -183,7 +183,8 @@ class BackendHandler(object):
             model_name,
             monitor='val_loss',
             verbose=0,
-            save_best_only=True)
+            save_best_only=True,
+            save_weights_only=True)
 
         tb = TensorBoard(
             log_dir='./logs',
