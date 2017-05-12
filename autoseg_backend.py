@@ -23,10 +23,13 @@ def oneHotToLabel(one_hot):
 def getID(size=6, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
-#def pixelwiseCrossentropy(y_true, y_pred):
+def pixelwise_crossentropy(y_true, y_pred):
+    y_true_flat = y_true.reshape((360*480*12))
+    y_pred_flat = y_pred.reshape((360*480*12))
+    return K.categorical_crossentropy(y_pred_flat, y_true_flat)
 
 
-def pixelwiseAccuracy(y_true, y_pred):
+def pixelwise_accuracy(y_true, y_pred):
     return K.cast(K.equal(K.argmax(y_true, axis=2),
                           K.argmax(y_pred, axis=2)),
                   K.floatx())
