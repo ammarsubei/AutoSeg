@@ -3,7 +3,7 @@ from keras import backend as K
 import numpy as np
 import sys
 import autoseg_models
-from autoseg_backend import BackendHandler
+from autoseg_backend import BackendHandler, pixelwiseAccuracy
 
 num_classes = 12
 num_filters = 64
@@ -20,7 +20,7 @@ else:
     model_name= 'test.h5'
 
 model = autoseg_models.getModel(input_shape, num_classes, num_filters)
-model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
+model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=[pixelwiseAccuracy])
 
 backend = BackendHandler(data_dir='/data/', num_classes=num_classes, reinitialize=False)
 

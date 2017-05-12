@@ -23,7 +23,9 @@ def getID(size=6, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
 def pixelwiseAccuracy(y_true, y_pred):
-
+    return K.cast(K.equal(K.argmax(y_true, axis=2),
+                          K.argmax(y_pred, axis=2)),
+                  K.floatx())
 
 class VisualizeResult(Callback):
     def __init__(self, num_classes, image_path, label_path, validation_file_list):
