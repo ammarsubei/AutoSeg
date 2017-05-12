@@ -3,7 +3,7 @@ from keras import backend as K
 import numpy as np
 import sys
 import autoseg_models
-from autoseg_backend import BackendHandler, pixelwiseAccuracy
+from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_accuracy
 
 num_classes = 12
 num_filters = 64
