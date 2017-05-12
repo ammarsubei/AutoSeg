@@ -13,11 +13,11 @@ random.seed(1) # For reproducability.
 
 # Accepts and returns a numpy array.
 def labelToOneHot(label, num_classes):
-    return np.eye(num_classes)[label]
+    return np.eye(num_classes)[label].reshape((360*480,12))
 
 # Accepts and returns a numpy array.
 def oneHotToLabel(one_hot):
-    return one_hot.argmax(2).astype('uint8')
+    return one_hot.argmax(2).astype('uint8').reshape((360,480))
 
 def getID(size=6, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
