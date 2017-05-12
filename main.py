@@ -4,7 +4,7 @@ from keras.models import load_model
 import numpy as np
 import sys, time
 import autoseg_models
-from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_accuracy, top_k_pixelwise_accuracy
+from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_accuracy
 
 num_classes = 12
 num_filters = 64
