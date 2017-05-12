@@ -4,7 +4,7 @@ from keras.models import load_model
 import numpy as np
 import sys, time
 import autoseg_models
-from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_accuracy
+from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_accuracy, top_k_pixelwise_accuracy
 
 num_classes = 12
 num_filters = 64
@@ -21,6 +21,7 @@ else:
     model_name= 'test.h5'
 
 model = autoseg_models.getModel(input_shape, num_classes, num_filters)
+model.load_weights('test.h5')
 model.compile(loss=pixelwise_crossentropy, optimizer='adadelta', metrics=[pixelwise_accuracy])
 
 backend = BackendHandler(data_dir='/data/', num_classes=num_classes, reinitialize=False)
