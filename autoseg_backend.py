@@ -32,8 +32,7 @@ def pixelwise_crossentropy(target, output):
                             keep_dims=True)
     '''
     # manual computation of crossentropy
-    #epsilon = _to_tensor(_EPSILON, output.dtype.base_dtype)
-    #output = tf.clip_by_value(output, epsilon, 1. - epsilon)
+    output = tf.clip_by_value(output, 10e-8, 1. - 10e-8)
     return - tf.reduce_sum(target * tf.log(output))
 
 def pixelwise_accuracy(y_true, y_pred):
