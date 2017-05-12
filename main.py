@@ -1,5 +1,6 @@
 import keras
 from keras import backend as K
+from keras.models import load_model
 import numpy as np
 import sys
 import autoseg_models
@@ -19,8 +20,9 @@ if len(sys.argv) > 1:
 else:
     model_name= 'test.h5'
 
-model = autoseg_models.getModel(input_shape, num_classes, num_filters)
-model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=[pixelwise_accuracy])
+#model = autoseg_models.getModel(input_shape, num_classes, num_filters)
+model = load_model(model_name)
+model.compile(loss=pixelwise_crossentropy, optimizer='adadelta', metrics=[pixelwise_accuracy])
 
 backend = BackendHandler(data_dir='/data/', num_classes=num_classes, reinitialize=False)
 
