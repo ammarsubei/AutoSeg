@@ -22,6 +22,9 @@ def oneHotToLabel(one_hot):
 def getID(size=6, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
+def pixelwiseAccuracy(y_true, y_pred):
+
+
 class VisualizeResult(Callback):
     def __init__(self, num_classes, image_path, label_path, validation_file_list):
         self.num_classes = num_classes

@@ -32,5 +32,5 @@ model.fit_generator(
     epochs=epochs,
     callbacks=callbacks,
     validation_data=backend.generateData(batch_size, validating=True),
-    validation_steps=len(backend.validation_file_list) / batch_size)
-
+    validation_steps=len(backend.validation_file_list) / batch_size,
+    class_weight=backend.class_weights)

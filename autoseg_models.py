@@ -59,8 +59,7 @@ def getModel(input_shape, num_classes, num_filters):
     trans_conv4 = Conv2DTranspose(num_filters, (3,3), padding='same', activation='elu')(ref3)
 
     prediction = Conv2D(num_classes, (1,1), padding='same', activation='softmax')(trans_conv4)
-    flat = Reshape((360*480,num_classes))(prediction)
 
-    model = Model(inputs=i, outputs=flat)
+    model = Model(inputs=i, outputs=prediction)
 
     return model
