@@ -1,4 +1,5 @@
 from keras.callbacks import Callback, TensorBoard, ModelCheckpoint, EarlyStopping
+from keras import backend as K
 import os, random, math, string
 import numpy as np
 import cv2
