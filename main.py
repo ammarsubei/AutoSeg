@@ -1,5 +1,6 @@
 import keras
 from keras import backend as K
+from keras.models import load_model
 import numpy as np
 import sys
 import autoseg_models
@@ -13,7 +14,7 @@ img_size = (img_width, img_height)
 mask_size = img_size
 input_shape = (img_width, img_height, 3)
 batch_size = 8
-epochs = 10000
+epochs = 10000000
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
 else:
