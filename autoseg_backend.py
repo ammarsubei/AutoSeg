@@ -24,13 +24,16 @@ def getID(size=6, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
 def pixelwise_crossentropy(y_true, y_pred):
-    y_true_flat = K.reshape(y_true, (360*480,12))
-    y_pred_flat = K.reshape(y_pred, (360*480,12))
-    entropies = []
-    for i in range(368*480):
-        entropies.append(K.categorical_crossentropy(y_pred_flat,y_true_flat))
-    entropies = np.array(entropies)
-    return np.mean(entropies)
+    # scale preds so that the class probas of each sample sum to 1
+    '''
+    output /= tf.reduce_sum(output,
+                            reduction_indices=len(output.get_shape()) - 1,
+                            keep_dims=True)
+    '''
+    # manual computation of crossentropy
+    #epsilon = _to_tensor(_EPSILON, output.dtype.base_dtype)
+    #output = tf.clip_by_value(output, epsilon, 1. - epsilon)
+    return - tf.reduce_sum(target * tf.log(output), 2)
 
 
 def pixelwise_accuracy(y_true, y_pred):
