@@ -2,7 +2,7 @@ import keras
 from keras import backend as K
 from keras.models import load_model
 import numpy as np
-import sys
+import sys, time
 import autoseg_models
 from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_accuracy
 
@@ -26,6 +26,11 @@ model.compile(loss=pixelwise_crossentropy, optimizer='adadelta', metrics=[pixelw
 backend = BackendHandler(data_dir='/data/', num_classes=num_classes, reinitialize=False)
 
 callbacks = backend.getCallbacks(model_name, patience=batch_size)
+
+start = time.clock()
+model.evaluate_generator(backend.generateData(1), 100)
+end = time.clock()
+print("Benchmarked at " + str(100 / (end - start)) + " frames per second.")
 
 model.fit_generator(
     backend.generateData(batch_size),
