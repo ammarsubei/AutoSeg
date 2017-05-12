@@ -29,9 +29,9 @@ def pixelwise_crossentropy(y_true, y_pred):
     entropies = []
     for i in range(368*480):
         entropies.append(K.categorical_crossentropy(y_pred_flat,y_true_flat))
+        print(i)
     entropies = np.array(entropies)
     return np.mean(entropies)
-
 
 def pixelwise_accuracy(y_true, y_pred):
     return K.cast(K.equal(K.argmax(y_true, axis=2),

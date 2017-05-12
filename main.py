@@ -20,7 +20,7 @@ else:
     model_name= 'test.h5'
 
 model = autoseg_models.getModel(input_shape, num_classes, num_filters)
-model.compile(loss=pixelwise_crossentropy, optimizer='adadelta', metrics=[pixelwise_accuracy])
+model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=[pixelwise_accuracy])
 
 backend = BackendHandler(data_dir='/data/', num_classes=num_classes, reinitialize=False)
 
