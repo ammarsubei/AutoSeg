@@ -23,6 +23,9 @@ def oneHotToLabel(one_hot):
 def getID(size=6, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
+#def pixelwiseCrossentropy(y_true, y_pred):
+
+
 def pixelwiseAccuracy(y_true, y_pred):
     return K.cast(K.equal(K.argmax(y_true, axis=2),
                           K.argmax(y_pred, axis=2)),
