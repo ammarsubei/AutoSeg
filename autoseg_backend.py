@@ -84,7 +84,7 @@ class VisualizeResult(Callback):
 
         return prettyLabel
 
-    def on_epoch_end(self, batch, logs={}):
+    def on_batch_end(self, batch, logs={}):
         seg_result = oneHotToLabel( self.model.predict( np.array( [self.image] ) ).squeeze(0) )
         pl = self.makeLabelPretty(seg_result)
         cv2.imshow('Segmentation Result', pl)
