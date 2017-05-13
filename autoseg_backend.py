@@ -157,6 +157,7 @@ class BackendHandler(object):
             data = self.validation_file_list
         else:
             data = self.training_file_list
+        data = self.file_list #Remove this when re-implementing validation.
         i = 0
         while True:
             image_batch = []

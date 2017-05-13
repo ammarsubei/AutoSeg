@@ -28,17 +28,17 @@ model.compile(loss=pixelwise_crossentropy, optimizer='adadelta', metrics=[pixelw
 backend = BackendHandler(data_dir='/data/', num_classes=num_classes, reinitialize=False)
 
 callbacks = backend.getCallbacks(model_name, patience=batch_size)
-
+'''
 start = time.clock()
 model.evaluate_generator(backend.generateData(1), 100)
 end = time.clock()
 print("Benchmarked at " + str(100 / (end - start)) + " frames per second.")
-
+'''
 model.fit_generator(
     backend.generateData(batch_size),
-    steps_per_epoch=len(backend.training_file_list) / batch_size,
+    steps_per_epoch=len(backend.file_list) / batch_size, # change this when re-implementing validation
     epochs=epochs,
-    callbacks=callbacks,
-    validation_data=backend.generateData(batch_size, validating=True),
-    validation_steps=len(backend.validation_file_list) / batch_size)
+    callbacks=callbacks)
+    #validation_data=backend.generateData(batch_size, validating=True),
+    #validation_steps=len(backend.validation_file_list) / batch_size)
     #class_weight=backend.class_weights)
