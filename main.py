@@ -22,7 +22,7 @@ else:
 
 model = autoseg_models.getModel(input_shape, num_classes, num_filters)
 if model_name in os.listdir(os.getcwd()):
-    model.load_weights('test.h5')
+    model.load_weights('test.h5', by_name=True)
 model.compile(loss=pixelwise_crossentropy, optimizer='adadelta', metrics=[pixelwise_accuracy])
 
 backend = BackendHandler(data_dir='/data/', num_classes=num_classes, reinitialize=False)
