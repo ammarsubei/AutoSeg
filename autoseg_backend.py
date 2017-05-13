@@ -32,8 +32,8 @@ def pixelwise_crossentropy(target, output):
                             keep_dims=True)
     '''
     # manual computation of crossentropy
-    output = tf.clip_by_value(output, 10e-8, 1. - 10e-8)
-    return - tf.reduce_sum(target * tf.log(output))
+    output = tf.clip_by_value(output, 10e-8, 1.-10e-8)
+    return - tf.reduce_mean(target * tf.log(output))
 
 def pixelwise_accuracy(y_true, y_pred):
     return K.cast(K.equal(K.argmax(y_true, axis=2),
@@ -84,7 +84,7 @@ class VisualizeResult(Callback):
         return prettyLabel
 
     def on_batch_end(self, batch, logs={}):
-        seg_result = oneHotToLabel( self.model.predict( np.array( [self.image] ) ).squeeze(0) )
+        seg_result = oneHotToLabel( self.model.predict( np.array( [self.image] ) )[0].squeeze(0) )
         pl = self.makeLabelPretty(seg_result)
         cv2.imshow('Segmentation Result', pl)
         cv2.moveWindow('Segmentation Result', 1010, 10)
@@ -168,6 +168,7 @@ class BackendHandler(object):
         while True:
             image_batch = []
             label_batch = []
+            small_label_batch = []
             for b in range(batch_size):
                 if i == len(data):
                     i = 0
@@ -178,12 +179,16 @@ class BackendHandler(object):
                 label = cv2.imread(self.label_path + sample, 0)
                 image = image
                 label = label
+                small_label = cv2.resize(label, (0,0), fx=0.125, fy=0.125) 
                 one_hot = labelToOneHot(label, self.num_classes)
+                small_one_hot = labelToOneHot(small_label, self.num_classes)
                 image_batch.append(image)
                 label_batch.append(one_hot)
+                small_label_batch.append(small_one_hot)
             image_batch = np.array(image_batch)
             label_batch = np.array(label_batch)
-            yield (image_batch, label_batch)
+            small_label_batch = np.array(small_label_batch)
+            yield (image_batch, [label_batch, small_label_batch])
 
     def getCallbacks(self, model_name='test.h5', num_classes=12, patience=12):
         checkpoint = ModelCheckpoint(
