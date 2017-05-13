@@ -43,7 +43,6 @@ def pixelwise_accuracy(y_true, y_pred):
 class VisualizeResult(Callback):
     def __init__(self, num_classes, image_path, label_path, validation_file_list):
         self.num_classes = num_classes
-        # TODO: Randomly select and create these if not present.
         self.image = cv2.imread(os.getcwd() + '/sample_image.png')
         cv2.imshow('Sample Image', self.image)
         cv2.moveWindow('Sample Image', 10, 10)
@@ -90,6 +89,13 @@ class VisualizeResult(Callback):
         cv2.imshow('Segmentation Result', pl)
         cv2.moveWindow('Segmentation Result', 1010, 10)
         cv2.waitKey(1)
+
+    def on_epoch_end(self, epoch, logs={}):
+        new_img = random.choice(self.validation_file_list)
+        self.image = cv2.imread(self.image_path + new_img)
+        self.ground_truth = self.makeLabelPretty( cv2.imread(self.label_path + new_img, 0) )
+        cv2.imshow('Sample Image', self.image)
+        cv2.imshow('Ground Truth', self.ground_truth)
 
     def on_train_end(self, logs={}):
         print("Training ended!")
