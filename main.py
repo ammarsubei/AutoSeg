@@ -13,7 +13,7 @@ img_width = 360
 img_size = (img_width, img_height)
 mask_size = img_size
 input_shape = (img_width, img_height, 3)
-batch_size = 16
+batch_size = 8
 epochs = 10000000
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
@@ -28,12 +28,12 @@ model.compile(loss=pixelwise_crossentropy, optimizer='adadelta', metrics=[pixelw
 backend = BackendHandler(data_dir='/data/', num_classes=num_classes, reinitialize=False)
 
 callbacks = backend.getCallbacks(model_name, patience=batch_size)
-'''
+
 start = time.clock()
 model.evaluate_generator(backend.generateData(1), 100)
 end = time.clock()
 print("Benchmarked at " + str(100 / (end - start)) + " frames per second.")
-'''
+
 model.fit_generator(
     backend.generateData(batch_size),
     steps_per_epoch=len(backend.file_list) / batch_size, # change this when re-implementing validation
