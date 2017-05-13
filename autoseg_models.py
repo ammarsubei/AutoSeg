@@ -3,8 +3,8 @@ from keras.layers import Input, Conv2D, MaxPooling2D, Conv2DTranspose, Reshape, 
 
 def addFireModule(x, squeeze_filters, expand_filters):
     squeeze = Conv2D(16, (3,3), padding='same', activation='elu')(x)
-    expand1 = Conv2D(num_filters, (1,1), padding='same', activation='elu')(squeeze)
-    expand3 = Conv2D(num_filters, (3,3), padding='same', activation='elu')(squeeze)
+    expand1 = Conv2D(expand_filters, (1,1), padding='same', activation='elu')(squeeze)
+    expand3 = Conv2D(expand_filters, (3,3), padding='same', activation='elu')(squeeze)
     c = concatenate([expand1, expand3])
 
     return c
