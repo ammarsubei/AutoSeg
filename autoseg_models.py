@@ -43,8 +43,8 @@ def getModel(input_shape, num_classes, num_filters):
     fire3_3 = addFireModule(fire3_2, 64, 256)
     fire3_4 = addFireModule(fire3_3, 64, 256)
 
-    pdc = addParallelDilatedConvolution(fire3_4, num_classes)
-
+    pdc = addParallelDilatedConvolution(convI, num_classes)
+    '''
     trans_conv1 = Conv2DTranspose(num_classes, (3,3), padding='same', activation='elu', strides=2)(pdc)
     ref1 = addBypassRefinementModule(trans_conv1, fire2_2, num_classes)
 
@@ -55,8 +55,8 @@ def getModel(input_shape, num_classes, num_filters):
     ref3 = addBypassRefinementModule(trans_conv3, convI, num_classes)
 
     trans_conv4 = Conv2DTranspose(num_classes, (3,3), padding='same', activation='elu')(ref3)
-
-    prediction = Conv2D(num_classes, (1,1), padding='same', activation='softmax')(i)
+    '''
+    prediction = Conv2D(num_classes, (1,1), padding='same', activation='softmax')(pdc)
 
     model = Model(inputs=i, outputs=prediction)
 
