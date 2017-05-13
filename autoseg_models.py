@@ -56,7 +56,7 @@ def getModel(input_shape, num_classes, num_filters):
 
     trans_conv4 = Conv2DTranspose(num_classes, (3,3), padding='same', activation='elu')(ref3)
 
-    prediction = Conv2D(num_classes, (1,1), padding='same', activation='softmax')(trans_conv4)
+    prediction = Conv2D(num_classes, (1,1), padding='same', activation='softmax')(i)
 
     model = Model(inputs=i, outputs=prediction)
 
