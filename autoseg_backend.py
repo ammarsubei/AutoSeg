@@ -182,7 +182,7 @@ class BackendHandler(object):
     def getCallbacks(self, model_name='test.h5', num_classes=12, patience=12):
         checkpoint = ModelCheckpoint(
             model_name,
-            monitor='val_loss',
+            monitor='loss', # CHANGE THIS when re-implementing validation
             verbose=0,
             save_best_only=True,
             save_weights_only=True)
