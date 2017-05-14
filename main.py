@@ -6,6 +6,7 @@ import os, sys, time
 import autoseg_models
 from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_accuracy
 
+train_encoder = True
 num_classes = 12
 num_filters = 64
 img_height = 480
@@ -23,12 +24,13 @@ else:
 model = autoseg_models.getModel(input_shape, num_classes, num_filters)
 if model_name in os.listdir(os.getcwd()):
     model.load_weights('squeezenet_weights.h5', by_name=True)
-    for layer in model.layers:
-        layer.trainable = False
-        if layer.name == "concatenate_8":
-            break
+    if not train_encoder:
+        for layer in model.layers:
+            layer.trainable = False
+            if layer.name == "concatenate_8":
+                break
 
-model.compile(loss=pixelwise_crossentropy, optimizer='adadelta', metrics=[pixelwise_accuracy], loss_weights=[0.99,0.01])
+model.compile(loss=pixelwise_crossentropy, optimizer='adadelta', metrics=[pixelwise_accuracy], loss_weights=[0.5,0.5])
 
 backend = BackendHandler(data_dir='/data/', num_classes=num_classes, reinitialize=False)
 
