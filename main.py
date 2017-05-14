@@ -14,7 +14,7 @@ img_width = 360
 img_size = (img_width, img_height)
 mask_size = img_size
 input_shape = (img_width, img_height, 3)
-batch_size = 8
+batch_size = 10
 epochs = 10000000
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
@@ -30,7 +30,7 @@ if model_name in os.listdir(os.getcwd()):
             if layer.name == "concatenate_8":
                 break
 
-model.compile(loss=pixelwise_crossentropy, optimizer='adadelta', metrics=[pixelwise_accuracy], loss_weights=[0.5,0.5])
+model.compile(loss=pixelwise_crossentropy, optimizer='adadelta', metrics=[pixelwise_accuracy], loss_weights=[0.01,0.99])
 
 backend = BackendHandler(data_dir='/data/', num_classes=num_classes, reinitialize=False)
 
