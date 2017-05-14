@@ -54,6 +54,7 @@ class VisualizeResult(Callback):
         self.image_path = image_path
         self.label_path = label_path
         self.validation_file_list = validation_file_list
+        self.activity_by_layer = []
 
 
     # Accepts and returns a numpy array.
@@ -73,7 +74,6 @@ class VisualizeResult(Callback):
         [0,102,0],      # 10: dark green
         [0,76,153],     # 11: dark blue
         [102,0,51],     # 12: dark pink
-        [0,153,153],    # 13: dark turquoise
         ]
 
         assert self.num_classes <= len(colors)
@@ -83,6 +83,24 @@ class VisualizeResult(Callback):
 
         return prettyLabel
 
+    def calculateActivityByLayer(self):
+        current_weights = self.model.get_weights()
+        avg_diff = []
+        for i in range(len(current_weights)):
+            avg_diff.append( np.mean(current_weights[i] - self.previous_epoch_weights[i]) )
+        self.activity_by_layer += avg_diff
+        histogram = np.zeros((500,1000,3))
+        h_width = int(1000 / len(self.model.layers) - 1)
+        x = 0
+        for i in range(len(avg_diff)):
+            cv2.rectangle(histogram, (x,0), (x+h_width, int(self.activity_by_layer[i] / max(self.activity_by_layer))*400), (255,0,0), -1)
+            x = x + h_width
+        cv2.imshow('Activity By Layer', histogram)
+        cv2.moveWindow('Activity By Layer', 10, 510)
+        cv2.waitKey(1)
+
+
+
     def on_batch_end(self, batch, logs={}):
         seg_result = oneHotToLabel( self.model.predict( np.array( [self.image] ) )[0].squeeze(0) )
         pl = self.makeLabelPretty(seg_result)
@@ -90,12 +108,16 @@ class VisualizeResult(Callback):
         cv2.moveWindow('Segmentation Result', 1010, 10)
         cv2.waitKey(1)
 
+    def on_epoch_begin(self, epoch, logs={}):
+        self.previous_epoch_weights = self.model.get_weights()
+
     def on_epoch_end(self, epoch, logs={}):
         new_img = random.choice(self.validation_file_list)
         self.image = cv2.imread(self.image_path + new_img)
         self.ground_truth = self.makeLabelPretty( cv2.imread(self.label_path + new_img, 0) )
         cv2.imshow('Sample Image', self.image)
         cv2.imshow('Ground Truth', self.ground_truth)
+        self.calculateActivityByLayer()
 
     def on_train_end(self, logs={}):
         print("Training ended!")
