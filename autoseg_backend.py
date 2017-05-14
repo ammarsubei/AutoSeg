@@ -50,6 +50,8 @@ class VisualizeResult(Callback):
         cv2.imshow('Ground Truth', self.ground_truth)
         cv2.imwrite('sample_ground_truth.png', self.ground_truth)
         cv2.moveWindow('Ground Truth', 510, 10)
+        cv2.imshow('Auxiliary Ground Truth', cv2.resize(self.ground_truth, (0,0), fx=0.125, fy=0.125))
+        cv2.moveWindow('Auxiliary Ground Truth', 510, 410)
         cv2.waitKey(1)
         self.image_path = image_path
         self.label_path = label_path
@@ -102,10 +104,14 @@ class VisualizeResult(Callback):
 
 
     def on_batch_end(self, batch, logs={}):
-        seg_result = oneHotToLabel( self.model.predict( np.array( [self.image] ) )[0].squeeze(0) )
-        pl = self.makeLabelPretty(seg_result)
-        cv2.imshow('Segmentation Result', pl)
+        seg_result = self.model.predict( np.array( [self.image] ) )
+        main = self.makeLabelPretty(oneHotToLabel(seg_result[0].squeeze(0)))
+        aux = self.makeLabelPretty(oneHotToLabel(seg_result[1].squeeze(0)))
+        cv2.imshow('Segmentation Result', main)
         cv2.moveWindow('Segmentation Result', 1010, 10)
+        aux_result = oneHotToLabel( self.model.predict( np.array( [self.image] ) )[1].squeeze(0) )
+        cv2.imshow('Auxiliary Result', aux)
+        cv2.moveWindow('Auxiliary Result', 1010, 410)
         cv2.waitKey(1)
 
     def on_epoch_begin(self, epoch, logs={}):
@@ -117,6 +123,7 @@ class VisualizeResult(Callback):
         self.ground_truth = self.makeLabelPretty( cv2.imread(self.label_path + new_img, 0) )
         cv2.imshow('Sample Image', self.image)
         cv2.imshow('Ground Truth', self.ground_truth)
+        cv2.imshow('Auxiliary Ground Truth', cv2.resize(self.ground_truth, (0,0), fx=0.125, fy=0.125))
         #self.calculateActivityByLayer()
 
     def on_train_end(self, logs={}):
