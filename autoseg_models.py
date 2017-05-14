@@ -9,19 +9,19 @@ def addFireModule(x, squeeze_filters, expand_filters, name='fire'):
 
     return c
 
-def addParallelDilatedConvolution(x, num_filters):
-    conv1 = Conv2D(num_filters, (3,3), padding='same', activation='elu', dilation_rate=1, name='pdc1')(x)
-    conv2 = Conv2D(num_filters, (3,3), padding='same', activation='elu', dilation_rate=2, name='pdc2')(x)
-    conv4 = Conv2D(num_filters, (3,3), padding='same', activation='elu', dilation_rate=4, name='pdc3')(x)
-    conv8 = Conv2D(num_filters, (3,3), padding='same', activation='elu', dilation_rate=8, name='pdc4')(x)
+def addParallelDilatedConvolution(x, num_filters, name='parallel_dilated_convolution'):
+    conv1 = Conv2D(num_filters, (3,3), padding='same', activation='elu', dilation_rate=1, name=name + '/dil_1')(x)
+    conv2 = Conv2D(num_filters, (3,3), padding='same', activation='elu', dilation_rate=2, name=name + '/dil_2')(x)
+    conv4 = Conv2D(num_filters, (3,3), padding='same', activation='elu', dilation_rate=4, name=name + '/dil_4')(x)
+    conv8 = Conv2D(num_filters, (3,3), padding='same', activation='elu', dilation_rate=8, name=name + '/dil_8')(x)
     a = add([conv1, conv2, conv4, conv8])
 
     return a
 
-def addBypassRefinementModule(high, low, num_filters):
-    preConv = Conv2D(num_filters, (3,3), padding='same', activation='elu')(low)
+def addBypassRefinementModule(high, low, num_filters, name='bypass'):
+    preConv = Conv2D(num_filters, (3,3), padding='same', activation='elu', name=name + '/pre_conv')(low)
     c = concatenate([preConv, high])
-    postConv = Conv2D(num_filters, (3,3), padding='same', activation='elu')(c)
+    postConv = Conv2D(num_filters, (3,3), padding='same', activation='elu', name=name + '/post_conv')(c)
 
     return postConv
 
@@ -43,20 +43,20 @@ def getModel(input_shape, num_classes, num_filters):
     fire3_3 = addFireModule(fire3_2, 64, 256, name='fire8')
     fire3_4 = addFireModule(fire3_3, 64, 256, name='fire9')
 
-    pdc = addParallelDilatedConvolution(fire3_4, 512)
+    pdc = addParallelDilatedConvolution(fire3_4, 512, name='parallel_dilated_convolution')
 
     auxiliary_prediction = Conv2D(num_classes, (1,1), padding='same', activation='softmax', name='auxiliary')(pdc)
 
-    trans_conv1 = Conv2DTranspose(256, (3,3), padding='same', activation='elu', strides=2)(pdc)
-    ref1 = addBypassRefinementModule(trans_conv1, fire2_2, 256)
+    trans_conv1 = Conv2DTranspose(256, (3,3), padding='same', activation='elu', strides=2, name='trans_conv10')(pdc)
+    ref1 = addBypassRefinementModule(trans_conv1, fire2_2, 256, name='bypass11')
 
-    trans_conv2 = Conv2DTranspose(128, (3,3), padding='same', activation='elu', strides=2)(ref1)
-    ref2 = addBypassRefinementModule(trans_conv2, fire1_2, 128)
+    trans_conv2 = Conv2DTranspose(128, (3,3), padding='same', activation='elu', strides=2, name='trans_conv12')(ref1)
+    ref2 = addBypassRefinementModule(trans_conv2, fire1_2, 128, name='bypass13')
 
-    trans_conv3 = Conv2DTranspose(64, (3,3), padding='same', activation='elu', strides=2)(ref2)
-    ref3 = addBypassRefinementModule(trans_conv3, convI, 64)
+    trans_conv3 = Conv2DTranspose(64, (3,3), padding='same', activation='elu', strides=2, name='trans_conv14')(ref2)
+    ref3 = addBypassRefinementModule(trans_conv3, convI, 64, name='bypass15')
 
-    trans_conv4 = Conv2DTranspose(32, (3,3), padding='same', activation='elu')(ref3)
+    trans_conv4 = Conv2DTranspose(32, (3,3), padding='same', activation='elu', name='trans_conv16')(ref3)
 
     prediction = Conv2D(num_classes, (1,1), padding='same', activation='softmax', name='main')(trans_conv4)
 
