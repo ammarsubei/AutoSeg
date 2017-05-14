@@ -10,10 +10,10 @@ def addFireModule(x, squeeze_filters, expand_filters, name='fire'):
     return c
 
 def addParallelDilatedConvolution(x, num_filters):
-    conv1 = Conv2D(num_filters, (3,3), padding='same', activation='elu', dilation_rate=1, name='pdc1' + str(num_filters))(x)
-    conv2 = Conv2D(num_filters, (3,3), padding='same', activation='elu', dilation_rate=2, name='pdc2' + str(num_filters))(x)
-    conv4 = Conv2D(num_filters, (3,3), padding='same', activation='elu', dilation_rate=4, name='pdc3' + str(num_filters))(x)
-    conv8 = Conv2D(num_filters, (3,3), padding='same', activation='elu', dilation_rate=8, name='pdc4' + str(num_filters))(x)
+    conv1 = Conv2D(num_filters, (3,3), padding='same', activation='elu', dilation_rate=1, name='pdc1')(x)
+    conv2 = Conv2D(num_filters, (3,3), padding='same', activation='elu', dilation_rate=2, name='pdc2')(x)
+    conv4 = Conv2D(num_filters, (3,3), padding='same', activation='elu', dilation_rate=4, name='pdc3')(x)
+    conv8 = Conv2D(num_filters, (3,3), padding='same', activation='elu', dilation_rate=8, name='pdc4')(x)
     a = add([conv1, conv2, conv4, conv8])
 
     return a
