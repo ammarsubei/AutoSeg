@@ -2,7 +2,7 @@ from keras.models import Model
 from keras.layers import Input, Conv2D, MaxPooling2D, Conv2DTranspose, Reshape, concatenate, add
 
 def addFireModule(x, squeeze_filters, expand_filters, name='fire'):
-    squeeze = Conv2D(16, (3,3), padding='same', activation='elu', name=name + '/squeeze1x1')(x)
+    squeeze = Conv2D(squeeze_filters, (1,1), padding='same', activation='elu', name=name + '/squeeze1x1')(x)
     expand1 = Conv2D(expand_filters, (1,1), padding='same', activation='elu', name=name + '/expand1x1')(squeeze)
     expand3 = Conv2D(expand_filters, (3,3), padding='same', activation='elu', name=name + '/expand3x3')(squeeze)
     c = concatenate([expand1, expand3])
@@ -27,7 +27,7 @@ def addBypassRefinementModule(high, low, num_filters):
 
 def getModel(input_shape, num_classes, num_filters):
     i = Input(input_shape)
-    convI = Conv2D(96, (3,3), padding='same', activation='elu', name='conv1')(i)
+    convI = Conv2D(64, (3,3), padding='same', activation='elu', name='conv1')(i)
 
     pool1 = MaxPooling2D((2,2))(convI)
     fire1_1 = addFireModule(pool1, 16, 64, name='fire2')
