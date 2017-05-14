@@ -28,7 +28,7 @@ if model_name in os.listdir(os.getcwd()):
         if layer.name == "concatenate_8":
             break
 
-model.compile(loss=pixelwise_crossentropy, optimizer='adadelta', metrics=[pixelwise_accuracy], loss_weights=[1.0,0.0])
+model.compile(loss=pixelwise_crossentropy, optimizer='adadelta', metrics=[pixelwise_accuracy], loss_weights=[0.99,0.01])
 
 backend = BackendHandler(data_dir='/data/', num_classes=num_classes, reinitialize=False)
 
