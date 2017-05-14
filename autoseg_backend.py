@@ -117,7 +117,7 @@ class VisualizeResult(Callback):
         self.ground_truth = self.makeLabelPretty( cv2.imread(self.label_path + new_img, 0) )
         cv2.imshow('Sample Image', self.image)
         cv2.imshow('Ground Truth', self.ground_truth)
-        self.calculateActivityByLayer()
+        #self.calculateActivityByLayer()
 
     def on_train_end(self, logs={}):
         print("Training ended!")
