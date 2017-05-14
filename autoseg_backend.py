@@ -184,7 +184,7 @@ class BackendHandler(object):
             print("Class weights found, loading...")
             with open('class_weights.pickle', 'rb') as f:
                 self.class_weights = pickle.load(f)
-        print("Class weights: ", end="")
+        #print("Class weights: ", end="")
         print(self.class_weights)
 
     def generateData(self, batch_size, validating=False):
