@@ -1,5 +1,6 @@
 import numpy as np
 import os, cv2
+import pickle
 
 colors = [None]*34
 for f in os.listdir('../../labels/'):
@@ -22,3 +23,5 @@ for f in os.listdir('../../labels/'):
         break
 print("")
 print(colors)
+with open('cityscapes_color_mappings.pickle', 'wb') as f:
+    pickle.dump(colors, f, protocol=pickle.HIGHEST_PROTOCOL)
