@@ -7,7 +7,7 @@ import autoseg_models
 from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_accuracy
 
 train_encoder = True
-num_classes = 12
+num_classes = 34
 num_filters = 64
 img_height = 480
 img_width = 360
