@@ -9,11 +9,11 @@ from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_ac
 train_encoder = True
 num_classes = 34
 num_filters = 64
-img_height = 480
-img_width = 360
+img_height = 240
+img_width = 480
 img_size = (img_width, img_height)
 mask_size = img_size
-input_shape = (img_width, img_height, 3)
+input_shape = (img_height, img_width, 3)
 batch_size = 8
 epochs = 10000000
 if len(sys.argv) > 1:
@@ -47,5 +47,5 @@ model.fit_generator(
     epochs=epochs,
     callbacks=callbacks,
     validation_data=backend.generateData(batch_size, validating=True),
-    validation_steps=len(backend.validation_file_list) / batch_size)
+    validation_steps=10)#len(backend.validation_file_list) / batch_size)
     #class_weight=backend.class_weights)

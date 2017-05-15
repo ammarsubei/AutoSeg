@@ -33,7 +33,7 @@ def pixelwise_crossentropy(target, output):
     '''
     # manual computation of crossentropy
     output = tf.clip_by_value(output, 10e-8, 1.-10e-8)
-    return - tf.reduce_mean(target * tf.log(output))
+    return -10000* tf.reduce_mean(target * tf.log(output))
 
 def pixelwise_accuracy(y_true, y_pred):
     return K.cast(K.equal(K.argmax(y_true, axis=2),
@@ -48,10 +48,12 @@ class VisualizeResult(Callback):
         self.validation_file_list = validation_file_list
         self.colors = None
         i = random.choice(self.validation_file_list)
-        self.image = cv2.imread(self.image_path + i)
+        print(i)
+        self.image = cv2.resize( cv2.imread(i[0]), (480,240))
         cv2.imshow('Sample Image', self.image)
         cv2.moveWindow('Sample Image', 10, 10)
-        self.ground_truth = self.makeLabelPretty( cv2.imread(self.label_path + i, 0) )
+        self.ground_truth = cv2.resize( cv2.imread(i[1], 0), (480,240) )
+        self.ground_truth = self.makeLabelPretty(self.ground_truth)
         cv2.imshow('Ground Truth', self.ground_truth)
         #cv2.imwrite('sample_ground_truth.png', self.ground_truth)
         cv2.moveWindow('Ground Truth', 510, 10)
@@ -110,8 +112,6 @@ class VisualizeResult(Callback):
         cv2.moveWindow('Activity By Layer', 10, 510)
         cv2.waitKey(1)
 
-
-
     def on_batch_end(self, batch, logs={}):
         seg_result = self.model.predict( np.array( [self.image] ) )
         main = self.makeLabelPretty(oneHotToLabel(seg_result[0].squeeze(0)))
@@ -128,8 +128,9 @@ class VisualizeResult(Callback):
 
     def on_epoch_end(self, epoch, logs={}):
         new_img = random.choice(self.validation_file_list)
-        self.image = cv2.imread(self.image_path + new_img)
-        self.ground_truth = self.makeLabelPretty( cv2.imread(self.label_path + new_img, 0) )
+        print(new_img)
+        self.image = cv2.resize( cv2.imread(new_img[0]), (480,240))
+        self.ground_truth = self.makeLabelPretty( cv2.resize( cv2.imread(new_img[1], 0), (480,240) ) )
         cv2.imshow('Sample Image', self.image)
         cv2.imshow('Ground Truth', self.ground_truth)
         #cv2.imshow('Auxiliary Ground Truth', cv2.resize(self.ground_truth, (0,0), fx=0.125, fy=0.125))
@@ -145,23 +146,26 @@ class VisualizeResult(Callback):
 class BackendHandler(object):
 
     def __init__(self, data_dir, num_classes, reinitialize=False):
+        self.num_classes = num_classes
         self.data_dir = os.getcwd() + data_dir
         self.image_path = self.data_dir + 'images/'
         self.label_path = self.data_dir + 'labels_fine/'
         self.cwd_contents = os.listdir(os.getcwd())
         self.training_file_list = self.getFileList('train/')
-        self.validation_file_list = self.getFileList('test/')
+        self.validation_file_list = self.getFileList('val/')
 
     # Sort the data into training and validation sets, or load already sorted sets.
     def getFileList(self, category='train/'):
         # Make training file list.
         file_dir = self.image_path + category
-        allfiles = [f for f in os.listdir(file_dir) if os.path.isfile(os.path.join(file_dir, f))]
-        for f in train_files:
-            f = f.split('_')[0] + '/' + f
+        allfiles = []
+        for path, subdirs, files in os.walk(file_dir):
+            for f in files:
+                f = f.split('_')[0] + '/' + f
+                allfiles.append(f)
         file_list = []
         for f in allfiles:
-            input_output = (self.image_path + category + f, self.label_path + category + f.replace('leftImg8bit', 'gtFine_instanceIds'))
+            input_output = (self.image_path + category + f, self.label_path + category + f.replace('leftImg8bit', 'gtFine_labelIds'))
             file_list.append(input_output)
         return file_list
 
@@ -170,6 +174,7 @@ class BackendHandler(object):
             data = self.validation_file_list
         else:
             data = self.training_file_list
+        random.shuffle(data)
         i = 0
         while True:
             image_batch = []
@@ -178,11 +183,13 @@ class BackendHandler(object):
             for b in range(batch_size):
                 if i == len(data):
                     i = 0
-                    random.shuffle(self.training_file_list)
+                    random.shuffle(data)
                 sample = data[i]
                 i += 1
                 image = cv2.imread(sample[0]) / 255
+                image = cv2.resize(image, (480,240))
                 label = cv2.imread(sample[1], 0)
+                label = cv2.resize(label, (480,240))
                 small_label = cv2.resize(label, (0,0), fx=0.125, fy=0.125)
                 one_hot = labelToOneHot(label, self.num_classes)
                 small_one_hot = labelToOneHot(small_label, self.num_classes)
