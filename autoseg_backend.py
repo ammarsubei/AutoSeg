@@ -57,8 +57,8 @@ class VisualizeResult(Callback):
         #cv2.imshow('Auxiliary Ground Truth', cv2.resize(self.ground_truth, (0,0), fx=0.125, fy=0.125))
         #cv2.moveWindow('Auxiliary Ground Truth', 510, 410)
         cv2.waitKey(1)
-        
-        
+
+
         self.activity_by_layer = []
 
 
@@ -86,10 +86,10 @@ class VisualizeResult(Callback):
             with open('cityscapes_color_mappings.pickle', 'rb') as f:
                 self.colors =  pickle.load(f)
 
-            assert self.num_classes <= len(colors)
+            assert self.num_classes <= len(self.colors)
 
         for i in range(self.num_classes):
-            prettyLabel[np.where( (label==[i]) )] = colors[i]
+            prettyLabel[np.where( (label==[i]) )] = self.colors[i]
 
         return prettyLabel
 
@@ -215,7 +215,7 @@ class BackendHandler(object):
                 label = cv2.imread(self.label_path + sample, 0)
                 image = image
                 label = label
-                small_label = cv2.resize(label, (0,0), fx=0.125, fy=0.125) 
+                small_label = cv2.resize(label, (0,0), fx=0.125, fy=0.125)
                 one_hot = labelToOneHot(label, self.num_classes)
                 small_one_hot = labelToOneHot(small_label, self.num_classes)
                 image_batch.append(image)
