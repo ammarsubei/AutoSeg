@@ -158,10 +158,9 @@ class BackendHandler(object):
     # Sort the data into training and validation sets, or load already sorted sets.
     def splitData(self, reinitialize):
         if reinitialize or 'training_file_list.pickle' not in self.cwd_contents or 'validation_file_list.pickle' not in self.cwd_contents:
-            print("Splitting training/validation data 80/20...")
-            random.shuffle(self.file_list)
-            breakpoint = int(len(self.file_list) * 0.8)
-            self.training_file_list, self.validation_file_list = self.file_list[:breakpoint], self.file_list[breakpoint:]
+            # get list of all files
+
+
             # pickle the files
             with open('training_file_list.pickle', 'wb') as f:
                 pickle.dump(self.training_file_list, f, protocol=pickle.HIGHEST_PROTOCOL)
