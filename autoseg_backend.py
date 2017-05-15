@@ -46,6 +46,7 @@ class VisualizeResult(Callback):
         self.image_path = image_path
         self.label_path = label_path
         self.validation_file_list = validation_file_list
+        self.colors = None
         self.image = cv2.imread(self.image_path + random.choice(self.validation_file_list))
         cv2.imshow('Sample Image', self.image)
         cv2.moveWindow('Sample Image', 10, 10)
@@ -64,23 +65,28 @@ class VisualizeResult(Callback):
     # Accepts and returns a numpy array.
     def makeLabelPretty(self, label):
         prettyLabel = cv2.cvtColor(label, cv2.COLOR_GRAY2RGB)
-        colors = [
-        [255,102,102],  # 0: light red
-        [255,255,102],  # 1: light yellow
-        [102,255,102],  # 2: light green
-        [102,255,255],  # 3: light blue
-        [102,102,255],  # 4: light indigo
-        [255,102,255],  # 5: light pink
-        [255,178,102],  # 6: light orange
-        [153,51,255],   # 7: violet
-        [153,0,0],      # 8: dark red
-        [153,153,0],    # 9: dark yellow
-        [0,102,0],      # 10: dark green
-        [0,76,153],     # 11: dark blue
-        [102,0,51],     # 12: dark pink
-        ]
+        if self.colors is None:
+            '''
+            self.colors = [
+            [255,102,102],  # 0: light red
+            [255,255,102],  # 1: light yellow
+            [102,255,102],  # 2: light green
+            [102,255,255],  # 3: light blue
+            [102,102,255],  # 4: light indigo
+            [255,102,255],  # 5: light pink
+            [255,178,102],  # 6: light orange
+            [153,51,255],   # 7: violet
+            [153,0,0],      # 8: dark red
+            [153,153,0],    # 9: dark yellow
+            [0,102,0],      # 10: dark green
+            [0,76,153],     # 11: dark blue
+            [102,0,51],     # 12: dark pink
+            ]'''
 
-        assert self.num_classes <= len(colors)
+            with open('cityscapes_color_mappings.pickle', 'rb') as f:
+                self.colors =  pickle.load(f)
+
+            assert self.num_classes <= len(colors)
 
         for i in range(self.num_classes):
             prettyLabel[np.where( (label==[i]) )] = colors[i]
