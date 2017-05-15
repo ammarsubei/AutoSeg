@@ -120,6 +120,8 @@ class VisualizeResult(Callback):
         self.previous_epoch_weights = self.model.get_weights()
 
     def on_epoch_end(self, epoch, logs={}):
+        new_img = random.choice(self.validation_file_list)
+        self.image = cv2.imread(self.image_path + new_img)
         self.ground_truth = self.makeLabelPretty( cv2.imread(self.label_path + new_img, 0) )
         cv2.imshow('Sample Image', self.image)
         cv2.imshow('Ground Truth', self.ground_truth)
