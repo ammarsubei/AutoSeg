@@ -32,7 +32,7 @@ if model_name in os.listdir(os.getcwd()):
 
 model.compile(loss=pixelwise_crossentropy, optimizer='adadelta', metrics=[pixelwise_accuracy], loss_weights=[0.01,0.99])
 
-backend = BackendHandler(data_dir='/cityscapes/', num_classes=num_classes, reinitialize=False)
+backend = BackendHandler(data_dir='/cityscapes/', num_classes=num_classes)
 
 callbacks = backend.getCallbacks(model_name, patience=batch_size)
 

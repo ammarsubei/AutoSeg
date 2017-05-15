@@ -146,49 +146,24 @@ class BackendHandler(object):
 
     def __init__(self, data_dir, num_classes, reinitialize=False):
         self.data_dir = os.getcwd() + data_dir
+        self.image_path = self.data_dir + 'images/'
+        self.label_path = self.data_dir + 'labels_fine/'
         self.cwd_contents = os.listdir(os.getcwd())
-        self.getFileLists(reinitialize)
+        self.training_file_list = self.getFileList('train/')
+        self.validation_file_list = self.getFileList('test/')
 
     # Sort the data into training and validation sets, or load already sorted sets.
-    def getFileLists(self, reinitialize):
-        if reinitialize or 'training_file_list.pickle' not in self.cwd_contents or 'validation_file_list.pickle' not in self.cwd_contents:
-            # recursively get list of all files in /coarse/leftImg8bit/
-            self.file_list = [f for f in listdir(mypath) if isfile(join(mypath, f))]
-            
-
-            # pickle the files
-            with open('training_file_list.pickle', 'wb') as f:
-                pickle.dump(self.training_file_list, f, protocol=pickle.HIGHEST_PROTOCOL)
-            with open('validation_file_list.pickle', 'wb') as f:
-                pickle.dump(self.validation_file_list, f, protocol=pickle.HIGHEST_PROTOCOL)
-        else:
-            print("Loading training/validation split...")
-            with open('training_file_list.pickle', 'rb') as f:
-                self.training_file_list =  pickle.load(f)
-            with open('validation_file_list.pickle', 'rb') as f:
-                self.validation_file_list = pickle.load(f)
-        print("Train on " + str(len(self.training_file_list)) + " images, validate on " + str(len(self.validation_file_list)) + " images.")
-
-    def getClassWeights(self, reinitialize):
-        if reinitialize or 'class_weights.pickle' not in self.cwd_contents:
-            print("Calculating class weights for " + str(len(self.file_list)) + " images, this may take a while...")
-            classcounts = [0]*self.num_classes
-            for f in self.file_list:
-                lbl = cv2.imread(self.label_path + f, 0)
-                for i in range(self.num_classes):
-                    classcounts[i] += len(np.where(lbl == i)[0])
-            total = sum(classcounts)
-            self.class_weights = {}
-            for i in range(self.num_classes):
-                self.class_weights.update( {i : float(math.log( total / classcounts[i] ))} )
-            with open('class_weights.pickle', 'wb') as f:
-                pickle.dump(self.class_weights, f, protocol=pickle.HIGHEST_PROTOCOL)
-        else:
-            print("Class weights found, loading...")
-            with open('class_weights.pickle', 'rb') as f:
-                self.class_weights = pickle.load(f)
-        #print("Class weights: ", end="")
-        print(self.class_weights)
+    def getFileList(self, category='train/'):
+        # Make training file list.
+        file_dir = self.image_path + category
+        allfiles = [f for f in os.listdir(file_dir) if os.path.isfile(os.path.join(file_dir, f))]
+        for f in train_files:
+            f = f.split('_')[0] + '/' + f
+        file_list = []
+        for f in allfiles:
+            input_output = (self.image_path + category + f, self.label_path + category + f.replace('leftImg8bit', 'gtFine_instanceIds'))
+            file_list.append(input_output)
+        return file_list
 
     def generateData(self, batch_size, validating=False):
         if validating:
@@ -206,10 +181,8 @@ class BackendHandler(object):
                     random.shuffle(self.training_file_list)
                 sample = data[i]
                 i += 1
-                image = cv2.imread(self.image_path + sample) / 255
-                label = cv2.imread(self.label_path + sample, 0)
-                image = image
-                label = label
+                image = cv2.imread(sample[0]) / 255
+                label = cv2.imread(sample[1], 0)
                 small_label = cv2.resize(label, (0,0), fx=0.125, fy=0.125)
                 one_hot = labelToOneHot(label, self.num_classes)
                 small_one_hot = labelToOneHot(small_label, self.num_classes)
