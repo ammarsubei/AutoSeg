@@ -47,12 +47,13 @@ class VisualizeResult(Callback):
         self.label_path = label_path
         self.validation_file_list = validation_file_list
         self.colors = None
-        self.image = cv2.imread(self.image_path + random.choice(self.validation_file_list))
+        i = random.choice(self.validation_file_list)
+        self.image = cv2.imread(self.image_path + i)
         cv2.imshow('Sample Image', self.image)
         cv2.moveWindow('Sample Image', 10, 10)
-        self.ground_truth = self.makeLabelPretty( cv2.imread(os.getcwd() + '/sample_label.png', 0) )
+        self.ground_truth = self.makeLabelPretty( cv2.imread(self.label_path + i, 0) )
         cv2.imshow('Ground Truth', self.ground_truth)
-        cv2.imwrite('sample_ground_truth.png', self.ground_truth)
+        #cv2.imwrite('sample_ground_truth.png', self.ground_truth)
         cv2.moveWindow('Ground Truth', 510, 10)
         #cv2.imshow('Auxiliary Ground Truth', cv2.resize(self.ground_truth, (0,0), fx=0.125, fy=0.125))
         #cv2.moveWindow('Auxiliary Ground Truth', 510, 410)
@@ -66,7 +67,7 @@ class VisualizeResult(Callback):
     def makeLabelPretty(self, label):
         prettyLabel = cv2.cvtColor(label, cv2.COLOR_GRAY2RGB)
         if self.colors is None:
-            '''
+
             self.colors = [
             [255,102,102],  # 0: light red
             [255,255,102],  # 1: light yellow
@@ -81,11 +82,11 @@ class VisualizeResult(Callback):
             [0,102,0],      # 10: dark green
             [0,76,153],     # 11: dark blue
             [102,0,51],     # 12: dark pink
-            ]'''
-
+            ]
+            '''
             with open('cityscapes_color_mappings.pickle', 'rb') as f:
                 self.colors =  pickle.load(f)
-
+            '''
             assert self.num_classes <= len(self.colors)
 
         for i in range(self.num_classes):
