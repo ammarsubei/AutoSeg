@@ -1,5 +1,5 @@
 from keras.models import Model
-from keras.layers import Input, Conv2D, MaxPooling2D, Conv2DTranspose, Reshape, concatenate, add
+from keras.layers import Input, Conv2D, MaxPooling2D, Conv2DTranspose, Reshape, Dropout, concatenate, add
 
 def addFireModule(x, squeeze_filters, expand_filters, name='fire'):
     squeeze = Conv2D(squeeze_filters, (1,1), padding='same', activation='elu', name=name + '/squeeze1x1')(x)
@@ -19,7 +19,7 @@ def addParallelDilatedConvolution(x, num_filters, name='parallel_dilated_convolu
     return a
 
 def addBypassRefinementModule(high, low, num_filters, name='bypass'):
-    preConv = Conv2D(num_filters, (3,3), padding='same', activation='elu', name=name + '/pre_conv')(low)
+    preConv = Dropout(0.5)(Conv2D(num_filters, (3,3), padding='same', activation='elu', name=name + '/pre_conv')(low))
     c = concatenate([preConv, high])
     postConv = Conv2D(num_filters, (3,3), padding='same', activation='elu', name=name + '/post_conv')(c)
 
