@@ -1,5 +1,5 @@
 from keras.models import Model
-from keras.layers import Input, Conv2D, MaxPooling2D, Conv2DTranspose, Reshape, Dropout, concatenate, add
+from keras.layers import Input, Conv2D, MaxPooling2D, UpSampling2D, Conv2DTranspose, Reshape, Dropout, concatenate, add
 
 def addFireModule(x, squeeze_filters, expand_filters, name='fire'):
     squeeze = Conv2D(squeeze_filters, (1,1), padding='same', activation='elu', name=name + '/squeeze1x1')(x)
@@ -58,7 +58,10 @@ def getModel(input_shape, num_classes, num_filters):
 
     trans_conv4 = Conv2DTranspose(32, (3,3), padding='same', activation='elu', name='trans_conv16')(ref3)
 
-    prediction = Conv2D(num_classes, (1,1), padding='same', activation='softmax', name='main')(trans_conv4)
+    up = UpSampling2D(8)(pdc)
+    res = concatenate([up, trans_conv4])
+
+    prediction = Conv2D(num_classes, (1,1), padding='same', activation='softmax', name='main')(res)
 
     model = Model(inputs=i, outputs=[prediction, auxiliary_prediction])
 
