@@ -41,6 +41,7 @@ coverage.xml
 CamVid/*
 camvid/*
 cityscapes/*
+cityscapes_orig/*
 *.h5
 logs/*
 __MACOSX/*

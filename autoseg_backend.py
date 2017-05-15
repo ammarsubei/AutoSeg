@@ -49,10 +49,10 @@ class VisualizeResult(Callback):
         self.colors = None
         i = random.choice(self.validation_file_list)
         print(i)
-        self.image = cv2.resize( cv2.imread(i[0]), (480,240))
+        self.image = cv2.imread(i[0])
         cv2.imshow('Sample Image', self.image)
         cv2.moveWindow('Sample Image', 10, 10)
-        self.ground_truth = cv2.resize( cv2.imread(i[1], 0), (480,240) )
+        self.ground_truth = cv2.imread(i[1], 0)
         self.ground_truth = self.makeLabelPretty(self.ground_truth)
         cv2.imshow('Ground Truth', self.ground_truth)
         #cv2.imwrite('sample_ground_truth.png', self.ground_truth)
@@ -129,8 +129,8 @@ class VisualizeResult(Callback):
     def on_epoch_end(self, epoch, logs={}):
         new_img = random.choice(self.validation_file_list)
         print(new_img)
-        self.image = cv2.resize( cv2.imread(new_img[0]), (480,240))
-        self.ground_truth = self.makeLabelPretty( cv2.resize( cv2.imread(new_img[1], 0), (480,240) ) )
+        self.image = cv2.imread(new_img[0])
+        self.ground_truth = self.makeLabelPretty( cv2.imread(new_img[1], 0) )
         cv2.imshow('Sample Image', self.image)
         cv2.imshow('Ground Truth', self.ground_truth)
         #cv2.imshow('Auxiliary Ground Truth', cv2.resize(self.ground_truth, (0,0), fx=0.125, fy=0.125))
@@ -187,9 +187,7 @@ class BackendHandler(object):
                 sample = data[i]
                 i += 1
                 image = cv2.imread(sample[0]) / 255
-                image = cv2.resize(image, (480,240))
                 label = cv2.imread(sample[1], 0)
-                label = cv2.resize(label, (480,240))
                 small_label = cv2.resize(label, (0,0), fx=0.125, fy=0.125)
                 one_hot = labelToOneHot(label, self.num_classes)
                 small_one_hot = labelToOneHot(small_label, self.num_classes)
