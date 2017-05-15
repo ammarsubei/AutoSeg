@@ -53,8 +53,8 @@ class VisualizeResult(Callback):
         cv2.imshow('Ground Truth', self.ground_truth)
         cv2.imwrite('sample_ground_truth.png', self.ground_truth)
         cv2.moveWindow('Ground Truth', 510, 10)
-        cv2.imshow('Auxiliary Ground Truth', cv2.resize(self.ground_truth, (0,0), fx=0.125, fy=0.125))
-        cv2.moveWindow('Auxiliary Ground Truth', 510, 410)
+        #cv2.imshow('Auxiliary Ground Truth', cv2.resize(self.ground_truth, (0,0), fx=0.125, fy=0.125))
+        #cv2.moveWindow('Auxiliary Ground Truth', 510, 410)
         cv2.waitKey(1)
         
         
@@ -112,8 +112,8 @@ class VisualizeResult(Callback):
         cv2.imshow('Segmentation Result', main)
         cv2.moveWindow('Segmentation Result', 1010, 10)
         aux_result = oneHotToLabel( self.model.predict( np.array( [self.image] ) )[1].squeeze(0) )
-        cv2.imshow('Auxiliary Result', aux)
-        cv2.moveWindow('Auxiliary Result', 1010, 410)
+        cv2.imshow('Scaled Auxiliary Result', cv2.resize(aux, (0,0), fx=8, fy=8))
+        cv2.moveWindow('Scaled Auxiliary Result', 1010, 410)
         cv2.waitKey(1)
 
     def on_epoch_begin(self, epoch, logs={}):
@@ -123,7 +123,7 @@ class VisualizeResult(Callback):
         self.ground_truth = self.makeLabelPretty( cv2.imread(self.label_path + new_img, 0) )
         cv2.imshow('Sample Image', self.image)
         cv2.imshow('Ground Truth', self.ground_truth)
-        cv2.imshow('Auxiliary Ground Truth', cv2.resize(self.ground_truth, (0,0), fx=0.125, fy=0.125))
+        #cv2.imshow('Auxiliary Ground Truth', cv2.resize(self.ground_truth, (0,0), fx=0.125, fy=0.125))
         #self.calculateActivityByLayer()
 
     def on_train_end(self, logs={}):

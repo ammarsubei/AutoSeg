@@ -14,7 +14,7 @@ img_width = 360
 img_size = (img_width, img_height)
 mask_size = img_size
 input_shape = (img_width, img_height, 3)
-batch_size = 10
+batch_size = 8
 epochs = 10000000
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
@@ -23,8 +23,7 @@ else:
 
 model = autoseg_models.getModel(input_shape, num_classes, num_filters)
 if model_name in os.listdir(os.getcwd()):
-    model.load_weights('squeezenet_weights.h5', by_name=True)
-    model.load_weights(model_name, by_name=True)
+    model.load_weights('test.h5', by_name=True)
     if not train_encoder:
         for layer in model.layers:
             layer.trainable = False
