@@ -66,7 +66,7 @@ class VisualizeResult(Callback):
     def makeLabelPretty(self, label):
         prettyLabel = cv2.cvtColor(label, cv2.COLOR_GRAY2RGB)
         if self.colors is None:
-            '''
+            
             self.colors = [
             [255,102,102],  # 0: light red
             [255,255,102],  # 1: light yellow
@@ -81,11 +81,11 @@ class VisualizeResult(Callback):
             [0,102,0],      # 10: dark green
             [0,76,153],     # 11: dark blue
             [102,0,51],     # 12: dark pink
-            ]'''
-
+            ]
+            '''
             with open('cityscapes_color_mappings.pickle', 'rb') as f:
                 self.colors =  pickle.load(f)
-
+            '''
             assert self.num_classes <= len(self.colors)
 
         for i in range(self.num_classes):
