@@ -146,20 +146,15 @@ class BackendHandler(object):
 
     def __init__(self, data_dir, num_classes, reinitialize=False):
         self.data_dir = os.getcwd() + data_dir
-        # TODO: Calculate num_classes automatically by iterating over the entire dataset and calculating len(uniques).
-        self.num_classes = num_classes
-        self.image_path = self.data_dir + 'images/'
-        self.label_path = self.data_dir + 'labels/'
-        self.file_list = os.listdir(self.data_dir + 'images/')
         self.cwd_contents = os.listdir(os.getcwd())
-        self.splitData(reinitialize)
-        self.getClassWeights(reinitialize)
+        self.getFileLists(reinitialize)
 
     # Sort the data into training and validation sets, or load already sorted sets.
-    def splitData(self, reinitialize):
+    def getFileLists(self, reinitialize):
         if reinitialize or 'training_file_list.pickle' not in self.cwd_contents or 'validation_file_list.pickle' not in self.cwd_contents:
-            # get list of all files
-
+            # recursively get list of all files in /coarse/leftImg8bit/
+            self.file_list = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+            
 
             # pickle the files
             with open('training_file_list.pickle', 'wb') as f:

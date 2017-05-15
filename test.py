@@ -1,24 +1,14 @@
-import numpy as np
-import os, cv2
+import os
 
-colors = [None]*34
-for f in os.listdir('../../labels/'):
+data_dir = '../../color'
+
+allfiles = [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f))]
+
+for f in allfiles:
     f = f[:27]
+    f = f.split('_')[0] + '/' + f
     print(f)
-    print(colors)
-    lbl = cv2.imread('../../labels/' + f + '_labelIds.png', 0)
-    col = cv2.imread('../../color/' + f + '_color.png')
-    if lbl is not None and col is not None:
-        for u in np.unique(lbl):
-            if colors[u] is None:
-                # find an element [x][y] in lbl with the value u
-                for y in range(lbl.shape[0]):
-                    for x in range(lbl.shape[1]):
-                        if lbl[y][x] == u:
-                            colors[u] = col[y][x].tolist()
-                            break
-            
-    if None not in colors:
-        break
-print("")
-print(colors)
+
+training_file_list = []
+for f in allfiles:
+    self.training_file_list.append( ('leftImg8bit/train/' + f + '_leftImg8bit.png', 'gtCoarse/train/' + f + '_gtCoarse_labelIds.png') )
