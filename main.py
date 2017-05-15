@@ -43,9 +43,9 @@ print("Benchmarked at " + str(100 / (end - start)) + " frames per second.")
 
 model.fit_generator(
     backend.generateData(batch_size),
-    steps_per_epoch=len(backend.file_list) / batch_size, # change this when re-implementing validation
+    steps_per_epoch=len(backend.training_file_list) / batch_size,c
     epochs=epochs,
-    callbacks=callbacks)
-    #validation_data=backend.generateData(batch_size, validating=True),
-    #validation_steps=len(backend.validation_file_list) / batch_size)
-    #class_weight=backend.class_weights)
+    callbacks=callbacks,
+    validation_data=backend.generateData(batch_size, validating=True),
+    validation_steps=len(backend.validation_file_list) / batch_size)
+    class_weight=backend.class_weights)

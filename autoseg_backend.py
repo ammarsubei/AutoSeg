@@ -200,7 +200,6 @@ class BackendHandler(object):
             data = self.validation_file_list
         else:
             data = self.training_file_list
-        data = self.file_list #Remove this when re-implementing validation.
         i = 0
         while True:
             image_batch = []
@@ -230,7 +229,7 @@ class BackendHandler(object):
     def getCallbacks(self, model_name='test.h5', num_classes=12, patience=12):
         checkpoint = ModelCheckpoint(
             model_name,
-            monitor='loss', # CHANGE THIS when re-implementing validation
+            monitor='val_loss', # CHANGE THIS when re-implementing validation
             verbose=0,
             save_best_only=True,
             save_weights_only=True)
@@ -245,7 +244,7 @@ class BackendHandler(object):
 
         vis = VisualizeResult(self.num_classes, self.image_path, self.label_path, self.validation_file_list)
 
-        return [checkpoint, vis]
+        return [checkpoint, tb, vis]
 
 #sg = SegGen('/data/', 11)
 #print(next(sg.trainingGenerator(11)))
