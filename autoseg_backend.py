@@ -43,7 +43,10 @@ def pixelwise_accuracy(y_true, y_pred):
 class VisualizeResult(Callback):
     def __init__(self, num_classes, image_path, label_path, validation_file_list):
         self.num_classes = num_classes
-        self.image = cv2.imread(os.getcwd() + '/sample_image.png')
+        self.image_path = image_path
+        self.label_path = label_path
+        self.validation_file_list = validation_file_list
+        self.image = cv2.imread(self.image_path + random.choice(self.validation_file_list))
         cv2.imshow('Sample Image', self.image)
         cv2.moveWindow('Sample Image', 10, 10)
         self.ground_truth = self.makeLabelPretty( cv2.imread(os.getcwd() + '/sample_label.png', 0) )
@@ -53,9 +56,8 @@ class VisualizeResult(Callback):
         cv2.imshow('Auxiliary Ground Truth', cv2.resize(self.ground_truth, (0,0), fx=0.125, fy=0.125))
         cv2.moveWindow('Auxiliary Ground Truth', 510, 410)
         cv2.waitKey(1)
-        self.image_path = image_path
-        self.label_path = label_path
-        self.validation_file_list = validation_file_list
+        
+        
         self.activity_by_layer = []
 
 
@@ -118,8 +120,6 @@ class VisualizeResult(Callback):
         self.previous_epoch_weights = self.model.get_weights()
 
     def on_epoch_end(self, epoch, logs={}):
-        new_img = random.choice(self.validation_file_list)
-        self.image = cv2.imread(self.image_path + new_img)
         self.ground_truth = self.makeLabelPretty( cv2.imread(self.label_path + new_img, 0) )
         cv2.imshow('Sample Image', self.image)
         cv2.imshow('Ground Truth', self.ground_truth)
@@ -184,7 +184,7 @@ class BackendHandler(object):
             print("Class weights found, loading...")
             with open('class_weights.pickle', 'rb') as f:
                 self.class_weights = pickle.load(f)
-        print("Class weights: ", end="")
+        #print("Class weights: ", end="")
         print(self.class_weights)
 
     def generateData(self, batch_size, validating=False):
