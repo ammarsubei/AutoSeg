@@ -1,14 +1,9 @@
-import os
+import cv2, time, os
 
-data_dir = '../../color'
-
-allfiles = [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f))]
-
-for f in allfiles:
-    f = f[:27]
-    f = f.split('_')[0] + '/' + f
-    print(f)
-
-training_file_list = []
-for f in allfiles:
-    self.training_file_list.append( ('leftImg8bit/train/' + f + '_leftImg8bit.png', 'gtCoarse/train/' + f + '_gtCoarse_labelIds.png') )
+image = cv2.imread('./cityscapes/images/val/munster/munster_000097_000019_leftImg8bit.png')
+label = cv2.imread('./cityscapes/labels_fine/val/munster/munster_000097_000019_gt_Fine_labelIds.png')
+start = time.clock()
+image = cv2.resize(image, (480,240))
+label = cv2.resize(image, (480,240))
+end = time.clock()
+print(2500*(end - start))
