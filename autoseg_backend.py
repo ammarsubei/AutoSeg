@@ -53,7 +53,7 @@ class VisualizeResult(Callback):
         cv2.moveWindow('Sample Image', 10, 10)
         self.ground_truth = self.makeLabelPretty( cv2.imread(self.label_path + i, 0) )
         cv2.imshow('Ground Truth', self.ground_truth)
-        cv2.imwrite('sample_ground_truth.png', self.ground_truth)
+        #cv2.imwrite('sample_ground_truth.png', self.ground_truth)
         cv2.moveWindow('Ground Truth', 510, 10)
         #cv2.imshow('Auxiliary Ground Truth', cv2.resize(self.ground_truth, (0,0), fx=0.125, fy=0.125))
         #cv2.moveWindow('Auxiliary Ground Truth', 510, 410)
