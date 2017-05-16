@@ -113,8 +113,8 @@ class VisualizeResult(Callback):
 
     def on_batch_end(self, batch, logs={}):
         seg_result = self.model.predict( np.array( [self.image] ) )
-        main = self.makeLabelPretty(oneHotToLabel(seg_result[0].squeeze(0)))
-        aux = self.makeLabelPretty(oneHotToLabel(seg_result[1].squeeze(0)))
+        main = self.makeLabelPretty(oneHotToLabel(seg_result.squeeze(0)))
+        #aux = self.makeLabelPretty(oneHotToLabel(seg_result[1].squeeze(0)))
         cv2.imshow('Segmentation Result', cv2.resize(main, (800,400)))
         cv2.moveWindow('Segmentation Result', 850, 500)
         #aux_result = oneHotToLabel( self.model.predict( np.array( [self.image] ) )[1].squeeze(0) )
