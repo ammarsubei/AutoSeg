@@ -186,12 +186,13 @@ class BackendHandler(object):
                 i += 1
                 image = cv2.imread(sample[0]) / 255
                 label = cv2.imread(sample[1], 0)
-                if horizontal_flip and not validating and random.randint(1,2) == 1:
-                    cv2.flip(image, 1)
-                    cv2.flip(label, 1)
-                if vertical_flip and not validating and random.randint(1,2) == 1:
-                    cv2.flip(image, 0)
-                    cv2.flip(label, 0)
+                if not validating:
+                    if horizontal_flip and random.randint(1,2) == 1:
+                        cv2.flip(image, 1)
+                        cv2.flip(label, 1)
+                    if vertical_flip and random.randint(1,2) == 1:
+                        cv2.flip(image, 0)
+                        cv2.flip(label, 0)
                 #small_label = cv2.resize(label, (0,0), fx=0.125, fy=0.125)
                 one_hot = labelToOneHot(label, self.num_classes)
                 #small_one_hot = labelToOneHot(small_label, self.num_classes)
