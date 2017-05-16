@@ -167,12 +167,13 @@ class BackendHandler(object):
             file_list.append(input_output)
         return file_list
 
-    def generateData(self, batch_size, validating=False, horizontal_flip=True, vertical_flip=False, adjust_brightness=0.25):
+    def generateData(self, batch_size, validating=False, horizontal_flip=True, vertical_flip=False, adjust_brightness=0.15, rotate=5, zoom=0.1):
         if validating:
             data = self.validation_file_list
         else:
             data = self.training_file_list
         random.shuffle(data)
+
         i = 0
         while True:
             image_batch = []
@@ -199,6 +200,19 @@ class BackendHandler(object):
                             factor = 1 / factor
                         image = 255*( (image/255)**factor )
                         image = np.array(image, dtype='uint8')
+                    if rotate:
+                        angle = random.gauss(mu=0, sigma=rotate)
+                    else:
+                        angle = 0
+                    if zoom:
+                        scale = random.gauss(mu=1, sigma=zoom)
+                    else:
+                        scale = 1
+                    if rotate or zoom:
+                        rows,cols = label.shape
+                        M = cv2.getRotationMatrix2D( (cols/2, rows/2), angle, scale)
+                        image = cv2.warpAffine(image, M, (cols, rows))
+                        label = cv2.warpAffine(label, M, (cols, rows))
 
                 #small_label = cv2.resize(label, (0,0), fx=0.125, fy=0.125)
                 one_hot = labelToOneHot(label, self.num_classes)
