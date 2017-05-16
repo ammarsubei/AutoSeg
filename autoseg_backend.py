@@ -116,10 +116,10 @@ class VisualizeResult(Callback):
         main = self.makeLabelPretty(oneHotToLabel(seg_result[0].squeeze(0)))
         aux = self.makeLabelPretty(oneHotToLabel(seg_result[1].squeeze(0)))
         cv2.imshow('Segmentation Result', cv2.resize(main, (800,400)))
-        cv2.moveWindow('Segmentation Result', 10, 500)
-        aux_result = oneHotToLabel( self.model.predict( np.array( [self.image] ) )[1].squeeze(0) )
-        cv2.imshow('Scaled Auxiliary Result', cv2.resize(aux, (800,400)))
-        cv2.moveWindow('Scaled Auxiliary Result', 850, 500)
+        cv2.moveWindow('Segmentation Result', 850, 500)
+        #aux_result = oneHotToLabel( self.model.predict( np.array( [self.image] ) )[1].squeeze(0) )
+        #cv2.imshow('Scaled Auxiliary Result', cv2.resize(aux, (800,400)))
+        #cv2.moveWindow('Scaled Auxiliary Result', 850, 500)
         cv2.waitKey(1)
 
     def on_epoch_begin(self, epoch, logs={}):
@@ -195,7 +195,7 @@ class BackendHandler(object):
             image_batch = np.array(image_batch)
             label_batch = np.array(label_batch)
             small_label_batch = np.array(small_label_batch)
-            yield (image_batch, [label_batch, small_label_batch])
+            yield (image_batch, label_batch)
 
     def getCallbacks(self, model_name='test.h5', num_classes=12, patience=12):
         checkpoint = ModelCheckpoint(
@@ -213,9 +213,9 @@ class BackendHandler(object):
 
         early = EarlyStopping(monitor='val_loss', patience=patience, verbose=1)
 
-        #vis = VisualizeResult(self.num_classes, self.image_path, self.label_path, self.validation_file_list)
+        vis = VisualizeResult(self.num_classes, self.image_path, self.label_path, self.validation_file_list)
 
-        return [checkpoint, tb]
+        return [checkpoint, tb, vis]
 
 #sg = SegGen('/data/', 11)
 #print(next(sg.trainingGenerator(11)))

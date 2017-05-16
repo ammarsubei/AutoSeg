@@ -60,6 +60,6 @@ def getModel(input_shape, num_classes, num_filters):
 
     prediction = Conv2D(num_classes, (1,1), padding='same', activation='softmax', name='main')(trans_conv15)
 
-    model = Model(inputs=i, outputs=[prediction, auxiliary_prediction])
+    model = Model(inputs=i, outputs=prediction)
 
     return model

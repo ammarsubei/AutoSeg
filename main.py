@@ -10,12 +10,12 @@ from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_ac
 train_encoder = True
 num_classes = 34
 num_filters = 64
-img_height = 1024
-img_width = 2048
+img_height = 512
+img_width = 1024
 img_size = (img_width, img_height)
 mask_size = img_size
 input_shape = (img_height, img_width, 3)
-batch_size = 1
+batch_size = 4
 epochs = 10000000
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
@@ -31,10 +31,10 @@ if model_name in os.listdir(os.getcwd()):
             if layer.name == "concatenate_8":
                 break
 
-model.compile(loss=pixelwise_crossentropy, optimizer='adam', metrics=[pixelwise_accuracy], loss_weights=[0.99,0.01])
+model.compile(loss=pixelwise_crossentropy, optimizer='adam', metrics=[pixelwise_accuracy])
 plot_model(model, to_file='architecture.png', show_shapes=True, show_layer_names=True)
 
-backend = BackendHandler(data_dir='/cityscapes_orig/', num_classes=num_classes)
+backend = BackendHandler(data_dir='/cityscapes_1024/', num_classes=num_classes)
 
 callbacks = backend.getCallbacks(model_name, patience=batch_size)
 
