@@ -49,13 +49,13 @@ class VisualizeResult(Callback):
         self.colors = None
         i = random.choice(self.validation_file_list)
         self.image = cv2.imread(i[0])
-        cv2.imshow('Sample Image', self.image)
+        cv2.imshow('Sample Image', cv2.resize(self.image, (800,400)) )
         cv2.moveWindow('Sample Image', 10, 10)
         self.ground_truth = cv2.imread(i[1], 0)
         self.ground_truth = self.makeLabelPretty(self.ground_truth)
-        cv2.imshow('Ground Truth', self.ground_truth)
+        cv2.imshow('Ground Truth', cv2.resize(self.ground_truth, (800,400)))
         #cv2.imwrite('sample_ground_truth.png', self.ground_truth)
-        cv2.moveWindow('Ground Truth', 510, 10)
+        cv2.moveWindow('Ground Truth', 850, 10)
         #cv2.imshow('Auxiliary Ground Truth', cv2.resize(self.ground_truth, (0,0), fx=0.125, fy=0.125))
         #cv2.moveWindow('Auxiliary Ground Truth', 510, 410)
         cv2.waitKey(1)
@@ -115,11 +115,11 @@ class VisualizeResult(Callback):
         seg_result = self.model.predict( np.array( [self.image] ) )
         main = self.makeLabelPretty(oneHotToLabel(seg_result[0].squeeze(0)))
         aux = self.makeLabelPretty(oneHotToLabel(seg_result[1].squeeze(0)))
-        cv2.imshow('Segmentation Result', main)
-        cv2.moveWindow('Segmentation Result', 1010, 10)
+        cv2.imshow('Segmentation Result', cv2.resize(main, (800,400)))
+        cv2.moveWindow('Segmentation Result', 10, 500)
         aux_result = oneHotToLabel( self.model.predict( np.array( [self.image] ) )[1].squeeze(0) )
-        cv2.imshow('Scaled Auxiliary Result', cv2.resize(aux, (0,0), fx=8, fy=8))
-        cv2.moveWindow('Scaled Auxiliary Result', 1010, 410)
+        cv2.imshow('Scaled Auxiliary Result', cv2.resize(aux, (800,400)))
+        cv2.moveWindow('Scaled Auxiliary Result', 850, 500)
         cv2.waitKey(1)
 
     def on_epoch_begin(self, epoch, logs={}):
@@ -129,8 +129,8 @@ class VisualizeResult(Callback):
         new_img = random.choice(self.validation_file_list)
         self.image = cv2.imread(new_img[0])
         self.ground_truth = self.makeLabelPretty( cv2.imread(new_img[1], 0) )
-        cv2.imshow('Sample Image', self.image)
-        cv2.imshow('Ground Truth', self.ground_truth)
+        cv2.imshow('Sample Image', cv2.resize(self.image, (800,400)))
+        cv2.imshow('Ground Truth', cv2.resize(self.ground_truth, (800,400)))
         #cv2.imshow('Auxiliary Ground Truth', cv2.resize(self.ground_truth, (0,0), fx=0.125, fy=0.125))
         #self.calculateActivityByLayer()
 
@@ -213,9 +213,9 @@ class BackendHandler(object):
 
         early = EarlyStopping(monitor='val_loss', patience=patience, verbose=1)
 
-        vis = VisualizeResult(self.num_classes, self.image_path, self.label_path, self.validation_file_list)
+        #vis = VisualizeResult(self.num_classes, self.image_path, self.label_path, self.validation_file_list)
 
-        return [checkpoint, tb, vis]
+        return [checkpoint, tb]
 
 #sg = SegGen('/data/', 11)
 #print(next(sg.trainingGenerator(11)))

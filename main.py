@@ -10,12 +10,12 @@ from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_ac
 train_encoder = True
 num_classes = 34
 num_filters = 64
-img_height = 240
-img_width = 480
+img_height = 1024
+img_width = 2048
 img_size = (img_width, img_height)
 mask_size = img_size
 input_shape = (img_height, img_width, 3)
-batch_size = 8
+batch_size = 1
 epochs = 10000000
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
@@ -34,12 +34,12 @@ if model_name in os.listdir(os.getcwd()):
 model.compile(loss=pixelwise_crossentropy, optimizer='adam', metrics=[pixelwise_accuracy], loss_weights=[0.99,0.01])
 plot_model(model, to_file='architecture.png', show_shapes=True, show_layer_names=True)
 
-backend = BackendHandler(data_dir='/cityscapes/', num_classes=num_classes)
+backend = BackendHandler(data_dir='/cityscapes_orig/', num_classes=num_classes)
 
 callbacks = backend.getCallbacks(model_name, patience=batch_size)
 
 start = time.clock()
-model.evaluate_generator(backend.generateData(1), 100)
+model.evaluate_generator(backend.generateData(1), 10)
 end = time.clock()
 print("Benchmarked at " + str(100 / (end - start)) + " frames per second.")
 
