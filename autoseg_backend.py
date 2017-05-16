@@ -167,7 +167,7 @@ class BackendHandler(object):
             file_list.append(input_output)
         return file_list
 
-    def generateData(self, batch_size, validating=False):
+    def generateData(self, batch_size, validating=False, horizontal_flip=True, vertical_flip=False):
         if validating:
             data = self.validation_file_list
         else:
@@ -186,15 +186,21 @@ class BackendHandler(object):
                 i += 1
                 image = cv2.imread(sample[0]) / 255
                 label = cv2.imread(sample[1], 0)
-                small_label = cv2.resize(label, (0,0), fx=0.125, fy=0.125)
+                if horizontal_flip and random.randint(1,2) == 1:
+                    cv2.flip(image, 1)
+                    cv2.flip(label, 1)
+                if vertical_flip and random.randint(1,2) == 1:
+                    cv2.flip(image, 0)
+                    cv2.flip(label, 0)
+                #small_label = cv2.resize(label, (0,0), fx=0.125, fy=0.125)
                 one_hot = labelToOneHot(label, self.num_classes)
-                small_one_hot = labelToOneHot(small_label, self.num_classes)
+                #small_one_hot = labelToOneHot(small_label, self.num_classes)
                 image_batch.append(image)
                 label_batch.append(one_hot)
-                small_label_batch.append(small_one_hot)
+                #small_label_batch.append(small_one_hot)
             image_batch = np.array(image_batch)
             label_batch = np.array(label_batch)
-            small_label_batch = np.array(small_label_batch)
+            #small_label_batch = np.array(small_label_batch)
             yield (image_batch, label_batch)
 
     def getCallbacks(self, model_name='test.h5', num_classes=12, patience=12):
