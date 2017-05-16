@@ -1,6 +1,7 @@
 import keras
 from keras import backend as K
 from keras.models import load_model
+from keras.utils import plot_model
 import numpy as np
 import os, sys, time
 import autoseg_models
@@ -30,7 +31,8 @@ if model_name in os.listdir(os.getcwd()):
             if layer.name == "concatenate_8":
                 break
 
-model.compile(loss=pixelwise_crossentropy, optimizer='adadelta', metrics=[pixelwise_accuracy], loss_weights=[0.01,0.99])
+model.compile(loss=pixelwise_crossentropy, optimizer='adam', metrics=[pixelwise_accuracy], loss_weights=[0.99,0.01])
+plot_model(model, to_file='architecture.png', show_shapes=True, show_layer_names=True)
 
 backend = BackendHandler(data_dir='/cityscapes/', num_classes=num_classes)
 

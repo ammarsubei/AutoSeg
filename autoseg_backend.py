@@ -48,7 +48,6 @@ class VisualizeResult(Callback):
         self.validation_file_list = validation_file_list
         self.colors = None
         i = random.choice(self.validation_file_list)
-        print(i)
         self.image = cv2.imread(i[0])
         cv2.imshow('Sample Image', self.image)
         cv2.moveWindow('Sample Image', 10, 10)
@@ -128,7 +127,6 @@ class VisualizeResult(Callback):
 
     def on_epoch_end(self, epoch, logs={}):
         new_img = random.choice(self.validation_file_list)
-        print(new_img)
         self.image = cv2.imread(new_img[0])
         self.ground_truth = self.makeLabelPretty( cv2.imread(new_img[1], 0) )
         cv2.imshow('Sample Image', self.image)
