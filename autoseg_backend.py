@@ -167,7 +167,7 @@ class BackendHandler(object):
             file_list.append(input_output)
         return file_list
 
-    def generateData(self, batch_size, validating=False, horizontal_flip=True, vertical_flip=False):
+    def generateData(self, batch_size, validating=False, horizontal_flip=True, vertical_flip=False, adjust_brightness=0.25):
         if validating:
             data = self.validation_file_list
         else:
@@ -187,12 +187,19 @@ class BackendHandler(object):
                 image = cv2.imread(sample[0]) / 255
                 label = cv2.imread(sample[1], 0)
                 if not validating:
-                    if horizontal_flip and random.randint(1,2) == 1:
+                    if horizontal_flip and random.randint(0,1):
                         cv2.flip(image, 1)
                         cv2.flip(label, 1)
-                    if vertical_flip and random.randint(1,2) == 1:
+                    if vertical_flip and random.randint(0,1):
                         cv2.flip(image, 0)
                         cv2.flip(label, 0)
+                    if adjust_brightness:
+                        factor = 1 + abs(random.gauss(mu=0, sigma=adjust_brightness))
+                        if random.randint(0,1):
+                            factor = 1 / factor
+                        image = 255*( (image/255)**factor )
+                        image = np.array(image, dtype='uint8')
+
                 #small_label = cv2.resize(label, (0,0), fx=0.125, fy=0.125)
                 one_hot = labelToOneHot(label, self.num_classes)
                 #small_one_hot = labelToOneHot(small_label, self.num_classes)
