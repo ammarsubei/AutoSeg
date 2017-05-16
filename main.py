@@ -39,7 +39,7 @@ backend = BackendHandler(data_dir='/cityscapes_1024/', num_classes=num_classes)
 callbacks = backend.getCallbacks(model_name, patience=batch_size)
 
 start = time.clock()
-model.evaluate_generator(backend.generateData(1), 10)
+model.evaluate_generator(backend.generateData(1), 100)
 end = time.clock()
 print("Benchmarked at " + str(100 / (end - start)) + " frames per second.")
 

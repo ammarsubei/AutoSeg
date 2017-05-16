@@ -33,7 +33,7 @@ def pixelwise_crossentropy(target, output):
     '''
     # manual computation of crossentropy
     output = tf.clip_by_value(output, 10e-8, 1.-10e-8)
-    return -10000* tf.reduce_mean(target * tf.log(output))
+    return -tf.reduce_sum(target * tf.log(output))
 
 def pixelwise_accuracy(y_true, y_pred):
     return K.cast(K.equal(K.argmax(y_true, axis=2),
@@ -213,9 +213,9 @@ class BackendHandler(object):
 
         early = EarlyStopping(monitor='val_loss', patience=patience, verbose=1)
 
-        vis = VisualizeResult(self.num_classes, self.image_path, self.label_path, self.validation_file_list)
+        #vis = VisualizeResult(self.num_classes, self.image_path, self.label_path, self.validation_file_list)
 
-        return [checkpoint, tb, vis]
+        return [checkpoint, tb]
 
 #sg = SegGen('/data/', 11)
 #print(next(sg.trainingGenerator(11)))
