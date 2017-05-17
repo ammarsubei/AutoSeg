@@ -40,7 +40,7 @@ coverage.xml
 .DS_Store
 CamVid/*
 camvid/*
-cityscapes/*
+cityscapes*
 *.h5
 logs/*
 __MACOSX/*

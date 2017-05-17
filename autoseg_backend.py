@@ -33,7 +33,7 @@ def pixelwise_crossentropy(target, output):
     '''
     # manual computation of crossentropy
     output = tf.clip_by_value(output, 10e-8, 1.-10e-8)
-    return -10000* tf.reduce_mean(target * tf.log(output))
+    return -tf.reduce_sum(target * tf.log(output))
 
 def pixelwise_accuracy(y_true, y_pred):
     return K.cast(K.equal(K.argmax(y_true, axis=2),
@@ -48,15 +48,14 @@ class VisualizeResult(Callback):
         self.validation_file_list = validation_file_list
         self.colors = None
         i = random.choice(self.validation_file_list)
-        print(i)
-        self.image = cv2.resize( cv2.imread(i[0]), (480,240))
-        cv2.imshow('Sample Image', self.image)
+        self.image = cv2.imread(i[0])
+        cv2.imshow('Sample Image', cv2.resize(self.image, (800,400)) )
         cv2.moveWindow('Sample Image', 10, 10)
-        self.ground_truth = cv2.resize( cv2.imread(i[1], 0), (480,240) )
+        self.ground_truth = cv2.imread(i[1], 0)
         self.ground_truth = self.makeLabelPretty(self.ground_truth)
-        cv2.imshow('Ground Truth', self.ground_truth)
+        cv2.imshow('Ground Truth', cv2.resize(self.ground_truth, (800,400)))
         #cv2.imwrite('sample_ground_truth.png', self.ground_truth)
-        cv2.moveWindow('Ground Truth', 510, 10)
+        cv2.moveWindow('Ground Truth', 850, 10)
         #cv2.imshow('Auxiliary Ground Truth', cv2.resize(self.ground_truth, (0,0), fx=0.125, fy=0.125))
         #cv2.moveWindow('Auxiliary Ground Truth', 510, 410)
         cv2.waitKey(1)
@@ -114,13 +113,13 @@ class VisualizeResult(Callback):
 
     def on_batch_end(self, batch, logs={}):
         seg_result = self.model.predict( np.array( [self.image] ) )
-        main = self.makeLabelPretty(oneHotToLabel(seg_result[0].squeeze(0)))
-        aux = self.makeLabelPretty(oneHotToLabel(seg_result[1].squeeze(0)))
-        cv2.imshow('Segmentation Result', main)
-        cv2.moveWindow('Segmentation Result', 1010, 10)
-        aux_result = oneHotToLabel( self.model.predict( np.array( [self.image] ) )[1].squeeze(0) )
-        cv2.imshow('Scaled Auxiliary Result', cv2.resize(aux, (0,0), fx=8, fy=8))
-        cv2.moveWindow('Scaled Auxiliary Result', 1010, 410)
+        main = self.makeLabelPretty(oneHotToLabel(seg_result.squeeze(0)))
+        #aux = self.makeLabelPretty(oneHotToLabel(seg_result[1].squeeze(0)))
+        cv2.imshow('Segmentation Result', cv2.resize(main, (800,400)))
+        cv2.moveWindow('Segmentation Result', 850, 500)
+        #aux_result = oneHotToLabel( self.model.predict( np.array( [self.image] ) )[1].squeeze(0) )
+        #cv2.imshow('Scaled Auxiliary Result', cv2.resize(aux, (800,400)))
+        #cv2.moveWindow('Scaled Auxiliary Result', 850, 500)
         cv2.waitKey(1)
 
     def on_epoch_begin(self, epoch, logs={}):
@@ -128,11 +127,10 @@ class VisualizeResult(Callback):
 
     def on_epoch_end(self, epoch, logs={}):
         new_img = random.choice(self.validation_file_list)
-        print(new_img)
-        self.image = cv2.resize( cv2.imread(new_img[0]), (480,240))
-        self.ground_truth = self.makeLabelPretty( cv2.resize( cv2.imread(new_img[1], 0), (480,240) ) )
-        cv2.imshow('Sample Image', self.image)
-        cv2.imshow('Ground Truth', self.ground_truth)
+        self.image = cv2.imread(new_img[0])
+        self.ground_truth = self.makeLabelPretty( cv2.imread(new_img[1], 0) )
+        cv2.imshow('Sample Image', cv2.resize(self.image, (800,400)))
+        cv2.imshow('Ground Truth', cv2.resize(self.ground_truth, (800,400)))
         #cv2.imshow('Auxiliary Ground Truth', cv2.resize(self.ground_truth, (0,0), fx=0.125, fy=0.125))
         #self.calculateActivityByLayer()
 
@@ -145,9 +143,10 @@ class VisualizeResult(Callback):
 
 class BackendHandler(object):
 
-    def __init__(self, data_dir, num_classes, reinitialize=False):
-        self.num_classes = num_classes
+    def __init__(self, data_dir, num_classes, visualize_while_training=False):
         self.data_dir = os.getcwd() + data_dir
+        self.num_classes = num_classes
+        self.visualize_while_training = visualize_while_training
         self.image_path = self.data_dir + 'images/'
         self.label_path = self.data_dir + 'labels_fine/'
         self.cwd_contents = os.listdir(os.getcwd())
@@ -169,12 +168,13 @@ class BackendHandler(object):
             file_list.append(input_output)
         return file_list
 
-    def generateData(self, batch_size, validating=False):
+    def generateData(self, batch_size, validating=False, horizontal_flip=True, vertical_flip=False, adjust_brightness=0.1, rotate=5, zoom=0.1):
         if validating:
             data = self.validation_file_list
         else:
             data = self.training_file_list
         random.shuffle(data)
+
         i = 0
         while True:
             image_batch = []
@@ -187,21 +187,44 @@ class BackendHandler(object):
                 sample = data[i]
                 i += 1
                 image = cv2.imread(sample[0]) / 255
-                image = cv2.resize(image, (480,240))
                 label = cv2.imread(sample[1], 0)
-                label = cv2.resize(label, (480,240))
-                small_label = cv2.resize(label, (0,0), fx=0.125, fy=0.125)
+
+                # Data Augmentation
+                if not validating:
+                    if horizontal_flip and random.randint(0,1):
+                        cv2.flip(image, 1)
+                        cv2.flip(label, 1)
+                    if vertical_flip and random.randint(0,1):
+                        cv2.flip(image, 0)
+                        cv2.flip(label, 0)
+                    if adjust_brightness:
+                        factor = 1 + abs(random.gauss(mu=0, sigma=adjust_brightness))
+                        if random.randint(0,1):
+                            factor = 1 / factor
+                        image = 255*( (image/255)**factor )
+                        image = np.array(image, dtype='uint8')
+                    if rotate:
+                        angle = random.gauss(mu=0, sigma=rotate)
+                    else:
+                        angle = 0
+                    if zoom:
+                        scale = random.gauss(mu=1, sigma=zoom)
+                    else:
+                        scale = 1
+                    if rotate or zoom:
+                        rows,cols = label.shape
+                        M = cv2.getRotationMatrix2D( (cols/2, rows/2), angle, scale)
+                        image = cv2.warpAffine(image, M, (cols, rows))
+                        label = cv2.warpAffine(label, M, (cols, rows))
+
                 one_hot = labelToOneHot(label, self.num_classes)
-                small_one_hot = labelToOneHot(small_label, self.num_classes)
                 image_batch.append(image)
                 label_batch.append(one_hot)
-                small_label_batch.append(small_one_hot)
             image_batch = np.array(image_batch)
             label_batch = np.array(label_batch)
-            small_label_batch = np.array(small_label_batch)
-            yield (image_batch, [label_batch, small_label_batch])
+            yield (image_batch, label_batch)
 
-    def getCallbacks(self, model_name='test.h5', num_classes=12, patience=12):
+    def getCallbacks(self, model_name='test.h5', patience=12):
         checkpoint = ModelCheckpoint(
             model_name,
             monitor='val_loss',
@@ -217,9 +240,11 @@ class BackendHandler(object):
 
         early = EarlyStopping(monitor='val_loss', patience=patience, verbose=1)
 
-        vis = VisualizeResult(self.num_classes, self.image_path, self.label_path, self.validation_file_list)
-
-        return [checkpoint, tb, vis]
+        if self.visualize_while_training:
+            vis = VisualizeResult(self.num_classes, self.image_path, self.label_path, self.validation_file_list)
+            return [checkpoint, tb, vis]
+        else:
+            return [checkpoint, tb]
 
 #sg = SegGen('/data/', 11)
 #print(next(sg.trainingGenerator(11)))
