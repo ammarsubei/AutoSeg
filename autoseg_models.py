@@ -18,7 +18,7 @@ def addParallelDilatedConvolution(x, num_filters, name='parallel_dilated_convolu
 
     return a
 
-def addBypassRefinementModule(high, low, num_filters, name='bypass'):
+def addBypassRefinementModule(high, low, num_filters, name='bypass', dropout_rate=0.2):
     preConv = Conv2D(num_filters, (3,3), padding='same', activation='elu', name=name + '/pre_conv')(low)
     c = concatenate([preConv, high])
     postConv = Conv2D(num_filters, (3,3), padding='same', activation='elu', name=name + '/post_conv')(c)
@@ -65,7 +65,7 @@ def getModel(input_shape, num_classes, residual_encoder_connections=False, dropo
     ref12 = addBypassRefinementModule(trans_conv11, pool2, 128, name='bypass12')
     trans_conv13 = Conv2DTranspose(128, (3,3), padding='same', activation='elu', strides=2, name='trans_conv13')(ref12)
 
-    ref14 = addBypassRefinementModule(trans_conv13, pool1, 64, name='bypass14')
+    ref14 = addBypassRefinementModule(trans_conv13, pool1, 64, name='bypass14', dropout_rate=dropout_rate)
     trans_conv15 = Conv2DTranspose(64, (3,3), padding='same', activation='elu', strides=2, name='trans_conv15')(ref14)
 
     prediction = Conv2D(num_classes, (1,1), padding='same', activation='softmax', name='main')(trans_conv15)
