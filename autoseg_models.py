@@ -59,11 +59,11 @@ def getModel(input_shape, num_classes, residual_encoder_connections=False, dropo
 
     pdc = addParallelDilatedConvolution(pool4, 512, name='parallel_dilated_convolution')
 
-    ref10 = addBypassRefinementModule(pdc, pool3, 64, name='bypass10')
-    trans_conv11 = Conv2DTranspose(64, (3,3), padding='same', activation='elu', strides=2, name='trans_conv11')(ref10)
+    ref10 = addBypassRefinementModule(pdc, pool3, 256, name='bypass10')
+    trans_conv11 = Conv2DTranspose(256, (3,3), padding='same', activation='elu', strides=2, name='trans_conv11')(ref10)
 
-    ref12 = addBypassRefinementModule(trans_conv11, pool2, 64, name='bypass12')
-    trans_conv13 = Conv2DTranspose(64, (3,3), padding='same', activation='elu', strides=2, name='trans_conv13')(ref12)
+    ref12 = addBypassRefinementModule(trans_conv11, pool2, 128, name='bypass12')
+    trans_conv13 = Conv2DTranspose(128, (3,3), padding='same', activation='elu', strides=2, name='trans_conv13')(ref12)
 
     ref14 = addBypassRefinementModule(trans_conv13, pool1, 64, name='bypass14')
     trans_conv15 = Conv2DTranspose(64, (3,3), padding='same', activation='elu', strides=2, name='trans_conv15')(ref14)
