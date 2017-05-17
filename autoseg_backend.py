@@ -167,7 +167,7 @@ class BackendHandler(object):
             file_list.append(input_output)
         return file_list
 
-    def generateData(self, batch_size, validating=False, horizontal_flip=True, vertical_flip=False, adjust_brightness=0.15, rotate=5, zoom=0.1):
+    def generateData(self, batch_size, validating=False, horizontal_flip=True, vertical_flip=False, adjust_brightness=0.05, rotate=1, zoom=0.01):
         if validating:
             data = self.validation_file_list
         else:
