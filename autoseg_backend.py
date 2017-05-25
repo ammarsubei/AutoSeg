@@ -21,6 +21,29 @@ def labelToOneHot(label, num_classes):
 def oneHotToLabel(one_hot):
     return one_hot.argmax(2).astype('uint8')
 
+# Reduces the 34 CityScapes classes to 9.
+def remapClass(cl):
+    if cl <= 6:
+        return 0
+    elif cl == 7:
+        return 1
+    elif cl == 8 or cl == 9 or cl == 10:
+        return 2
+    elif cl >= 11 and cl <= 16:
+        return 3
+    elif cl >= 17 and cl <= 20:
+        return 4
+    elif cl == 21:
+        return 5
+    elif cl == 22: 
+        return 6
+    elif cl == 23:
+        return 7
+    elif cl == 24 or cl == 25:
+        return 8
+    else:
+        return 9
+
 def getID(size=6, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
@@ -51,7 +74,7 @@ class VisualizeResult(Callback):
         self.image = cv2.imread(i[0])
         cv2.imshow('Sample Image', cv2.resize(self.image, (800,400)) )
         cv2.moveWindow('Sample Image', 10, 10)
-        self.ground_truth = cv2.imread(i[1], 0)
+        self.ground_truth = remapClass( cv2.imread(i[1], 0) )
         self.ground_truth = self.makeLabelPretty(self.ground_truth)
         cv2.imshow('Ground Truth', cv2.resize(self.ground_truth, (800,400)))
         cv2.moveWindow('Ground Truth', 850, 10)
@@ -62,25 +85,20 @@ class VisualizeResult(Callback):
     def makeLabelPretty(self, label):
         prettyLabel = cv2.cvtColor(label, cv2.COLOR_GRAY2RGB)
         if self.colors is None:
-            '''
             self.colors = [
-            [255,102,102],  # 0: light red
-            [255,255,102],  # 1: light yellow
-            [102,255,102],  # 2: light green
-            [102,255,255],  # 3: light blue
-            [102,102,255],  # 4: light indigo
-            [255,102,255],  # 5: light pink
-            [255,178,102],  # 6: light orange
-            [153,51,255],   # 7: violet
-            [153,0,0],      # 8: dark red
-            [153,153,0],    # 9: dark yellow
-            [0,102,0],      # 10: dark green
-            [0,76,153],     # 11: dark blue
-            [102,0,51],     # 12: dark pink
+            [0,0,0],        # 0: void
+            [128,64,128],   # 1: road
+            [244, 35,232],  # 2: sidewalk
+            [70,70,70],     # 3: construction
+            [153,153,153],  # 4: object
+            [107,142, 35],  # 5: vegetation
+            [152,251,152],  # 6: terrain
+            [ 70,130,180],  # 7: sky
+            [220, 20, 60],  # 8: person
+            [  0,  0,142]   # 9: vehicle
             ]
-            '''
-            with open('cityscapes_color_mappings.pickle', 'rb') as f:
-                self.colors =  pickle.load(f)
+            #with open('cityscapes_color_mappings.pickle', 'rb') as f:
+            #    self.colors =  pickle.load(f)
 
             assert self.num_classes <= len(self.colors)
 
@@ -102,7 +120,7 @@ class VisualizeResult(Callback):
     def on_epoch_end(self, epoch, logs={}):
         new_img = random.choice(self.validation_file_list)
         self.image = cv2.imread(new_img[0])
-        self.ground_truth = self.makeLabelPretty( cv2.imread(new_img[1], 0) )
+        self.ground_truth = self.makeLabelPretty( remapClass( cv2.imread(new_img[1], 0) ) )
         cv2.imshow('Sample Image', cv2.resize(self.image, (800,400)))
         cv2.imshow('Ground Truth', cv2.resize(self.ground_truth, (800,400)))
 
@@ -159,7 +177,7 @@ class BackendHandler(object):
                 sample = data[i]
                 i += 1
                 image = cv2.imread(sample[0]) / 255
-                label = cv2.imread(sample[1], 0)
+                label = remapClass( cv2.imread(sample[1], 0) )
 
                 # Data Augmentation
                 if not validating:
