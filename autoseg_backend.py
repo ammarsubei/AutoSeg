@@ -25,7 +25,9 @@ def oneHotToLabel(one_hot):
 def remapClass(arr):
     arr[arr<=6] = 0
     arr[arr==7] = 1
-    arr[arr==8 or arr==9 or arr==10] = 2
+    arr[arr==8] = 2
+    arr[arr==9] = 2
+    arr[arr==10] = 2
     arr[arr>=11 and arr<=16] = 3
     arr[arr>=17 and arr<=20] = 4
     arr[arr==21] = 5
