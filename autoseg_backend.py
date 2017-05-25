@@ -25,13 +25,13 @@ def oneHotToLabel(one_hot):
 def remapClass(cs):
     np.place(cs, cs<=6, [0])
     np.place(cs, cs==7, [1])
-    np.place(cs, cs==8 or cs == 9 or cs ==10, [2])
-    np.place(cs, cs>=11 and cs<=16, [3])
-    np.place(cs, cs>=17 and cs<=20, [4])
+    np.place(cs, (cs==8 or cs==9 or cs==10), [2])
+    np.place(cs, (cs>=11 and cs<=16), [3])
+    np.place(cs, (cs>=17 and cs<=20), [4])
     np.place(cs, cs==21, [5])
     np.place(cs, cs==22, [6])
     np.place(cs, cs==23, [7])
-    np.place(cs, cs==24 or cs==25, [8])
+    np.place(cs, (cs==24 or cs==25), [8])
     np.place(cs, cs>=26, [9])
 
 def getID(size=6, chars=string.ascii_lowercase + string.digits):
