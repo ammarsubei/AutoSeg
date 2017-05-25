@@ -22,17 +22,17 @@ def oneHotToLabel(one_hot):
     return one_hot.argmax(2).astype('uint8')
 
 # Reduces the 34 CityScapes classes to 9.
-def remapClass(cs):
-    np.place(cs, cs<=6, [0])
-    np.place(cs, cs==7, [1])
-    np.place(cs, (cs==8 or cs==9 or cs==10), [2])
-    np.place(cs, (cs>=11 and cs<=16), [3])
-    np.place(cs, (cs>=17 and cs<=20), [4])
-    np.place(cs, cs==21, [5])
-    np.place(cs, cs==22, [6])
-    np.place(cs, cs==23, [7])
-    np.place(cs, (cs==24 or cs==25), [8])
-    np.place(cs, cs>=26, [9])
+def remapClass(arr):
+    arr[arr<=6] = 0
+    arr[arr==7] = 1
+    arr[arr==8 or arr==9 or arr==10] = 2
+    arr[arr>=11 and arr<=16] = 3
+    arr[arr>=17 and arr<=20] = 4
+    arr[arr==21] = 5
+    arr[arr==22] = 6
+    arr[arr==23] = 7
+    arr[arr==24 or arr==25] = 8
+    arr[arr>=26] = 9
 
 def getID(size=6, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
