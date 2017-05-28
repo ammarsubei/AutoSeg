@@ -9,16 +9,16 @@ import autoseg_models
 from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_accuracy
 
 train_encoder = True
-num_classes = 8
+num_classes = 10
 data_dir = '/cityscapes_1024/'
 img_height = 512
 img_width = 1024
 visualize_while_training = False
-dropout_rate = 0.0
+dropout_rate = 0.4
 img_size = (img_width, img_height)
 mask_size = img_size
 input_shape = (img_height, img_width, 3)
-batch_size = 3
+batch_size = 4
 epochs = 10000000
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
@@ -40,7 +40,7 @@ if model_name in os.listdir(os.getcwd()):
             #print(layer.name + ": " + str(layer.trainable))
 
 sgd = keras.optimizers.SGD(lr=1e-8, momentum=0.9)
-model.compile(loss=pixelwise_crossentropy, optimizer=sgd, metrics=[pixelwise_accuracy])
+model.compile(loss=pixelwise_crossentropy, optimizer='adam', metrics=[pixelwise_accuracy])
 plot_model(model, to_file='architecture.png', show_shapes=True, show_layer_names=True)
 
 backend = BackendHandler(data_dir=data_dir, num_classes=num_classes, visualize_while_training=visualize_while_training)
