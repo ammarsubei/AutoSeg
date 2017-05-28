@@ -8,7 +8,7 @@ import autoseg_models
 from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_accuracy
 
 train_encoder = False
-num_classes = 34
+num_classes = 10
 data_dir = '/cityscapes_1024/'
 img_height = 512
 img_width = 1024
@@ -28,7 +28,7 @@ model = autoseg_models.getModel(input_shape=input_shape,
                                 num_classes=num_classes,
                                 dropout_rate=dropout_rate)
 
-model.load_weights('squeezenet_weights.h5', by_name=True)
+model.load_weights('fitty.h5', by_name=True)
 if not train_encoder:
     for layer in model.layers:
         layer.trainable = False

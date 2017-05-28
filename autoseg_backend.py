@@ -48,8 +48,10 @@ def remapClass(arr):
 
     arr[arr==24] = 8
     arr[arr==25] = 8
-    
+
     arr[arr>=26] = 9
+
+    return arr
 
 def getID(size=6, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
