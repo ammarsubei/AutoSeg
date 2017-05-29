@@ -28,7 +28,7 @@ model = autoseg_models.getModel(input_shape=input_shape,
                                 num_classes=num_classes,
                                 dropout_rate=dropout_rate)
 
-model.load_weights('fitty.h5', by_name=True)
+model.load_weights('test.h5', by_name=True)
 if not train_encoder:
     for layer in model.layers:
         layer.trainable = False

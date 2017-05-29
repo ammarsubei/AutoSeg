@@ -69,7 +69,7 @@ def getModel(input_shape, num_classes, residual_encoder_connections=False, dropo
     ref14 = addBypassRefinementModule(trans_conv13, pool1, 64, name='bypass14', dropout_rate=dropout_rate)
     trans_conv15 = Conv2DTranspose(64, (3,3), padding='same', activation='elu', strides=2, name='trans_conv15', kernel_regularizer=l2(0.0002))(Dropout(dropout_rate)(ref14))
 
-    prediction = Conv2D(num_classes, (1,1), padding='same', activation='softmax', name='main', kernel_regularizer=l2(0.0002))(trans_conv15)
+    prediction = Conv2D(num_classes, (1,1), padding='same', activation='softmax', name='main_', kernel_regularizer=l2(0.0002))(trans_conv15)
 
     model = Model(inputs=i, outputs=prediction)
 

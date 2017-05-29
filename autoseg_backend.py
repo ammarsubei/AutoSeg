@@ -23,6 +23,7 @@ def oneHotToLabel(one_hot):
 
 # Reduces the 34 CityScapes classes to 9.
 def remapClass(arr):
+    o = arr.copy()
     arr[arr<=6] = 0
     arr[arr==7] = 1
 
@@ -51,7 +52,7 @@ def remapClass(arr):
 
     arr[arr>=26] = 9
 
-    return arr
+    return o
 
 def getID(size=6, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
@@ -94,6 +95,7 @@ class VisualizeResult(Callback):
     def makeLabelPretty(self, label):
         prettyLabel = cv2.cvtColor(label, cv2.COLOR_GRAY2RGB)
         if self.colors is None:
+            '''
             self.colors = [
             [0,0,0],        # 0: void
             [128,64,128],   # 1: road
@@ -106,8 +108,9 @@ class VisualizeResult(Callback):
             [220, 20, 60],  # 8: person
             [  0,  0,142]   # 9: vehicle
             ]
-            #with open('cityscapes_color_mappings.pickle', 'rb') as f:
-            #    self.colors =  pickle.load(f)
+            '''
+            with open('cityscapes_color_mappings.pickle', 'rb') as f:
+                self.colors =  pickle.load(f)
 
             assert self.num_classes <= len(self.colors)
 

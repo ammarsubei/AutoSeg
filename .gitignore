@@ -37,12 +37,13 @@ coverage.xml
 # Mr Developer
 .mr.developer.cfg
 
+# Custom
 .DS_Store
 CamVid/*
 camvid/*
 cityscapes*
 *.h5
-logs/*
+*logs/*
 __MACOSX/*
 *.png
 *.jpg
