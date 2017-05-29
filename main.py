@@ -27,6 +27,7 @@ else:
 
 model = autoseg_models.getModel(input_shape=input_shape,
                                 num_classes=num_classes,
+                                residual_encoder_connections=True,
                                 dropout_rate=dropout_rate)
 
 if model_name in os.listdir(os.getcwd()):
