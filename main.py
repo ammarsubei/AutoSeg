@@ -15,6 +15,7 @@ img_height = 512
 img_width = 1024
 visualize_while_training = True
 dropout_rate = 0.4
+weight_decay=0.5
 img_size = (img_width, img_height)
 mask_size = img_size
 input_shape = (img_height, img_width, 3)
@@ -28,7 +29,8 @@ else:
 model = autoseg_models.getModel(input_shape=input_shape,
                                 num_classes=num_classes,
                                 residual_encoder_connections=True,
-                                dropout_rate=dropout_rate)
+                                dropout_rate=dropout_rate,
+                                weight_decay=weight_decay)
 
 if model_name in os.listdir(os.getcwd()):
     model.load_weights('test.h5', by_name=True)
