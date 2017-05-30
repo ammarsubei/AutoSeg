@@ -15,11 +15,11 @@ img_height = 512
 img_width = 1024
 visualize_while_training = True
 dropout_rate = 0.4
-weight_decay=0.5
+weight_decay=0.0002
 img_size = (img_width, img_height)
 mask_size = img_size
 input_shape = (img_height, img_width, 3)
-batch_size = 3
+batch_size = 4
 epochs = 10000000
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
@@ -28,7 +28,7 @@ else:
 
 model = autoseg_models.getModel(input_shape=input_shape,
                                 num_classes=num_classes,
-                                residual_encoder_connections=True,
+                                residual_encoder_connections=False,
                                 dropout_rate=dropout_rate,
                                 weight_decay=weight_decay)
 
