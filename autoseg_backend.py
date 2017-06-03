@@ -120,14 +120,12 @@ class VisualizeResult(Callback):
         return prettyLabel
 
     def on_batch_end(self, batch, logs={}):
-        seg_result = self.model.predict( np.array( [self.image] ) )
-        main = self.makeLabelPretty(oneHotToLabel(seg_result.squeeze(0)))
-        cv2.imshow('Segmentation Result', cv2.resize(main, (800,400)))
-        cv2.moveWindow('Segmentation Result', 850, 500)
-        cv2.waitKey(1)
-
-    def on_epoch_begin(self, epoch, logs={}):
-        self.previous_epoch_weights = self.model.get_weights()
+        if batch % 5 == 0 or batch < 10:
+            seg_result = self.model.predict( np.array( [self.image] ) )
+            main = self.makeLabelPretty(oneHotToLabel(seg_result.squeeze(0)))
+            cv2.imshow('Segmentation Result', cv2.resize(main, (800,400)))
+            cv2.moveWindow('Segmentation Result', 850, 500)
+            cv2.waitKey(1)
 
     def on_epoch_end(self, epoch, logs={}):
         new_img = random.choice(self.validation_file_list)
