@@ -56,6 +56,9 @@ callbacks = backend.getCallbacks(model_name, patience=batch_size)
 def getID(size=6, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
+def oneHotToLabel(one_hot):
+    return one_hot.argmax(2).astype('uint8')
+
 def makeLabelPretty(label):
     prettyLabel = cv2.cvtColor(label, cv2.COLOR_GRAY2RGB)
     with open('cityscapes_color_mappings.pickle', 'rb') as f:
@@ -73,8 +76,8 @@ for x,y in backend.generateData(batch_size=3, validating=True):
         ID = getID()
         cv2.imshow('Image', x[i]*255)
         cv2.moveWindow('Image', 10, 10)
-        cv2.imshow('Ground Truth', makeLabelPretty(y[i]))
+        cv2.imshow('Ground Truth', makeLabelPretty( oneHotToLabel(y[i]) ))
         cv2.moveWindow('Ground Truth', 850, 10)
-        cv2.imshow('Model Output', makeLabelPretty(predictions[i]))
+        cv2.imshow('Model Output', makeLabelPretty( oneHotToLabel(predictions[i]) ))
         cv2.moveWindow('Model Output', 850, 500)
         cv2.waitKey(5000)
