@@ -1,36 +1,14 @@
 import numpy as np
 
-# Reduces the 34 CityScapes classes to 9.
-def remapClass(arr):
-    arr[arr<=6] = 0
-    arr[arr==7] = 1
+weights = [1,2]
 
-    arr[arr==8] = 2
-    arr[arr==9] = 2
-    arr[arr==10] = 2
+target = np.array([ [[0.0,1.0],[1.0,0.0]],
+                    [[0.0,1.0],[1.0,0.0]]])
 
-    arr[arr==11] = 3
-    arr[arr==12] = 3
-    arr[arr==13] = 3
-    arr[arr==14] = 3
-    arr[arr==15] = 3
-    arr[arr==16] = 3
+output = np.array([ [[0.5,0.5],[0.9,0.1]],
+                    [[0.9,0.1],[0.4,0.6]]])
 
-    arr[arr==17] = 4
-    arr[arr==18] = 4
-    arr[arr==19] = 4
-    arr[arr==20] = 4
+crossentropy_matrix = -np.sum(target * np.log(output), axis=-1)
+crossentropy = target * weights * np.log(output)
 
-    arr[arr==21] = 5
-    arr[arr==22] = 6
-    arr[arr==23] = 7
-
-    arr[arr==24] = 8
-    arr[arr==25] = 8
-    
-    arr[arr>=26] = 9
-
-arr = np.array([[1,2],[23,24]])
-print(arr)
-remapClass(arr)
-print(arr)
+print(crossentropy)
