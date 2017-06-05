@@ -35,7 +35,7 @@ model = autoseg_models.getModel(input_shape=input_shape,
                                 weight_decay=weight_decay)
 
 if model_name in os.listdir(os.getcwd()):
-    model.load_weights('squeezenet_weights.h5', by_name=True)
+    model.load_weights(model_name, by_name=True)
     if not train_encoder:
         for layer in model.layers:
             layer.trainable = False
