@@ -227,7 +227,7 @@ class BackendHandler(object):
     def getCallbacks(self, model_name='test.h5', patience=12):
         checkpoint = ModelCheckpoint(
             model_name,
-            monitor='val_loss',
+            monitor='val_pixelwise_accuracy',
             verbose=0,
             save_best_only=True,
             save_weights_only=True)

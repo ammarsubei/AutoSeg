@@ -8,25 +8,25 @@ import os, sys, time
 import autoseg_models
 from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_accuracy
 
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
-train_encoder = True
+train_encoder = False
 num_classes = 34
 data_dir = '/cityscapes_1024/'
 img_height = 512
 img_width = 1024
-visualize_while_training = True
+visualize_while_training = False
 dropout_rate = 0.4
 weight_decay=0.0002
 img_size = (img_width, img_height)
 mask_size = img_size
 input_shape = (img_height, img_width, 3)
-batch_size = 3
+batch_size = 4
 epochs = 10000000
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
 else:
-    model_name= 'show.h5'
+    model_name= 'exp.h5'
 
 model = autoseg_models.getModel(input_shape=input_shape,
                                 num_classes=num_classes,
@@ -35,7 +35,7 @@ model = autoseg_models.getModel(input_shape=input_shape,
                                 weight_decay=weight_decay)
 
 if model_name in os.listdir(os.getcwd()):
-    model.load_weights('no_residual_encoder_connections.h5', by_name=True)
+    model.load_weights(model_name, by_name=True)
     if not train_encoder:
         for layer in model.layers:
             layer.trainable = False
@@ -51,6 +51,11 @@ plot_model(model, to_file='architecture.png', show_shapes=True, show_layer_names
 backend = BackendHandler(data_dir=data_dir, num_classes=num_classes, visualize_while_training=visualize_while_training)
 
 callbacks = backend.getCallbacks(model_name, patience=batch_size)
+
+start = time.clock()
+model.evaluate_generator(backend.generateData(batch_size=1, validating=True), 100)
+end = time.clock()
+print("Benchmarked at " + str(100 / (end - start)) + " frames per second.")
 
 model.fit_generator(
     backend.generateData(batch_size),
