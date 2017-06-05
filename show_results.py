@@ -4,7 +4,8 @@ from keras.models import load_model
 from keras.utils import plot_model
 import tensorflow as tf
 import numpy as np
-import os, sys, time
+import os, sys, time, string, random
+import cv2
 import autoseg_models
 from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_accuracy
 
