@@ -12,23 +12,23 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 train_encoder = False
 num_classes = 34
-data_dir = '/cityscapes_orig/'
-img_height = 1024
-img_width = 2048
+data_dir = '/cityscapes_1024/'
+img_height = 512
+img_width = 1024
 visualize_while_training = False
 dropout_rate = 0.4
 weight_decay=0.0002
 img_size = (img_width, img_height)
 mask_size = img_size
 input_shape = (img_height, img_width, 3)
-batch_size = 1
+batch_size = 3
 epochs = 10000000
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
 else:
     model_name= 'main.h5'
 
-model = autoseg_models.getModel(input_shape=input_shape,
+model = autoseg_models.getResidualModel(input_shape=input_shape,
                                 num_classes=num_classes,
                                 residual_encoder_connections=False,
                                 dropout_rate=dropout_rate,
