@@ -4,7 +4,7 @@ from keras.models import load_model
 from keras.utils import plot_model
 import tensorflow as tf
 import numpy as np
-import os, sys, time, string, random
+import os, sys, time, string, random, pickle
 import cv2
 import autoseg_models
 from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_accuracy
@@ -13,9 +13,9 @@ os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 train_encoder = True
 num_classes = 34
-data_dir = '/cityscapes_1024/'
-img_height = 512
-img_width = 1024
+data_dir = '/cityscapes_800/'
+img_height = 400
+img_width = 800
 visualize_while_training = True
 dropout_rate = 0.4
 weight_decay=0.0002
@@ -24,10 +24,7 @@ mask_size = img_size
 input_shape = (img_height, img_width, 3)
 batch_size = 3
 epochs = 10000000
-if len(sys.argv) > 1:
-    model_name = sys.argv[1]
-else:
-    model_name= 'show.h5'
+model_name= 'visualized_model.h5'
 
 model = autoseg_models.getModel(input_shape=input_shape,
                                 num_classes=num_classes,
@@ -36,7 +33,7 @@ model = autoseg_models.getModel(input_shape=input_shape,
                                 weight_decay=weight_decay)
 
 if model_name in os.listdir(os.getcwd()):
-    model.load_weights('holy_shit_i_think_it_works.h5', by_name=True)
+    model.load_weights(sys.argv[1], by_name=True)
     if not train_encoder:
         for layer in model.layers:
             layer.trainable = False
@@ -48,6 +45,7 @@ if model_name in os.listdir(os.getcwd()):
 sgd = keras.optimizers.SGD(lr=1e-8, momentum=0.9)
 model.compile(loss=pixelwise_crossentropy, optimizer=sgd, metrics=[pixelwise_accuracy])
 plot_model(model, to_file='architecture.png', show_shapes=True, show_layer_names=True)
+model.save(model_name)
 
 backend = BackendHandler(data_dir=data_dir, num_classes=num_classes, visualize_while_training=visualize_while_training)
 
@@ -62,11 +60,10 @@ def oneHotToLabel(one_hot):
 def makeLabelPretty(label):
     prettyLabel = cv2.cvtColor(label, cv2.COLOR_GRAY2RGB)
     with open('cityscapes_color_mappings.pickle', 'rb') as f:
-        self.colors =  pickle.load(f)
-        assert self.num_classes <= len(self.colors)
+        colors =  pickle.load(f)
 
-    for i in range(self.num_classes):
-        prettyLabel[np.where( (label==[i]) )] = self.colors[i]
+    for i in range(num_classes):
+        prettyLabel[np.where( (label==[i]) )] = colors[i]
 
     return prettyLabel
 
@@ -74,7 +71,7 @@ for x,y in backend.generateData(batch_size=3, validating=True):
     predictions = model.predict_on_batch(x)
     for i in range(len(predictions)):
         ID = getID()
-        cv2.imshow('Image', x[i]*255)
+        cv2.imshow('Image', x[i])
         cv2.moveWindow('Image', 10, 10)
         cv2.imshow('Ground Truth', makeLabelPretty( oneHotToLabel(y[i]) ))
         cv2.moveWindow('Ground Truth', 850, 10)
