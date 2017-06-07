@@ -68,6 +68,13 @@ def pixelwise_crossentropy(target, output):
     output = tf.clip_by_value(output, 10e-8, 1.-10e-8)
     return -tf.reduce_sum(target * tf.log(output))
 
+def class_weighted_pixelwise_crossentropy(target, output):
+    output = tf.clip_by_value(output, 10e-8, 1.-10e-8)
+    with open('class_weights.pickle', 'rb') as f:
+        weight = pickle.load(f)
+    return -tf.reduce_sum(target * weight * tf.log(output))
+
+
 def pixelwise_accuracy(y_true, y_pred):
     return K.cast(K.equal(K.argmax(y_true, axis=2),
                           K.argmax(y_pred, axis=2)),
@@ -152,6 +159,7 @@ class BackendHandler(object):
         self.cwd_contents = os.listdir(os.getcwd())
         self.training_file_list = self.getFileList('train/')
         self.validation_file_list = self.getFileList('val/')
+        self.getClassWeights()
 
     # Sort the data into training and validation sets, or load already sorted sets.
     def getFileList(self, category='train/'):
@@ -167,6 +175,36 @@ class BackendHandler(object):
             input_output = (self.image_path + category + f, self.label_path + category + f.replace('leftImg8bit', 'gtFine_labelIds'))
             file_list.append(input_output)
         return file_list
+
+    def getClassWeights(self):
+        if 'class_weights.pickle' not in self.cwd_contents:
+            file_list = self.training_file_list + self.validation_file_list
+            print("Calculating class weights for " + str(len(file_list)) + " images, this may take a while...")
+            classcounts = [1]*self.num_classes
+            c = 0
+            for f in file_list:
+                lbl = cv2.imread(f[1], 0)
+                show = lbl*int(255/self.num_classes)
+                cv2.putText(show, str(c) + '/' + str(len(file_list)), (50,50), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
+                cv2.imshow('Processing...', show)
+                cv2.waitKey(1)
+                for i in range(self.num_classes):
+                    classcounts[i] += len(np.where(lbl == i)[0])
+                c += 1
+            total = sum(classcounts)
+            class_weights = [0]*self.num_classes
+            for i in range(self.num_classes):
+                class_weights[i] = total / classcounts[i]
+            self.class_weights = [float(i) / max(class_weights) for i in class_weights]
+            cv2.destroyAllWindows()
+            cv2.waitKey(1)
+            with open('class_weights.pickle', 'wb') as f:
+                pickle.dump(self.class_weights, f, protocol=pickle.HIGHEST_PROTOCOL)
+        else:
+            with open('class_weights.pickle', 'rb') as f:
+                self.class_weights = pickle.load(f)
+        print(self.class_weights)
+
 
     def generateData(self, batch_size, validating=False, horizontal_flip=True, vertical_flip=False, adjust_brightness=0.1, rotate=5, zoom=0.1):
         if validating:
