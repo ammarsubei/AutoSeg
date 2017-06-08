@@ -83,7 +83,13 @@ def pixelwise_accuracy(y_true, y_pred):
                   K.floatx())
 
 def mIoU(y_true, y_pred):
-    return tf.contrib.metrics.streaming_mean_iou(y_pred, y_true, 34)
+    false_negatives = tf.metrics.false_negatives(y_true, y_pred)[0]
+    false_positives = tf.metrics.false_positives(y_true, y_pred)[0]
+    true_positives = tf.metrics.true_positives(y_true, y_pred)[0]
+
+    iou = true_positives / (true_positives + false_positives + false_negatives)
+
+    return iou
 
 class VisualizeResult(Callback):
     def __init__(self, num_classes, image_path, label_path, validation_file_list):
@@ -270,7 +276,7 @@ class BackendHandler(object):
     def getCallbacks(self, model_name='test.h5', patience=12):
         checkpoint = ModelCheckpoint(
             model_name,
-            monitor='val_pixelwise_accuracy',
+            monitor='val_loss',
             verbose=0,
             save_best_only=True,
             save_weights_only=True)
