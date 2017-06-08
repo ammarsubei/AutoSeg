@@ -17,7 +17,7 @@ img_height = 512
 img_width = 1024
 visualize_while_training = True
 dropout_rate = 0.4
-weight_decay=0.0002
+weight_decay=0.0004
 img_size = (img_width, img_height)
 mask_size = img_size
 input_shape = (img_height, img_width, 3)
@@ -48,7 +48,7 @@ backend = BackendHandler(data_dir=data_dir, num_classes=num_classes, visualize_w
 callbacks = backend.getCallbacks(model_name, patience=batch_size)
 
 sgd = keras.optimizers.SGD(lr=1e-8, momentum=0.9)
-model.compile(loss=class_weighted_pixelwise_crossentropy, optimizer='adam', metrics=[pixelwise_accuracy])
+model.compile(loss=class_weighted_pixelwise_crossentropy, optimizer=sgd, metrics=[pixelwise_accuracy])
 plot_model(model, to_file='architecture.png', show_shapes=True, show_layer_names=True)
 
 
