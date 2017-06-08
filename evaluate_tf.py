@@ -11,7 +11,7 @@ saver.restore(sess, tf.train.latest_checkpoint('./'))
 
 backend = BackendHandler(data_dir=data_dir, num_classes=num_classes, visualize_while_training=visualize_while_training)
 
-for batch in backend.generateData(batch_size=3):
+for batch in backend.generateData(batch_size=3, validating=True):
     predictions = main.eval(feed_dict={
         input_1: batch})
     for i in range(len(predictions)):
