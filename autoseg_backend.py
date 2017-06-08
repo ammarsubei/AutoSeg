@@ -6,6 +6,8 @@ import numpy as np
 import cv2
 import pickle
 
+ignore_classes = [0,0,0,0,0,0,0,1,1,0,0,1,1,1,0,0,0,1,0,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1]
+
 # Get lists: train_img, train_label, etc.
 # Create a method that batch-process the categorical labels to a one-hot matrix and saves them in a database along with the images.
 # Create a generator method that yields a tuple of two tensors of shape (batch_size, img_height, img_width, num_channels).
@@ -194,8 +196,8 @@ class BackendHandler(object):
             total = sum(classcounts)
             class_weights = [0]*self.num_classes
             for i in range(self.num_classes):
-                class_weights[i] = total / classcounts[i]
-            self.class_weights = [float(i) / max(class_weights) for i in class_weights]
+                class_weights[i] = ignore_classes[i] * total / classcounts[i]
+            self.class_weights = [100 * float(w) / max(class_weights) for w in class_weights]
             cv2.destroyAllWindows()
             cv2.waitKey(1)
             with open('class_weights.pickle', 'wb') as f:
@@ -272,8 +274,9 @@ class BackendHandler(object):
 
         tb = TensorBoard(
             log_dir='./logs',
-            histogram_freq=0,
+            histogram_freq=1,
             write_graph=True,
+            write_grads=True,
             write_images=True)
 
         early = EarlyStopping(monitor='val_loss', patience=patience, verbose=1)
