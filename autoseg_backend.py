@@ -82,6 +82,9 @@ def pixelwise_accuracy(y_true, y_pred):
                           K.argmax(y_pred, axis=2)),
                   K.floatx())
 
+def mIoU(y_true, y_pred):
+    return tf.contrib.metrics.streaming_mean_iou(y_pred, y_true, 34)
+
 class VisualizeResult(Callback):
     def __init__(self, num_classes, image_path, label_path, validation_file_list):
         self.num_classes = num_classes
