@@ -11,6 +11,7 @@ data_dir = '/cityscapes_1024/'
 sess = tf.Session()
 saver = tf.train.import_meta_graph('my_test_model.meta')
 saver.restore(sess, tf.train.latest_checkpoint('./'))
+print(tf.get_collection(tf.GraphKeys.VARIABLES))
 
 backend = BackendHandler(data_dir=data_dir, num_classes=num_classes)
 
@@ -21,7 +22,7 @@ for batch in backend.generateData(batch_size=3, validating=True):
         ID = getID()
         cv2.imshow('Image', x[i])
         cv2.moveWindow('Image', 10, 10)
-        cv2.imshow('Ground Truth', makeLabelPretty( oneHotToLabel(y[i]) ))
+        cv2.imshow('Ground Truth', makeLabelPretty( oneHotToLabel( y[i]) ))
         cv2.moveWindow('Ground Truth', 850, 10)
         cv2.imshow('Model Output', makeLabelPretty( oneHotToLabel(predictions[i]) ))
         cv2.moveWindow('Model Output', 850, 500)
