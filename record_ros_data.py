@@ -2,12 +2,19 @@
 import rospy
 from sensor_msgs.msg import Image
 from can_translator.msg import Steering
+import pickle
+
+image = None
+steering = None
 
 def image_callback(data):
-    rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
+    image = data.data
 
 def angle_callback(data):
-    rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
+    steering = data.steering_angle
+
+def getID(size=6, chars=string.ascii_lowercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
     
 def listener():
 
@@ -22,7 +29,15 @@ def listener():
     rospy.Subscriber("/vehicle/steering", Steering, angle_callback)
 
     # spin() simply keeps python from exiting until this node is stopped
-    rospy.spin()
+    rospy.spinOnce()
+    rospy.sleep(0.2)
+
+    # write image and steering angle to pickle file
+    if image is not None and steering is not None:
+        xy = (image, steering)
+        ID = getID()
+        with open('rosbag_data/' + ID, 'wb') as f:
+            pickle.dump(xy, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 if __name__ == '__main__':
     listener()
