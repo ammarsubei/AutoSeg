@@ -12,16 +12,16 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 train_encoder = False
 num_classes = 34
-data_dir = '/cityscapes_480/'
-img_height = 240
-img_width = 480
+data_dir = '/cityscapes_1024/'
+img_height = 512
+img_width = 1024
 visualize_while_training = True
 dropout_rate = 0.4
 weight_decay=0.0002
 img_size = (img_width, img_height)
 mask_size = img_size
 input_shape = (img_height, img_width, 3)
-batch_size = 8
+batch_size = 3
 epochs = 10000000
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
@@ -55,7 +55,7 @@ callbacks = backend.getCallbacks(model_name, patience=100)
 
 model.fit_generator(
     backend.generateData(batch_size),
-    steps_per_epoch=len(backend.training_file_list) // batch_size,
+    steps_per_epoch=500, #len(backend.training_file_list) // batch_size,
     epochs=epochs,
     callbacks=callbacks,
     validation_data=backend.generateData(batch_size, validating=True),
