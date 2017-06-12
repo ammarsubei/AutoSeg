@@ -34,12 +34,6 @@ model = autoseg_models.getResidualModel(input_shape=input_shape,
                                 dropout_rate=dropout_rate,
                                 weight_decay=weight_decay)
 
-sgd = keras.optimizers.SGD(lr=1e-8, momentum=0.9)
-model.compile(loss=class_weighted_pixelwise_crossentropy, optimizer=sgd, metrics=[pixelwise_accuracy])
-K.get_session().run(tf.global_variables_initializer())
-K.get_session().run(tf.local_variables_initializer())
-plot_model(model, to_file='architecture.png', show_shapes=True, show_layer_names=True)
-
 if model_name in os.listdir(os.getcwd()):
     model.load_weights(model_name, by_name=True)
     if not train_encoder:
@@ -49,6 +43,10 @@ if model_name in os.listdir(os.getcwd()):
                 break
         #for layer in model.layers:
             #print(layer.name + ": " + str(layer.trainable))
+
+sgd = keras.optimizers.SGD(lr=1e-8, momentum=0.9)
+model.compile(loss=class_weighted_pixelwise_crossentropy, optimizer=sgd, metrics=[pixelwise_accuracy])
+plot_model(model, to_file='architecture.png', show_shapes=True, show_layer_names=True)
 
 backend = BackendHandler(data_dir=data_dir, num_classes=num_classes, visualize_while_training=visualize_while_training)
 callbacks = backend.getCallbacks(model_name, patience=100)
