@@ -74,7 +74,7 @@ def class_weighted_pixelwise_crossentropy(target, output):
     output = tf.clip_by_value(output, 10e-8, 1.-10e-8)
     with open('class_weights.pickle', 'rb') as f:
         weight = pickle.load(f)
-    return -tf.reduce_sum(target * weight * tf.log(output))
+    return -tf.reduce_sum(target * ignore_classes * tf.log(output))
 
 
 def pixelwise_accuracy(y_true, y_pred):
@@ -83,11 +83,7 @@ def pixelwise_accuracy(y_true, y_pred):
                   K.floatx())
 
 def mIoU(y_true, y_pred):
-    false_negatives = tf.metrics.false_negatives(y_true, y_pred)[0]
-    false_positives = tf.metrics.false_positives(y_true, y_pred)[0]
-    true_positives = tf.metrics.true_positives(y_true, y_pred)[0]
-
-    iou = true_positives / (true_positives + false_positives + false_negatives)
+    iou, op = tf.metrics.mean_iou(y_true, y_pred, 34, weights=tf.convert_to_tensor(ignore_classes))
 
     return iou
 
@@ -166,9 +162,9 @@ class BackendHandler(object):
         self.num_classes = num_classes
         self.visualize_while_training = visualize_while_training
         self.image_path = self.data_dir + 'images/'
-        self.label_path = self.data_dir + 'labels_fine/'
+        self.label_path = self.data_dir + 'labels_coarse/'
         self.cwd_contents = os.listdir(os.getcwd())
-        self.training_file_list = self.getFileList('train/')
+        self.training_file_list = self.getFileList('train_extra/')
         self.validation_file_list = self.getFileList('val/')
         self.getClassWeights()
 
@@ -183,7 +179,7 @@ class BackendHandler(object):
                 allfiles.append(f)
         file_list = []
         for f in allfiles:
-            input_output = (self.image_path + category + f, self.label_path + category + f.replace('leftImg8bit', 'gtFine_labelIds'))
+            input_output = (self.image_path + category + f, self.label_path + category + f.replace('leftImg8bit', 'gtCoarse_labelIds'))
             file_list.append(input_output)
         return file_list
 
@@ -292,9 +288,9 @@ class BackendHandler(object):
 
         if self.visualize_while_training:
             vis = VisualizeResult(self.num_classes, self.image_path, self.label_path, self.validation_file_list)
-            return [checkpoint, tb, vis]
+            return [checkpoint, early, tb, vis]
         else:
-            return [checkpoint, tb]
+            return [checkpoint, early, tb]
 
 #sg = SegGen('/data/', 11)
 #print(next(sg.trainingGenerator(11)))
