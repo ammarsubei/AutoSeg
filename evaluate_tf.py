@@ -11,7 +11,10 @@ data_dir = '/cityscapes_1024/'
 sess = tf.Session()
 saver = tf.train.import_meta_graph('my_test_model.meta')
 saver.restore(sess, tf.train.latest_checkpoint('./'))
-print(tf.get_collection(tf.GraphKeys.VARIABLES))
+
+last_op = sess.graph.get_operation_by_name('main/Sum_1')
+main = last_op.values()[0]
+print(main)
 
 backend = BackendHandler(data_dir=data_dir, num_classes=num_classes)
 
