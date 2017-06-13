@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 import rospy
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, CompressedImage
 from can_translator.msg import Steering
 import pickle, string, random
+import cv2
 
 image = None
 previous_image = None
@@ -11,6 +12,7 @@ steering = None
 def image_callback(data):
     global image
     image = data.data
+    print(data.data)
     #print("Got image!")
 
 def angle_callback(data):
@@ -39,6 +41,8 @@ def listener():
         # spin() simply keeps python from exiting until this node is stopped
         rospy.sleep(0.2)
         if image is not None and steering is not None:
+            cv2.imshow('Image', image)
+            cv2.waitKey(1)
             xy = (image, steering)
             ID = getID()
             with open('rosbag_data/' + ID, 'wb') as f:
