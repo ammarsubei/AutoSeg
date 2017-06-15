@@ -28,7 +28,7 @@ if len(sys.argv) > 1:
 else:
     model_name= 'main.h5'
 
-model = autoseg_models.getResidualModel(input_shape=input_shape,
+model = autoseg_models.get_residual_model_with_batch_norm(input_shape=input_shape,
                                 num_classes=num_classes,
                                 residual_encoder_connections=False,
                                 dropout_rate=dropout_rate,
