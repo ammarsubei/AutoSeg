@@ -23,38 +23,17 @@ def labelToOneHot(label, num_classes):
 def oneHotToLabel(one_hot):
     return one_hot.argmax(2).astype('uint8')
 
-# Reduces the 34 CityScapes classes to 9.
 def remapClass(arr):
-    o = arr.copy()
-    arr[arr<=6] = 0
-    arr[arr==7] = 1
+    arr[arr==12] = 11 # walls -> buildings
+    arr[arr==13] = 11 # fences -> buildings
 
-    arr[arr==8] = 2
-    arr[arr==9] = 2
-    arr[arr==10] = 2
+    arr[arr==25] = 24 # cyclists -> people
 
-    arr[arr==11] = 3
-    arr[arr==12] = 3
-    arr[arr==13] = 3
-    arr[arr==14] = 3
-    arr[arr==15] = 3
-    arr[arr==16] = 3
+    arr[arr==27] = 26 # truck -> car
+    arr[arr==28] = 26 # bus -> car
+    arr[arr==32] = 26 # motorcycle -> car
 
-    arr[arr==17] = 4
-    arr[arr==18] = 4
-    arr[arr==19] = 4
-    arr[arr==20] = 4
-
-    arr[arr==21] = 5
-    arr[arr==22] = 6
-    arr[arr==23] = 7
-
-    arr[arr==24] = 8
-    arr[arr==25] = 8
-
-    arr[arr>=26] = 9
-
-    return o
+    return arr
 
 def getID(size=6, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
