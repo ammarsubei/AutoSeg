@@ -31,7 +31,8 @@ else:
 model = autoseg_models.getModel(input_shape=input_shape,
                                 num_classes=num_classes,
                                 dropout_rate=dropout_rate,
-                                weight_decay=weight_decay)
+                                weight_decay=weight_decay,
+                                batch_norm=False)
 
 if model_name in os.listdir(os.getcwd()):
     model.load_weights(model_name, by_name=True)
