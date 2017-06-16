@@ -8,7 +8,7 @@ def addFireModule(x, squeeze_filters, expand_filters, weight_decay, name='fire')
     expand3 = Conv2D(expand_filters, (3,3), padding='same', activation='elu', name=name + '/expand3x3', kernel_regularizer=l2(weight_decay))(squeeze)
     c = concatenate([expand1, expand3])
 
-    return c
+    return BatchNormalization()(c)
 
 def addParallelDilatedConvolution(x, num_filters, weight_decay, name='parallel_dilated_convolution'):
     conv1 = Conv2D(num_filters, (3,3), padding='same', activation='elu', dilation_rate=1, name=name + '/dil_1', kernel_regularizer=l2(weight_decay))(x)
@@ -17,14 +17,14 @@ def addParallelDilatedConvolution(x, num_filters, weight_decay, name='parallel_d
     conv8 = Conv2D(num_filters, (3,3), padding='same', activation='elu', dilation_rate=8, name=name + '/dil_8', kernel_regularizer=l2(weight_decay))(x)
     a = add([conv1, conv2, conv4, conv8])
 
-    return a
+    return BatchNormalization()(a)
 
 def addBypassRefinementModule(high, low, num_filters, weight_decay, name='bypass', dropout_rate=0.2):
     preConv = Conv2D(num_filters, (3,3), padding='same', activation='elu', name=name + '/pre_conv', kernel_regularizer=l2(weight_decay))(low)
     c = concatenate([preConv, high])
     postConv = Conv2D(num_filters, (3,3), padding='same', activation='elu', name=name + '/post_conv', kernel_regularizer=l2(weight_decay))(c)
 
-    return Dropout(dropout_rate)(postConv)
+    return Dropout(dropout_rate)(BatchNormalization()(postConv))
 
 def getModel(input_shape, num_classes, residual_encoder_connections=False, dropout_rate=0.2, weight_decay=0.0002):
     i = Input(input_shape)
@@ -77,7 +77,7 @@ def getModel(input_shape, num_classes, residual_encoder_connections=False, dropo
 
 def getResidualModel(input_shape, num_classes, residual_encoder_connections=False, dropout_rate=0.2, weight_decay=0.0002):
     i = Input(input_shape)
-    convI = Conv2D(64, (3,3), padding='same', activation='elu', name='conv1', kernel_regularizer=l2(weight_decay))(i)
+    convI = Conv2D(64, (3,3), padding='same', activation='elu', name='conv1', kernel_regularizer=l2(weight_decay))(BatchNormalization()(i))
 
     pool1 = MaxPooling2D(2)(convI)
     fire1_1 = addFireModule(pool1, 16, 64, weight_decay, name='fire2')
