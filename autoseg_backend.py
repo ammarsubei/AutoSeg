@@ -75,7 +75,7 @@ class VisualizeResult(Callback):
         cv2.imshow('Sample Image', cv2.resize(self.image, (800, 400)))
         cv2.moveWindow('Sample Image', 10, 10)
         self.ground_truth = remap_class(cv2.imread(i[1], 0))
-        self.ground_truth = self.makeLabelPretty(self.ground_truth)
+        self.ground_truth = self.make_label_pretty(self.ground_truth)
         cv2.imshow('Ground Truth', cv2.resize(self.ground_truth, (800, 400)))
         cv2.moveWindow('Ground Truth', 850, 10)
         cv2.waitKey(1)
@@ -138,9 +138,9 @@ class BackendHandler(object):
         self.num_classes = num_classes
         self.visualize_while_training = visualize_while_training
         self.image_path = self.data_dir + 'images/'
-        self.label_path = self.data_dir + 'labels_fine/'
+        self.label_path = self.data_dir + 'labels_coarse/'
         self.cwd_contents = os.listdir(os.getcwd())
-        self.training_file_list = self.get_file_list('train/')
+        self.training_file_list = self.get_file_list('train_extra/')
         self.validation_file_list = self.get_file_list('val/')
         self.get_class_weights()
 
@@ -158,7 +158,7 @@ class BackendHandler(object):
         for f in allfiles:
             input_output = (self.image_path + category + f,
                             self.label_path + category + \
-                            f.replace('leftImg8bit', 'gtFine_labelIds'))
+                            f.replace('leftImg8bit', 'gtCoarse_labelIds'))
             file_list.append(input_output)
         return file_list
 
