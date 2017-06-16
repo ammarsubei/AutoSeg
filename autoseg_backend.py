@@ -61,11 +61,6 @@ def pixelwise_accuracy(y_true, y_pred):
                           K.argmax(y_pred, axis=2)),
                   K.floatx())
 
-def mIoU(y_true, y_pred):
-    iou, op = tf.metrics.mean_iou(y_true, y_pred, 34, weights=tf.convert_to_tensor(ignore_classes))
-
-    return iou
-
 class VisualizeResult(Callback):
     def __init__(self, num_classes, image_path, label_path, validation_file_list):
         self.num_classes = num_classes
