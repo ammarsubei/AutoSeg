@@ -113,7 +113,7 @@ class VisualizeResult(Callback):
         return prettyLabel
 
     def on_batch_end(self, batch, logs={}):
-        if batch % 5 == 0 or batch < 10:
+        if batch % 10 == 0 or batch < 10:
             seg_result = self.model.predict( np.array( [self.image] ) )
             main = self.makeLabelPretty(oneHotToLabel(seg_result.squeeze(0)))
             cv2.imshow('Segmentation Result', cv2.resize(main, (800,400)))
