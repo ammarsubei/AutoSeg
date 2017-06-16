@@ -28,7 +28,7 @@ def addBypassRefinementModule(high, low, num_filters, weight_decay, name='bypass
 
 def getModel(input_shape, num_classes, residual_encoder_connections=False, dropout_rate=0.2, weight_decay=0.0002):
     i = Input(input_shape)
-    convI = Conv2D(64, (3,3), padding='same', activation='elu', name='conv1', kernel_regularizer=l2(weight_decay))(i)
+    convI = Conv2D(64, (3,3), padding='same', activation='elu', name='conv1', kernel_regularizer=l2(weight_decay))(BatchNormalization()(i))
 
     if residual_encoder_connections:
         pool1 = MaxPooling2D(2)( concatenate( [convI, i] ) )

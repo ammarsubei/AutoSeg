@@ -13,9 +13,9 @@ os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 train_encoder = True
 num_classes = 34
-data_dir = '/cityscapes_480/'
-img_height = 240
-img_width = 480
+data_dir = '/cityscapes_1024/'
+img_height = 512
+img_width = 1024
 visualize_while_training = True
 dropout_rate = 0.4
 weight_decay=0.0002
