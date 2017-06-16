@@ -191,7 +191,7 @@ int main(int argc, char* argv[]) {
 
      // Get the image from disk as a float array of numbers, resized and
      // normalized to the specifications the main graph expects.
-     std:vector<Tensor> resized_tensors;
+     std::vector<Tensor> resized_tensors;
      string image_path = tensorflow::io::JoinPath(root_dir, image);
      Status read_tensor_status =
         ReadTensorFromImageFile(image_path, input_height, input_width,
