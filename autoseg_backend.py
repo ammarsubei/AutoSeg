@@ -162,9 +162,9 @@ class BackendHandler(object):
         self.num_classes = num_classes
         self.visualize_while_training = visualize_while_training
         self.image_path = self.data_dir + 'images/'
-        self.label_path = self.data_dir + 'labels_coarse/'
+        self.label_path = self.data_dir + 'labels_fine/'
         self.cwd_contents = os.listdir(os.getcwd())
-        self.training_file_list = self.getFileList('train_extra/')
+        self.training_file_list = self.getFileList('train/')
         self.validation_file_list = self.getFileList('val/')
         self.getClassWeights()
 
@@ -179,7 +179,7 @@ class BackendHandler(object):
                 allfiles.append(f)
         file_list = []
         for f in allfiles:
-            input_output = (self.image_path + category + f, self.label_path + category + f.replace('leftImg8bit', 'gtCoarse_labelIds'))
+            input_output = (self.image_path + category + f, self.label_path + category + f.replace('leftImg8bit', 'gtFine_labelIds'))
             file_list.append(input_output)
         return file_list
 
