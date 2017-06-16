@@ -2,66 +2,68 @@ from keras.callbacks import Callback, TensorBoard, ModelCheckpoint, EarlyStoppin
 from keras import backend as K
 import tensorflow as tf
 import os, random, math, string
+import pickle
 import numpy as np
 import cv2
-import pickle
 
-ignore_classes = [0,0,0,0,0,0,0,1,1,0,0,1,1,1,0,0,0,1,0,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1]
-
-# Get lists: train_img, train_label, etc.
-# Create a method that batch-process the categorical labels to a one-hot matrix and saves them in a database along with the images.
-# Create a generator method that yields a tuple of two tensors of shape (batch_size, img_height, img_width, num_channels).
-# This method should also imshow() the segmentation of the sample image after each batch.
+# Class weights. Classes with weight 0 do not contribute to the loss.
+IGNORE_CLASSES = [0, 0, 0, 0, 0, 0, 0,  # ignore 'void' class
+                  1, 1, 0, 0,           # ignore 'parking', 'rail track'
+                  1, 1, 1, 0, 0, 0,     # ignore 'guard rail', 'bridge', 'tunnel'
+                  1, 0,                 # ignore 'polegroup'
+                  1, 1, 1, 1,           # 'object' class
+                  1, 1, 1,              # 'nature' and 'sky' classes
+                  1, 1,                 # 'human' class
+                  1, 0, 0, 1, 1, 1]     # ignore 'caravan', 'trailer'
 
 random.seed(1) # For reproducability.
 
-# Accepts and returns a numpy array.
-def labelToOneHot(label, num_classes):
+def label_to_onehot(label, num_classes):
+    """Converts labels (e.g. 2) to one-hot vectors (e.g. [0,0,1,0]).
+    Accepts and returns a numpy array."""
     return np.eye(num_classes)[label]
 
 # Accepts and returns a numpy array.
-def oneHotToLabel(one_hot):
+def one_hot_to_label(one_hot):
+    """Converts one-hot vectors (e.g. [0,0,1,0]) to labels (e.g. 2).
+    Accepts and returns a numpy array."""
     return one_hot.argmax(2).astype('uint8')
 
-def remapClass(arr):
-    arr[arr==12] = 11 # walls -> buildings
-    arr[arr==13] = 11 # fences -> buildings
+def remap_class(arr):
+    """Remaps CityScapes classes as explained below."""
+    arr[arr == 12] = 11 # walls -> buildings
+    arr[arr == 13] = 11 # fences -> buildings
 
-    arr[arr==25] = 24 # cyclists -> people
+    arr[arr == 25] = 24 # cyclists -> people
 
-    arr[arr==27] = 26 # truck -> car
-    arr[arr==28] = 26 # bus -> car
-    arr[arr==32] = 26 # motorcycle -> car
+    arr[arr == 27] = 26 # truck -> car
+    arr[arr == 28] = 26 # bus -> car
+    arr[arr == 32] = 26 # motorcycle -> car
 
     return arr
 
-def getID(size=6, chars=string.ascii_lowercase + string.digits):
-    return ''.join(random.choice(chars) for _ in range(size))
-
 def pixelwise_crossentropy(target, output):
-    # scale preds so that the class probas of each sample sum to 1
-    '''
-    output /= tf.reduce_sum(output,
-                            reduction_indices=len(output.get_shape()) - 1,
-                            keep_dims=True)
-    '''
-    # manual computation of crossentropy
+    """Keras' default crossentropy function wasn't working, not sure why."""
     output = tf.clip_by_value(output, 10e-8, 1.-10e-8)
-    return -tf.reduce_sum(target * tf.log(output))
+    return -tf.reduce_sum(target * IGNORE_CLASSES * tf.log(output))
 
 def class_weighted_pixelwise_crossentropy(target, output):
+    """As above. IGNORE_CLASSES is already used in calculating class_weights."""
     output = tf.clip_by_value(output, 10e-8, 1.-10e-8)
     with open('class_weights.pickle', 'rb') as f:
-        weight = pickle.load(f)
-    return -tf.reduce_sum(target * ignore_classes * tf.log(output))
+        weights = pickle.load(f)
+    return -tf.reduce_sum(target * weights * tf.log(output))
 
 
 def pixelwise_accuracy(y_true, y_pred):
+    """Same as Keras' default accuracy function, but with axis=-1 changed to axis=2.
+        These should be equivalent, I'm not sure why they result in different values."""
     return K.cast(K.equal(K.argmax(y_true, axis=2),
                           K.argmax(y_pred, axis=2)),
                   K.floatx())
 
 class VisualizeResult(Callback):
+    """Custom callback that shows the model's prediction on a sample image during training."""
     def __init__(self, num_classes, image_path, label_path, validation_file_list):
         self.num_classes = num_classes
         self.image_path = image_path
@@ -70,19 +72,20 @@ class VisualizeResult(Callback):
         self.colors = None
         i = random.choice(self.validation_file_list)
         self.image = cv2.imread(i[0])
-        cv2.imshow('Sample Image', cv2.resize(self.image, (800,400)) )
+        cv2.imshow('Sample Image', cv2.resize(self.image, (800, 400)))
         cv2.moveWindow('Sample Image', 10, 10)
-        self.ground_truth = remapClass( cv2.imread(i[1], 0) )
+        self.ground_truth = remap_class(cv2.imread(i[1], 0))
         self.ground_truth = self.makeLabelPretty(self.ground_truth)
-        cv2.imshow('Ground Truth', cv2.resize(self.ground_truth, (800,400)))
+        cv2.imshow('Ground Truth', cv2.resize(self.ground_truth, (800, 400)))
         cv2.moveWindow('Ground Truth', 850, 10)
         cv2.waitKey(1)
 
-
     # Accepts and returns a numpy array.
-    def makeLabelPretty(self, label):
-        prettyLabel = cv2.cvtColor(label, cv2.COLOR_GRAY2RGB)
+    def make_label_pretty(self, label):
+        """Maps integer labels to RGB color values, for visualization."""
+        pretty_label = cv2.cvtColor(label, cv2.COLOR_GRAY2RGB)
         if self.colors is None:
+            # Saved as example.
             '''
             self.colors = [
             [0,0,0],        # 0: void
@@ -98,39 +101,38 @@ class VisualizeResult(Callback):
             ]
             '''
             with open('cityscapes_color_mappings.pickle', 'rb') as f:
-                self.colors =  pickle.load(f)
+                self.colors = pickle.load(f)
 
             assert self.num_classes <= len(self.colors)
 
         for i in range(self.num_classes):
-            prettyLabel[np.where( (label==[i]) )] = self.colors[i]
+            pretty_label[np.where((label == [i]))] = self.colors[i]
 
-        return prettyLabel
+        return pretty_label
 
     def on_batch_end(self, batch, logs={}):
-        if batch % 10 == 0 or batch < 10:
-            seg_result = self.model.predict( np.array( [self.image] ) )
-            main = self.makeLabelPretty(oneHotToLabel(seg_result.squeeze(0)))
-            cv2.imshow('Segmentation Result', cv2.resize(main, (800,400)))
+        """Updates the displayed prediction after every 10th batch."""
+        if batch % 10 == 0 or batch < 5:
+            seg_result = self.model.predict(np.array([self.image]))
+            main = self.make_label_pretty(one_hot_to_label(seg_result.squeeze(0)))
+            cv2.imshow('Segmentation Result', cv2.resize(main, (800, 400)))
             cv2.moveWindow('Segmentation Result', 850, 500)
             cv2.waitKey(1)
 
     def on_epoch_end(self, epoch, logs={}):
+        """Changes the image used as an example at the end of each epoch."""
         new_img = random.choice(self.validation_file_list)
         self.image = cv2.imread(new_img[0])
-        self.ground_truth = self.makeLabelPretty( remapClass( cv2.imread(new_img[1], 0) ) )
-        cv2.imshow('Sample Image', cv2.resize(self.image, (800,400)))
-        cv2.imshow('Ground Truth', cv2.resize(self.ground_truth, (800,400)))
+        self.ground_truth = self.makeLabelPretty(remap_class(cv2.imread(new_img[1], 0)))
+        cv2.imshow('Sample Image', cv2.resize(self.image, (800, 400)))
+        cv2.imshow('Ground Truth', cv2.resize(self.ground_truth, (800, 400)))
 
     def on_train_end(self, logs={}):
+        """Currently does nothing useful, saved here as a TODO."""
         print("Training ended!")
-        seg_result = oneHotToLabel( self.model.predict( np.array( [self.image] ) ).squeeze(0) )
-        pl = self.makeLabelPretty(seg_result)
-        cv2.imwrite('sample_output.png', pl)
-        # TODO: Run predict over test set and write results to files in "results" dir.
 
 class BackendHandler(object):
-
+    """Handles data generation and hides callback creation."""
     def __init__(self, data_dir, num_classes, visualize_while_training=False):
         self.data_dir = os.getcwd() + data_dir
         self.num_classes = num_classes
@@ -138,13 +140,14 @@ class BackendHandler(object):
         self.image_path = self.data_dir + 'images/'
         self.label_path = self.data_dir + 'labels_fine/'
         self.cwd_contents = os.listdir(os.getcwd())
-        self.training_file_list = self.getFileList('train/')
-        self.validation_file_list = self.getFileList('val/')
-        self.getClassWeights()
+        self.training_file_list = self.get_file_list('train/')
+        self.validation_file_list = self.get_file_list('val/')
+        self.get_class_weights()
 
-    # Sort the data into training and validation sets, or load already sorted sets.
-    def getFileList(self, category='train/'):
-        # Make training file list.
+    def get_file_list(self, category='train/'):
+        """Recursively get raw images and annotations in given dir.
+            Return as tuple where first element is the path to the image
+            and the second element is the path to the corresponding annotation."""
         file_dir = self.image_path + category
         allfiles = []
         for path, subdirs, files in os.walk(file_dir):
@@ -153,29 +156,37 @@ class BackendHandler(object):
                 allfiles.append(f)
         file_list = []
         for f in allfiles:
-            input_output = (self.image_path + category + f, self.label_path + category + f.replace('leftImg8bit', 'gtFine_labelIds'))
+            input_output = (self.image_path + category + f,
+                            self.label_path + category + \
+                            f.replace('leftImg8bit', 'gtFine_labelIds'))
             file_list.append(input_output)
         return file_list
 
-    def getClassWeights(self):
+    def get_class_weights(self):
+        """Iterates over the entire dataset and for each class calculates the
+            instances of that class divided by the total number of instances.
+            Since this is time-consuming for large datasets, save the result
+            to a pickle file for reuse."""
         if 'class_weights.pickle' not in self.cwd_contents:
             file_list = self.training_file_list + self.validation_file_list
-            print("Calculating class weights for " + str(len(file_list)) + " images, this may take a while...")
+            print("Calculating class weights for " + str(len(file_list)) + \
+                  " images, this may take a while...")
             classcounts = [1]*self.num_classes
-            c = 0
+            count = 0
             for f in file_list:
                 lbl = cv2.imread(f[1], 0)
                 show = lbl*int(255/self.num_classes)
-                cv2.putText(show, str(c) + '/' + str(len(file_list)), (50,50), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
+                cv2.putText(show, str(count) + '/' + str(len(file_list)),
+                            (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
                 cv2.imshow('Processing...', show)
                 cv2.waitKey(1)
                 for i in range(self.num_classes):
                     classcounts[i] += len(np.where(lbl == i)[0])
-                c += 1
+                count += 1
             total = sum(classcounts)
             class_weights = [0]*self.num_classes
             for i in range(self.num_classes):
-                class_weights[i] = ignore_classes[i] * total / classcounts[i]
+                class_weights[i] = IGNORE_CLASSES[i] * total / classcounts[i]
             self.class_weights = [100 * float(w) / max(class_weights) for w in class_weights]
             cv2.destroyAllWindows()
             cv2.waitKey(1)
@@ -187,7 +198,10 @@ class BackendHandler(object):
         print(self.class_weights)
 
 
-    def generateData(self, batch_size, validating=False, horizontal_flip=True, vertical_flip=False, adjust_brightness=0.1, rotate=5, zoom=0.1):
+    def generate_data(self, batch_size, validating=False,
+                      horizontal_flip=True, vertical_flip=False,
+                      adjust_brightness=0.1, rotate=5, zoom=0.1):
+        """Replaces Keras' native ImageDataGenerator."""
         if validating:
             data = self.validation_file_list
         else:
@@ -198,52 +212,59 @@ class BackendHandler(object):
         while True:
             image_batch = []
             label_batch = []
-            small_label_batch = []
-            for b in range(batch_size):
+            for batch in range(batch_size):
                 if i == len(data):
                     i = 0
                     random.shuffle(data)
                 sample = data[i]
                 i += 1
                 image = cv2.imread(sample[0]) / 255
-                label = remapClass( cv2.imread(sample[1], 0) )
+                label = remap_class(cv2.imread(sample[1], 0))
 
                 # Data Augmentation
                 if not validating:
-                    if horizontal_flip and random.randint(0,1):
+                    # Horizontal flip.
+                    if horizontal_flip and random.randint(0, 1):
                         cv2.flip(image, 1)
                         cv2.flip(label, 1)
-                    if vertical_flip and random.randint(0,1):
+                    # Vertical flip.
+                    if vertical_flip and random.randint(0, 1):
                         cv2.flip(image, 0)
                         cv2.flip(label, 0)
+                    # Randomly make image brighter or darker.
                     if adjust_brightness:
                         factor = 1 + abs(random.gauss(mu=0, sigma=adjust_brightness))
-                        if random.randint(0,1):
+                        if random.randint(0, 1):
                             factor = 1 / factor
-                        image = 255*( (image/255)**factor )
+                        image = 255*((image/255)**factor)
                         image = np.array(image, dtype='uint8')
+                    # Randomly rotate image within a certain range.
                     if rotate:
                         angle = random.gauss(mu=0, sigma=rotate)
                     else:
                         angle = 0
+                    # Randomly zoom image.
                     if zoom:
                         scale = random.gauss(mu=1, sigma=zoom)
                     else:
                         scale = 1
+                    # Apply rotation/zoom calculated above.
                     if rotate or zoom:
-                        rows,cols = label.shape
-                        M = cv2.getRotationMatrix2D( (cols/2, rows/2), angle, scale)
+                        rows, cols = label.shape
+                        M = cv2.getRotationMatrix2D((cols/2, rows/2), angle, scale)
                         image = cv2.warpAffine(image, M, (cols, rows))
                         label = cv2.warpAffine(label, M, (cols, rows))
 
-                one_hot = labelToOneHot(label, self.num_classes)
+                one_hot = label_to_onehot(label, self.num_classes)
                 image_batch.append(image)
                 label_batch.append(one_hot)
             image_batch = np.array(image_batch)
             label_batch = np.array(label_batch)
             yield (image_batch, label_batch)
 
-    def getCallbacks(self, model_name='test.h5', patience=12):
+    def get_callbacks(self, model_name='test.h5', patience=12):
+        """Returns a standard set of callbacks.
+            Kept here mainly to avoid clutter in main.py"""
         checkpoint = ModelCheckpoint(
             model_name,
             monitor='val_loss',
@@ -261,10 +282,8 @@ class BackendHandler(object):
         early = EarlyStopping(monitor='val_loss', patience=patience, verbose=1)
 
         if self.visualize_while_training:
-            vis = VisualizeResult(self.num_classes, self.image_path, self.label_path, self.validation_file_list)
+            vis = VisualizeResult(self.num_classes, self.image_path,
+                                  self.label_path, self.validation_file_list)
             return [checkpoint, early, tb, vis]
         else:
             return [checkpoint, early, tb]
-
-#sg = SegGen('/data/', 11)
-#print(next(sg.trainingGenerator(11)))

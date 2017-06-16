@@ -49,13 +49,13 @@ model.compile(loss=class_weighted_pixelwise_crossentropy, optimizer=sgd, metrics
 plot_model(model, to_file='architecture.png', show_shapes=True, show_layer_names=True)
 
 backend = BackendHandler(data_dir=data_dir, num_classes=num_classes, visualize_while_training=visualize_while_training)
-callbacks = backend.getCallbacks(model_name, patience=100)
+callbacks = backend.get_callbacks(model_name, patience=100)
 
 model.fit_generator(
-    backend.generateData(batch_size),
+    backend.generate_data(batch_size),
     steps_per_epoch=500, #len(backend.training_file_list) // batch_size,
     epochs=epochs,
     callbacks=callbacks,
-    validation_data=backend.generateData(batch_size, validating=True),
+    validation_data=backend.generate_data(batch_size, validating=True),
     validation_steps=len(backend.validation_file_list) // batch_size)
     #class_weight=backend.class_weights)
