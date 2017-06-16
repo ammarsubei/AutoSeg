@@ -44,7 +44,7 @@ if model_name in os.listdir(os.getcwd()):
         #for layer in model.layers:
             #print(layer.name + ": " + str(layer.trainable))
 
-sgd = keras.optimizers.SGD(lr=1e-8, momentum=0.9)
+sgd = keras.optimizers.SGD(lr=1e-9, momentum=0.9)
 model.compile(loss=class_weighted_pixelwise_crossentropy, optimizer=sgd, metrics=[pixelwise_accuracy])
 plot_model(model, to_file='architecture.png', show_shapes=True, show_layer_names=True)
 
