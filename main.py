@@ -12,16 +12,16 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 train_encoder = False
 num_classes = 34
-data_dir = '/cityscapes_1024/'
-img_height = 512
-img_width = 1024
+data_dir = '/cityscapes_orig/'
+img_height = 1024
+img_width = 2048
 visualize_while_training = True
 dropout_rate = 0.4
 weight_decay=0.0002
 img_size = (img_width, img_height)
 mask_size = img_size
 input_shape = (img_height, img_width, 3)
-batch_size = 3
+batch_size = 1
 epochs = 10000000
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
