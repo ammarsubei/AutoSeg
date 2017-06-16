@@ -51,6 +51,11 @@ plot_model(model, to_file='architecture.png', show_shapes=True, show_layer_names
 backend = BackendHandler(data_dir=data_dir, num_classes=num_classes, visualize_while_training=visualize_while_training)
 callbacks = backend.get_callbacks(model_name, patience=100)
 
+start = time.clock()
+model.evaluate_generator(backend.generate_data(1), 100)
+end = time.clock()
+print("Benchmarked at " + str(100 / (end - start)) + " frames per second.")
+
 model.fit_generator(
     backend.generate_data(batch_size),
     steps_per_epoch=500, #len(backend.training_file_list) // batch_size,
