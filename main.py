@@ -28,9 +28,8 @@ if len(sys.argv) > 1:
 else:
     model_name= 'main.h5'
 
-model = autoseg_models.getResidualModel(input_shape=input_shape,
+model = autoseg_models.getModel(input_shape=input_shape,
                                 num_classes=num_classes,
-                                residual_encoder_connections=False,
                                 dropout_rate=dropout_rate,
                                 weight_decay=weight_decay)
 
