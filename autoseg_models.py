@@ -34,7 +34,7 @@ def addBypassRefinementModule(high, low, num_filters, weight_decay, name='bypass
 
     return b
 
-def getModel(input_shape, num_classes, dropout_rate=0.2, weight_decay=0.0002, batch_norm=True):
+def get_SQ(input_shape, num_classes, dropout_rate=0.2, weight_decay=0.0002, batch_norm=True):
     i = Input(input_shape)
     if batch_norm:
         i = BatchNormalization()(i)
@@ -73,5 +73,14 @@ def getModel(input_shape, num_classes, dropout_rate=0.2, weight_decay=0.0002, ba
     prediction = Conv2D(num_classes, (1,1), padding='same', activation='softmax', name='main', kernel_regularizer=l2(weight_decay))(trans_conv15)
 
     model = Model(inputs=i, outputs=prediction)
+
+    return model
+
+def get_rn50(input_shape, num_classes):
+    from keras.applications.resnet50 import ResNet50
+    rn50 = ResNet50(include_top=False, weights='imagenet', input_shape=input_shape)
+    classifier = Conv2D(num_classes, (1,1), padding='same', activation='softmax', name='main')(rn50)
+
+    model = Model(inputs=rn50.inputs, outputs=classifier)
 
     return model

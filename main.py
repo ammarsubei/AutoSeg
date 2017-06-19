@@ -28,11 +28,16 @@ if len(sys.argv) > 1:
 else:
     model_name= 'main.h5'
 
-model = autoseg_models.getModel(input_shape=input_shape,
-                                num_classes=num_classes,
-                                dropout_rate=dropout_rate,
-                                weight_decay=weight_decay,
-                                batch_norm=False)
+'''
+model = autoseg_models.get_SQ(input_shape=input_shape,
+                              num_classes=num_classes,
+                              dropout_rate=dropout_rate,
+                              weight_decay=weight_decay,
+                              batch_norm=False)
+'''
+
+model = autoseg_models.get_rn50(input_shape=input_shape,
+                                num_classes=num_classes)
 
 if model_name in os.listdir(os.getcwd()):
     model.load_weights(model_name, by_name=True)
