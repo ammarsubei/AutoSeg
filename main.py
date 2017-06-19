@@ -49,7 +49,7 @@ model.compile(loss=class_weighted_pixelwise_crossentropy, optimizer=sgd, metrics
 plot_model(model, to_file='architecture.png', show_shapes=True, show_layer_names=True)
 
 backend = BackendHandler(data_dir=data_dir, num_classes=num_classes, visualize_while_training=visualize_while_training)
-callbacks = backend.get_callbacks(model_name, patience=100)
+callbacks = backend.get_callbacks(model_name, patience=250)
 
 start = time.clock()
 model.evaluate_generator(backend.generate_data(1), 100)

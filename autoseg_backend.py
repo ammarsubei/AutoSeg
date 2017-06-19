@@ -123,7 +123,7 @@ class VisualizeResult(Callback):
         """Changes the image used as an example at the end of each epoch."""
         new_img = random.choice(self.validation_file_list)
         self.image = cv2.imread(new_img[0])
-        self.ground_truth = self.makeLabelPretty(remap_class(cv2.imread(new_img[1], 0)))
+        self.ground_truth = self.make_label_pretty(remap_class(cv2.imread(new_img[1], 0)))
         cv2.imshow('Sample Image', cv2.resize(self.image, (800, 400)))
         cv2.imshow('Ground Truth', cv2.resize(self.ground_truth, (800, 400)))
 
@@ -262,7 +262,7 @@ class BackendHandler(object):
             label_batch = np.array(label_batch)
             yield (image_batch, label_batch)
 
-    def get_callbacks(self, model_name='test.h5', patience=12):
+    def get_callbacks(self, model_name='test.h5', patience=500):
         """Returns a standard set of callbacks.
             Kept here mainly to avoid clutter in main.py"""
         checkpoint = ModelCheckpoint(
@@ -284,6 +284,6 @@ class BackendHandler(object):
         if self.visualize_while_training:
             vis = VisualizeResult(self.num_classes, self.image_path,
                                   self.label_path, self.validation_file_list)
-            return [checkpoint, early, tb, vis]
+            return [checkpoint, tb, vis]
         else:
-            return [checkpoint, early, tb]
+            return [checkpoint, tb]

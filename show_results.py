@@ -28,9 +28,9 @@ model_name= 'visualized_model.h5'
 
 model = autoseg_models.getModel(input_shape=input_shape,
                                 num_classes=num_classes,
-                                residual_encoder_connections=False,
                                 dropout_rate=dropout_rate,
-                                weight_decay=weight_decay)
+                                weight_decay=weight_decay,
+                                batch_norm=False)
 
 if model_name in os.listdir(os.getcwd()):
     model.load_weights(sys.argv[1], by_name=True)
@@ -51,8 +51,6 @@ saver.save(K.get_session(), 'my_test_model')
 
 backend = BackendHandler(data_dir=data_dir, num_classes=num_classes, visualize_while_training=visualize_while_training)
 
-callbacks = backend.getCallbacks(model_name, patience=batch_size)
-
 def getID(size=6, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
@@ -69,7 +67,7 @@ def makeLabelPretty(label):
 
     return prettyLabel
 
-for x,y in backend.generateData(batch_size=3, validating=True):
+for x,y in backend.generate_data(batch_size=3, validating=True):
     predictions = model.predict_on_batch(x)
     for i in range(len(predictions)):
         ID = getID()
