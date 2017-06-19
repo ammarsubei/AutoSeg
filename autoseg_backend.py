@@ -220,6 +220,7 @@ class BackendHandler(object):
                 i += 1
                 image = cv2.imread(sample[0]) / 255
                 label = remap_class(cv2.imread(sample[1], 0))
+                #label = cv2.resize(label_, None, fx=0.125, fy=0.125)
 
                 # Data Augmentation
                 if not validating:

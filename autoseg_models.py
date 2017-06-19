@@ -84,7 +84,7 @@ def standard_residual_unit(input, num_channels, name='res_unit', double_second=F
     conv2 = Conv2D(num_channels, (3,3), padding='same', activation='elu', name=name+'/conv2', dilation_rate=dilation_rate)(batch_norm1)
     batch_norm2 = BatchNormalization(name=name+'/batch_norm2')(conv2)
 
-    a = add([input, batch_norm2])
+    a = concatenate([input, batch_norm2])
     return a
 
 def bottleneck_residual_unit(input, num_channels, name='res_unit', dilation_rate=1):
@@ -95,7 +95,7 @@ def bottleneck_residual_unit(input, num_channels, name='res_unit', dilation_rate
     conv3 = Conv2D(num_channels*4, (1,1), padding='same', activation='elu', name=name+'/conv3', dilation_rate=dilation_rate)(batch_norm2)
     batch_norm3 = BatchNormalization(name=name+'/batch_norm3')(conv3)
 
-    a = add([input, batch_norm3])
+    a = concatenate([input, batch_norm3])
     return a
 
 def get_rn50(input_shape, num_classes, dropout_rate=0.4):
@@ -119,9 +119,9 @@ def get_rn50(input_shape, num_classes, dropout_rate=0.4):
     x = bottleneck_residual_unit(x, 512, 'B6', dilation_rate=8)
     x = bottleneck_residual_unit(x, 1024, 'B7', dilation_rate=8)
 
-    x = Conv2D(512, (3,3), padding='same', name='classifier1', dilation_rate=12)(x)
-    x = Conv2D(512, (3,3), padding='same', name='classifier2', dilation_rate=12)(x)
-    x = softmax(x)
+    x = Conv2DTranspose(512, (3,3), padding='same', activation='elu', strides=2, name='trans_conv1')(x)
+    x = Conv2DTranspose(num_classes, (3,3), padding='same', activation='elu', strides=2, name='trans_conv2')(x)
+    x = Activation('softmax')(x)
 
     model = Model(inputs=input, outputs=x)
 

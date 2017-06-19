@@ -12,16 +12,15 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 train_encoder = True
 num_classes = 34
-data_dir = '/cityscapes_1024/'
-img_height = 1024
-img_width = 2048
+data_dir = '/cityscapes_360/'
+img_height = 180
+img_width = 360
 visualize_while_training = True
 dropout_rate = 0.4
 weight_decay=0.0002
 img_size = (img_width, img_height)
-mask_size = img_size
 input_shape = (img_height, img_width, 3)
-batch_size = 1
+batch_size = 4
 epochs = 10000000
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
@@ -49,7 +48,7 @@ if model_name in os.listdir(os.getcwd()):
         #for layer in model.layers:
             #print(layer.name + ": " + str(layer.trainable))
 
-sgd = keras.optimizers.SGD(lr=1e-8, momentum=0.9)
+sgd = keras.optimizers.SGD(lr=1e-10, momentum=0.9)
 model.compile(loss=class_weighted_pixelwise_crossentropy, optimizer=sgd, metrics=[pixelwise_accuracy])
 plot_model(model, to_file='architecture.png', show_shapes=True, show_layer_names=True)
 
