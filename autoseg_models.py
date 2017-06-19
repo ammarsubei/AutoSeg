@@ -79,8 +79,8 @@ def get_SQ(input_shape, num_classes, dropout_rate=0.2, weight_decay=0.0002, batc
 def get_rn50(input_shape, num_classes):
     from keras.applications.resnet50 import ResNet50
     rn50 = ResNet50(include_top=False, weights='imagenet', input_shape=input_shape)
-    classifier = Conv2D(num_classes, (1,1), padding='same', activation='softmax', name='main')(rn50)
+    classifier = Conv2D(num_classes, (1,1), padding='same', activation='softmax', name='main')(rn50.output)
 
-    model = Model(inputs=rn50.inputs, outputs=classifier)
+    model = Model(inputs=rn50.input, outputs=classifier)
 
     return model
