@@ -76,11 +76,53 @@ def get_SQ(input_shape, num_classes, dropout_rate=0.2, weight_decay=0.0002, batc
 
     return model
 
-def get_rn50(input_shape, num_classes):
-    from keras.applications.resnet50 import ResNet50
-    rn50 = ResNet50(include_top=False, weights='imagenet', input_shape=input_shape)
-    classifier = Conv2D(num_classes, (1,1), padding='same', activation='softmax', name='main')(rn50.output)
+def standard_residual_unit(input, num_channels, name='res_unit', double_second=False, dilation_rate=1):
+    conv1 = Conv2D(num_channels, (3,3), padding='same', activation='elu', name=name+'/conv1', dilation_rate=dilation_rate)(input)
+    batch_norm1 = BatchNormalization(name=name+'/batch_norm1')(conv1)
+    if double_second:
+        num_channels *= 2
+    conv2 = Conv2D(num_channels, (3,3), padding='same', activation='elu', name=name+'/conv2', dilation_rate=dilation_rate)(batch_norm1)
+    batch_norm2 = BatchNormalization(name=name+'/batch_norm2')(conv2)
 
-    model = Model(inputs=rn50.input, outputs=classifier)
+    a = add([input, batch_norm2])
+    return a
+
+def bottleneck_residual_unit(input, num_channels, name='res_unit', dilation_rate=1):
+    conv1 = Conv2D(num_channels, (1,1), padding='same', activation='elu', name=name+'/conv1', dilation_rate=dilation_rate)(input)
+    batch_norm1 = BatchNormalization(name=name+'/batch_norm1')(conv1)
+    conv2 = Conv2D(num_channels*2, (3,3), padding='same', activation='elu', name=name+'/conv2', dilation_rate=dilation_rate)(batch_norm1)
+    batch_norm2 = BatchNormalization(name=name+'/batch_norm2')(conv2)
+    conv3 = Conv2D(num_channels*4, (1,1), padding='same', activation='elu', name=name+'/conv3', dilation_rate=dilation_rate)(batch_norm2)
+    batch_norm3 = BatchNormalization(name=name+'/batch_norm3')(conv3)
+
+    a = add([input, batch_norm3])
+    return a
+
+def get_rn50(input_shape, num_classes, dropout_rate=0.4):
+    input = Input(input_shape)
+    x = Conv2D(64, (3,3), padding='same', activation='elu', name='conv_i')(input)
+    #x = standard_residual_unit(x, 64, 'B1')
+    x = MaxPooling2D()(x)
+    x = Dropout(dropout_rate)(x)
+    x = standard_residual_unit(x, 128, 'B2')
+    x = MaxPooling2D()(x)
+    x = Dropout(dropout_rate)(x)
+    x = standard_residual_unit(x, 256, 'B3')
+    #x = MaxPooling2D()(x)
+    x = Dropout(dropout_rate)(x)
+    x = standard_residual_unit(x, 512, 'B4', dilation_rate=2)
+    #x = MaxPooling2D()(x)
+    x = Dropout(dropout_rate)(x)
+    x = standard_residual_unit(x, 512, 'B5', double_second=True, dilation_rate=4)
+    #x = MaxPooling2D()(x)
+    x = Dropout(dropout_rate)(x)
+    x = bottleneck_residual_unit(x, 512, 'B6', dilation_rate=8)
+    x = bottleneck_residual_unit(x, 1024, 'B7', dilation_rate=8)
+
+    x = Conv2D(512, (3,3), padding='same', name='classifier1', dilation_rate=12)(x)
+    x = Conv2D(512, (3,3), padding='same', name='classifier2', dilation_rate=12)(x)
+    x = softmax(x)
+
+    model = Model(inputs=input, outputs=x)
 
     return model
