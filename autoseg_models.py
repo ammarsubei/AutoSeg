@@ -108,6 +108,7 @@ def get_rn50(input_shape, num_classes, dropout_rate=0.4):
     x = MaxPooling2D()(x)
     x = Dropout(dropout_rate)(x)
     x = standard_residual_unit(x, 256, 'B3')
+    '''
     #x = MaxPooling2D()(x)
     x = Dropout(dropout_rate)(x)
     x = standard_residual_unit(x, 512, 'B4', dilation_rate=2)
@@ -118,9 +119,10 @@ def get_rn50(input_shape, num_classes, dropout_rate=0.4):
     x = Dropout(dropout_rate)(x)
     x = bottleneck_residual_unit(x, 512, 'B6', dilation_rate=8)
     x = bottleneck_residual_unit(x, 1024, 'B7', dilation_rate=8)
+    '''
 
-    x = Conv2DTranspose(512, (3,3), padding='same', activation='elu', strides=2, name='trans_conv1')(x)
-    x = Conv2DTranspose(num_classes, (3,3), padding='same', activation='elu', strides=2, name='trans_conv2')(x)
+    x = Conv2DTranspose(512, (3,3), padding='same', activation='elu', strides=2, name='trans_conv1_')(x)
+    x = Conv2DTranspose(num_classes, (3,3), padding='same', activation='elu', strides=2, name='trans_conv2_')(x)
     x = Activation('softmax')(x)
 
     model = Model(inputs=input, outputs=x)
