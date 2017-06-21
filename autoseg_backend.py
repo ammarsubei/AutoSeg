@@ -58,9 +58,9 @@ def class_weighted_pixelwise_crossentropy(target, output):
 def pixelwise_accuracy(y_true, y_pred):
     """Same as Keras' default accuracy function, but with axis=-1 changed to axis=2.
         These should be equivalent, I'm not sure why they result in different values."""
-    return K.cast(K.equal(K.argmax(y_true, axis=2),
+    return K.mean(K.cast(K.equal(K.argmax(y_true, axis=2),
                           K.argmax(y_pred, axis=2)),
-                  K.floatx())
+                  K.floatx()))
 
 class VisualizeResult(Callback):
     """Custom callback that shows the model's prediction on a sample image during training."""
