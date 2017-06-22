@@ -12,31 +12,30 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 train_encoder = True
 num_classes = 34
-data_dir = '/cityscapes_360/'
-img_height = 180
-img_width = 360
+data_dir = '/cityscapes_400/'
+img_height = 200
+img_width = 400
 visualize_while_training = True
 dropout_rate = 0.4
 weight_decay=0.0002
 img_size = (img_width, img_height)
 input_shape = (img_height, img_width, 3)
-batch_size = 4
+batch_size = 8
 epochs = 10000000
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
 else:
     model_name= 'main.h5'
 
-'''
 model = autoseg_models.get_SQ(input_shape=input_shape,
                               num_classes=num_classes,
                               dropout_rate=dropout_rate,
                               weight_decay=weight_decay,
-                              batch_norm=False)
+                              batch_norm=True)
 '''
-
 model = autoseg_models.get_rn50(input_shape=input_shape,
                                 num_classes=num_classes)
+'''
 
 if model_name in os.listdir(os.getcwd()):
     model.load_weights(model_name, by_name=True)
@@ -53,7 +52,7 @@ model.compile(loss=class_weighted_pixelwise_crossentropy, optimizer=sgd, metrics
 plot_model(model, to_file='architecture.png', show_shapes=True, show_layer_names=True)
 
 backend = BackendHandler(data_dir=data_dir, num_classes=num_classes, visualize_while_training=visualize_while_training)
-callbacks = backend.get_callbacks(model_name, patience=250)
+callbacks = backend.get_callbacks(model_name, patience=250, logdir='./logs/SQ/)
 
 start = time.clock()
 model.evaluate_generator(backend.generate_data(1), 100)
