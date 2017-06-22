@@ -29,15 +29,13 @@ def addBypassRefinementModule(high, low, num_filters, weight_decay, name='bypass
     postConv = Conv2D(num_filters, (3,3), padding='same', activation='elu', name=name + '/post_conv', kernel_regularizer=l2(weight_decay))(c)
 
     b = Dropout(dropout_rate)(postConv)
+
     if batch_norm:
         b = BatchNormalization()(b)
-
     return b
 
 def get_SQ(input_shape, num_classes, dropout_rate=0.2, weight_decay=0.0002, batch_norm=True):
     i = Input(input_shape)
-    if batch_norm:
-        i = BatchNormalization()(i)
     convI = Conv2D(64, (3,3), padding='same', activation='elu', name='conv1', kernel_regularizer=l2(weight_decay))(i)
 
     pool1 = MaxPooling2D(2)(convI)
@@ -108,7 +106,6 @@ def get_rn50(input_shape, num_classes, dropout_rate=0.4):
     x = MaxPooling2D()(x)
     x = Dropout(dropout_rate)(x)
     x = standard_residual_unit(x, 256, 'B3')
-    '''
     #x = MaxPooling2D()(x)
     x = Dropout(dropout_rate)(x)
     x = standard_residual_unit(x, 512, 'B4', dilation_rate=2)
@@ -119,10 +116,9 @@ def get_rn50(input_shape, num_classes, dropout_rate=0.4):
     x = Dropout(dropout_rate)(x)
     x = bottleneck_residual_unit(x, 512, 'B6', dilation_rate=8)
     x = bottleneck_residual_unit(x, 1024, 'B7', dilation_rate=8)
-    '''
 
-    x = Conv2DTranspose(512, (3,3), padding='same', activation='elu', strides=2, name='trans_conv1_')(x)
-    x = Conv2DTranspose(num_classes, (3,3), padding='same', activation='elu', strides=2, name='trans_conv2_')(x)
+    x = Conv2DTranspose(512, (3,3), padding='same', activation='elu', strides=2, name='trans_conv1')(x)
+    x = Conv2DTranspose(num_classes, (3,3), padding='same', activation='elu', strides=2, name='trans_conv2')(x)
     x = Activation('softmax')(x)
 
     model = Model(inputs=input, outputs=x)
