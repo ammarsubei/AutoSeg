@@ -218,7 +218,7 @@ class BackendHandler(object):
                     random.shuffle(data)
                 sample = data[i]
                 i += 1
-                image = cv2.imread(sample[0]) / 255
+                image = (cv2.imread(sample[0]) - 128) / 128
                 label = remap_class(cv2.imread(sample[1], 0))
                 #label = cv2.resize(label_, None, fx=0.125, fy=0.125)
 
@@ -263,7 +263,7 @@ class BackendHandler(object):
             label_batch = np.array(label_batch)
             yield (image_batch, label_batch)
 
-    def get_callbacks(self, model_name='test.h5', patience=500):
+    def get_callbacks(self, model_name='test.h5', patience=500, logdir='./logs/default'):
         """Returns a standard set of callbacks.
             Kept here mainly to avoid clutter in main.py"""
         checkpoint = ModelCheckpoint(
@@ -274,7 +274,7 @@ class BackendHandler(object):
             save_weights_only=True)
 
         tb = TensorBoard(
-            log_dir='./logs',
+            log_dir=logdir,
             histogram_freq=1,
             write_graph=True,
             write_grads=True,
