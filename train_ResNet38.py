@@ -8,34 +8,27 @@ import os, sys, time
 import autoseg_models
 from autoseg_backend import BackendHandler, pixelwise_crossentropy, class_weighted_pixelwise_crossentropy, pixelwise_accuracy
 
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 train_encoder = True
 num_classes = 34
-data_dir = '/cityscapes_400/'
-img_height = 200
-img_width = 400
+data_dir = '/cityscapes_128/'
+img_height = 64
+img_width = 128
 visualize_while_training = True
 dropout_rate = 0.4
 weight_decay=0.0002
 img_size = (img_width, img_height)
 input_shape = (img_height, img_width, 3)
-batch_size = 8
+batch_size = 16
 epochs = 10000000
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
 else:
     model_name= 'main.h5'
 
-model = autoseg_models.get_SQ(input_shape=input_shape,
-                              num_classes=num_classes,
-                              dropout_rate=dropout_rate,
-                              weight_decay=weight_decay,
-                              batch_norm=True)
-'''
-model = autoseg_models.get_rn50(input_shape=input_shape,
+model = autoseg_models.get_rn38(input_shape=input_shape,
                                 num_classes=num_classes)
-'''
 
 if model_name in os.listdir(os.getcwd()):
     model.load_weights(model_name, by_name=True)

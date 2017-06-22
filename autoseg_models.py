@@ -96,7 +96,7 @@ def bottleneck_residual_unit(input, num_channels, name='res_unit', dilation_rate
     a = concatenate([input, batch_norm3])
     return a
 
-def get_rn50(input_shape, num_classes, dropout_rate=0.4):
+def get_rn38(input_shape, num_classes, dropout_rate=0.4):
     input = Input(input_shape)
     x = Conv2D(64, (3,3), padding='same', activation='elu', name='conv_i')(input)
     #x = standard_residual_unit(x, 64, 'B1')
