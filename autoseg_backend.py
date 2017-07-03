@@ -7,6 +7,7 @@ import numpy as np
 import cv2
 
 # Class weights. Classes with weight 0 do not contribute to the loss.
+
 IGNORE_CLASSES = [0, 0, 0, 0, 0, 0, 0,  # ignore 'void' class
                   1, 1, 0, 0,           # ignore 'parking', 'rail track'
                   1, 1, 1, 0, 0, 0,     # ignore 'guard rail', 'bridge', 'tunnel'
@@ -31,6 +32,7 @@ def one_hot_to_label(one_hot):
 
 def remap_class(arr):
     """Remaps CityScapes classes as explained below."""
+
     arr[arr == 12] = 11 # walls -> buildings
     arr[arr == 13] = 11 # fences -> buildings
 
@@ -53,7 +55,6 @@ def class_weighted_pixelwise_crossentropy(target, output):
     with open('class_weights.pickle', 'rb') as f:
         weights = pickle.load(f)
     return -tf.reduce_sum(target * weights * tf.log(output))
-
 
 def pixelwise_accuracy(y_true, y_pred):
     """Same as Keras' default accuracy function, but with axis=-1 changed to axis=2.
@@ -90,14 +91,8 @@ class VisualizeResult(Callback):
             self.colors = [
             [0,0,0],        # 0: void
             [128,64,128],   # 1: road
-            [244, 35,232],  # 2: sidewalk
-            [70,70,70],     # 3: construction
-            [153,153,153],  # 4: object
-            [107,142, 35],  # 5: vegetation
-            [152,251,152],  # 6: terrain
-            [ 70,130,180],  # 7: sky
-            [220, 20, 60],  # 8: person
-            [  0,  0,142]   # 9: vehicle
+            [  0,  0,142],  # 3: vehicle
+            [220, 20, 60],  # 2: person
             ]
             '''
             with open('cityscapes_color_mappings.pickle', 'rb') as f:
@@ -218,9 +213,8 @@ class BackendHandler(object):
                     random.shuffle(data)
                 sample = data[i]
                 i += 1
-                image = (cv2.imread(sample[0]) - 128) / 128
+                image = cv2.imread(sample[0])
                 label = remap_class(cv2.imread(sample[1], 0))
-                #label = cv2.resize(label_, None, fx=0.125, fy=0.125)
 
                 # Data Augmentation
                 if not validating:
@@ -257,7 +251,7 @@ class BackendHandler(object):
                         label = cv2.warpAffine(label, M, (cols, rows))
 
                 one_hot = label_to_onehot(label, self.num_classes)
-                image_batch.append(image)
+                image_batch.append((image - 128) / 128)
                 label_batch.append(one_hot)
             image_batch = np.array(image_batch)
             label_batch = np.array(label_batch)
