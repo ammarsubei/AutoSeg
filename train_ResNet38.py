@@ -12,9 +12,9 @@ os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 train_encoder = True
 num_classes = 34
-data_dir = '/cityscapes_480/'
-img_height = 240
-img_width = 480
+data_dir = '/cityscapes_400/'
+img_height = 200
+img_width = 400
 visualize_while_training = True
 dropout_rate = 0.4
 weight_decay=0.0002
@@ -40,7 +40,7 @@ if model_name in os.listdir(os.getcwd()):
         #for layer in model.layers:
             #print(layer.name + ": " + str(layer.trainable))
 
-sgd = keras.optimizers.SGD(lr=1e-10, momentum=0.9)
+sgd = keras.optimizers.SGD(lr=1e-8, momentum=0.9, decay=1e-6)
 model.compile(loss=pixelwise_crossentropy, optimizer=sgd, metrics=[pixelwise_accuracy])
 plot_model(model, to_file='architecture.png', show_shapes=True, show_layer_names=True)
 
