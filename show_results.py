@@ -9,13 +9,13 @@ import cv2
 import autoseg_models
 from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_accuracy
 
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 train_encoder = True
 num_classes = 34
-data_dir = '/cityscapes_480/'
-img_height = 240
-img_width = 480
+data_dir = '/cityscapes_800/'
+img_height = 400
+img_width = 800
 visualize_while_training = True
 dropout_rate = 0.4
 weight_decay=0.0002
@@ -26,21 +26,24 @@ batch_size = 1
 epochs = 10000000
 model_name= 'visualized_model.h5'
 
-model = autoseg_models.getModel(input_shape=input_shape,
+
+model = autoseg_models.get_SQ(input_shape=input_shape,
                                 num_classes=num_classes,
                                 dropout_rate=dropout_rate,
                                 weight_decay=weight_decay,
-                                batch_norm=False)
+                                batch_norm=True)
+'''
 
-if model_name in os.listdir(os.getcwd()):
-    model.load_weights(sys.argv[1], by_name=True)
-    if not train_encoder:
-        for layer in model.layers:
-            layer.trainable = False
-            if layer.name == "concatenate_8":
-                break
-        #for layer in model.layers:
-            #print(layer.name + ": " + str(layer.trainable))
+model = autoseg_models.get_rn38(input_shape=input_shape,
+                                num_classes=num_classes)
+'''
+
+model.load_weights(sys.argv[1], by_name=True)
+if not train_encoder:
+    for layer in model.layers:
+        layer.trainable = False
+        if layer.name == "concatenate_8":
+            break
 
 sgd = keras.optimizers.SGD(lr=1e-8, momentum=0.9)
 model.compile(loss=pixelwise_crossentropy, optimizer=sgd, metrics=[pixelwise_accuracy])
@@ -71,7 +74,8 @@ for x,y in backend.generate_data(batch_size=3, validating=True):
     predictions = model.predict_on_batch(x)
     for i in range(len(predictions)):
         ID = getID()
-        cv2.imshow('Image', x[i])
+        img = x[i]*128+128
+        cv2.imshow('Image', img.astype('uint8'))
         cv2.moveWindow('Image', 10, 10)
         cv2.imshow('Ground Truth', makeLabelPretty( oneHotToLabel(y[i]) ))
         cv2.moveWindow('Ground Truth', 850, 10)
