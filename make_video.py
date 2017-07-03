@@ -15,8 +15,8 @@ os.environ["CUDA_VISIBLE_DEVICES"]="1"
 train_encoder = True
 num_classes = 34
 data_dir = '/cityscapes_800/'
-img_height = 560
-img_width = 960
+img_height = 360
+img_width = 480
 visualize_while_training = True
 dropout_rate = 0.4
 weight_decay=0.0002
@@ -27,11 +27,11 @@ batch_size = 3
 epochs = 10000000
 model_name= 'visualized_model.h5'
 
-model = autoseg_models.getModel(input_shape=input_shape,
+model = autoseg_models.get_SQ(input_shape=input_shape,
                                 num_classes=num_classes,
-                                residual_encoder_connections=False,
                                 dropout_rate=dropout_rate,
-                                weight_decay=weight_decay)
+                                weight_decay=weight_decay,
+                                batch_norm=True)
 
 if model_name in os.listdir(os.getcwd()):
     model.load_weights(sys.argv[1], by_name=True)
@@ -68,7 +68,8 @@ out = cv2.VideoWriter('segmented_output.avi', fourcc, 20.0, img_size)
 for rgb in videogen:
     if True:
         bgr = cv2.resize(rgb[...,::-1], img_size)
-        segmented_frame = makeLabelPretty( oneHotToLabel( model.predict(np.array([bgr])).squeeze(0) ) )
+        bgr_in = (bgr - 128) / 128
+        segmented_frame = makeLabelPretty( oneHotToLabel( model.predict(np.array([bgr_in])).squeeze(0) ) )
 
         out.write(segmented_frame)
         cv2.imshow('Input', bgr)
