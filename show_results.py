@@ -9,7 +9,7 @@ import cv2
 import autoseg_models
 from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_accuracy
 
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 train_encoder = True
 num_classes = 34
@@ -49,8 +49,10 @@ sgd = keras.optimizers.SGD(lr=1e-8, momentum=0.9)
 model.compile(loss=pixelwise_crossentropy, optimizer=sgd, metrics=[pixelwise_accuracy])
 plot_model(model, to_file='architecture.png', show_shapes=True, show_layer_names=True)
 model.save(model_name)
+'''
 saver = tf.train.Saver()
 saver.save(K.get_session(), 'my_test_model')
+'''
 
 backend = BackendHandler(data_dir=data_dir, num_classes=num_classes, visualize_while_training=visualize_while_training)
 
