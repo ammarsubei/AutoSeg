@@ -186,7 +186,7 @@ class BackendHandler(object):
             cv2.destroyAllWindows()
             cv2.waitKey(1)
             with open('class_weights.pickle', 'wb') as f:
-                pickle.dump(self.class_weights, f, protocol=pickle.HIGHEST_PROTOCOL)
+                pickle.dump(self.class_weights, f, protocol=0)
         else:
             with open('class_weights.pickle', 'rb') as f:
                 self.class_weights = pickle.load(f)
