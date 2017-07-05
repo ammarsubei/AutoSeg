@@ -124,3 +124,31 @@ def get_rn38(input_shape, num_classes, dropout_rate=0.4):
     model = Model(inputs=input, outputs=x)
 
     return model
+
+def get_rn38_classifier(input_shape, num_classes, dropout_rate=0.4):
+    input = Input(input_shape)
+    x = Conv2D(64, (3,3), padding='same', activation='elu', name='conv_i')(input)
+    #x = standard_residual_unit(x, 64, 'B1')
+    x = MaxPooling2D()(x)
+    x = Dropout(dropout_rate)(x)
+    x = standard_residual_unit(x, 128, 'B2')
+    x = MaxPooling2D()(x)
+    x = Dropout(dropout_rate)(x)
+    x = standard_residual_unit(x, 256, 'B3')
+    x = MaxPooling2D()(x)
+    x = Dropout(dropout_rate)(x)
+    x = standard_residual_unit(x, 512, 'B4')#, dilation_rate=2)
+    x = MaxPooling2D()(x)
+    x = Dropout(dropout_rate)(x)
+    x = standard_residual_unit(x, 512, 'B5', double_second=True)#, dilation_rate=4)
+    x = MaxPooling2D()(x)
+    x = Dropout(dropout_rate)(x)
+    x = bottleneck_residual_unit(x, 512, 'B6')#, dilation_rate=8)
+    x = bottleneck_residual_unit(x, 1024, 'B7')#, dilation_rate=8)
+
+    x = GlobalAveragePooling2D()(x)
+    x = Activation('softmax')(x)
+
+    model = Model(inputs=input, outputs=x)
+
+    return model

@@ -251,7 +251,7 @@ class BackendHandler(object):
                         label = cv2.warpAffine(label, M, (cols, rows))
 
                 one_hot = label_to_onehot(label, self.num_classes)
-                image_batch.append((image - 128) / 128)
+                image_batch.append((image - 128.0) / 128.0)
                 label_batch.append(one_hot)
             image_batch = np.array(image_batch)
             label_batch = np.array(label_batch)
