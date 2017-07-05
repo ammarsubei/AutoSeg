@@ -38,6 +38,7 @@ coverage.xml
 .mr.developer.cfg
 
 # Custom
+imagenet_train/*
 .DS_Store
 CamVid/*
 camvid/*
