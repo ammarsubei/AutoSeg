@@ -262,7 +262,7 @@ class BackendHandler(object):
             Kept here mainly to avoid clutter in main.py"""
         checkpoint = ModelCheckpoint(
             model_name,
-            monitor='val_loss',
+            monitor='loss',
             verbose=0,
             save_best_only=True,
             save_weights_only=True)
