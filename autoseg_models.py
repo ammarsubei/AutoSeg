@@ -147,7 +147,8 @@ def get_rn38_classifier(input_shape, num_classes, dropout_rate=0.4):
     x = bottleneck_residual_unit(x, 1024, 'B7')#, dilation_rate=8)
 
     x = GlobalAveragePooling2D()(x)
-    x = Activation('softmax')(x)
+    x = Dense(1000)(x)
+    #x = Activation('softmax')(x)
 
     model = Model(inputs=input, outputs=x)
 
