@@ -17,8 +17,6 @@ IGNORE_CLASSES = [0, 0, 0, 0, 0, 0, 0,  # ignore 'void' class
                   1, 1,                 # 'human' class
                   1, 0, 0, 1, 1, 1]     # ignore 'caravan', 'trailer'
 
-random.seed(1) # For reproducability.
-
 def label_to_onehot(label, num_classes):
     """Converts labels (e.g. 2) to one-hot vectors (e.g. [0,0,1,0]).
     Accepts and returns a numpy array."""
@@ -41,6 +39,10 @@ def remap_class(arr):
     arr[arr == 27] = 26 # truck -> car
     arr[arr == 28] = 26 # bus -> car
     arr[arr == 32] = 26 # motorcycle -> car
+
+    arr[arr == 20] = 0
+    arr[arr == 21] = 11
+    arr[arr == 24] = 0
 
     return arr
 
