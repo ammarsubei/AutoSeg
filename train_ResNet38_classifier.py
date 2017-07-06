@@ -21,7 +21,7 @@ dropout_rate = 0.4
 weight_decay=0.0002
 img_size = (img_width, img_height)
 input_shape = (img_height, img_width, 3)
-batch_size = 100
+batch_size = 50
 epochs = 10000000
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
@@ -56,6 +56,6 @@ generator = datagen.flow_from_directory(
 
 model.fit_generator(
     generator,
-    steps_per_epoch=10000, #len(backend.training_file_list) // batch_size,
+    steps_per_epoch=500, #len(backend.training_file_list) // batch_size,
     epochs=epochs,
     callbacks=callbacks)
