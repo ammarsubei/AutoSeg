@@ -58,4 +58,4 @@ model.fit_generator(
     generator,
     steps_per_epoch=500, #len(backend.training_file_list) // batch_size,
     epochs=epochs,
-    callbacks=callbacks)
+    callbacks=[ModelCheckpoint('ResNet38_classifier.h5', monitor='loss', save_weights_only=True)])
