@@ -76,8 +76,8 @@ for x,y in backend.generate_data(batch_size=3, validating=True):
     predictions = model.predict_on_batch(x)
     for i in range(len(predictions)):
         ID = getID()
-        img = x[i]*128+128
-        print(img)
+        img = x[i]*128.0+128.0
+        print(x[i])
         cv2.imshow('Image', img.astype('uint8'))
         cv2.moveWindow('Image', 10, 10)
         cv2.imshow('Ground Truth', makeLabelPretty( oneHotToLabel(y[i]) ))
