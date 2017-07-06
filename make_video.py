@@ -15,8 +15,8 @@ os.environ["CUDA_VISIBLE_DEVICES"]="1"
 train_encoder = True
 num_classes = 34
 data_dir = '/cityscapes_800/'
-img_height = 360
-img_width = 480
+img_height = 720
+img_width = 1280
 visualize_while_training = True
 dropout_rate = 0.4
 weight_decay=0.0002
@@ -61,24 +61,24 @@ def makeLabelPretty(label):
 
     return prettyLabel
 
-videogen = skvideo.io.vreader('/home/autobon/AutoSeg/output.avi')
+videogen = skvideo.io.vreader('/home/autobon/AutoSeg/output_5.avi')
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
-out = cv2.VideoWriter('segmented_output.avi', fourcc, 20.0, img_size)
+out = cv2.VideoWriter('/home/autobon/AutoSeg/segmented_output.avi', fourcc, 20.0, img_size)
 
 for rgb in videogen:
     if True:
         bgr = cv2.resize(rgb[...,::-1], img_size)
-        bgr_in = (bgr - 128) / 128
+        bgr_in = (bgr.astype('float') - 128) / 128
         segmented_frame = makeLabelPretty( oneHotToLabel( model.predict(np.array([bgr_in])).squeeze(0) ) )
-
-        out.write(segmented_frame)
+        overlay = bgr.copy()
+        cv2.addWeighted(segmented_frame, 0.8, bgr, 0.2, 0, overlay)
+        out.write(overlay)
         cv2.imshow('Input', bgr)
         cv2.moveWindow('Input', 10, 10)
-        cv2.imshow('Output', segmented_frame)
+        cv2.imshow('Output', overlay)
         cv2.moveWindow('Output', 800, 10)
         cv2.waitKey(1)
     else:
         break
 
-cap.release()
 out.release()
