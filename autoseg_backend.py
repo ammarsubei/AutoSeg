@@ -251,7 +251,7 @@ class BackendHandler(object):
                         label = cv2.warpAffine(label, M, (cols, rows))
 
                 one_hot = label_to_onehot(label, self.num_classes)
-                image_batch.append((image - 128.0) / 128.0)
+                image_batch.append((image.astype(float) - 128) / 128)
                 label_batch.append(one_hot)
             image_batch = np.array(image_batch)
             label_batch = np.array(label_batch)
@@ -262,7 +262,7 @@ class BackendHandler(object):
             Kept here mainly to avoid clutter in main.py"""
         checkpoint = ModelCheckpoint(
             model_name,
-            monitor='loss',
+            monitor='val_loss',
             verbose=0,
             save_best_only=True,
             save_weights_only=True)
