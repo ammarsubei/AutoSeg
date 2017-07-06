@@ -8,6 +8,7 @@ import os, sys, time
 import autoseg_models
 from autoseg_backend import BackendHandler, pixelwise_crossentropy, class_weighted_pixelwise_crossentropy, pixelwise_accuracy
 from keras.preprocessing.image import ImageDataGenerator
+from keras.callbacks import ModelCheckpoint
 
 os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
