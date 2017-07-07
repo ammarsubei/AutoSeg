@@ -11,17 +11,17 @@ from autoseg_backend import BackendHandler, pixelwise_crossentropy, class_weight
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 train_encoder = True
-num_classes = 34
-data_dir = '/cityscapes_1024/'
-img_height = 512
-img_width = 1024
-visualize_while_training = True
+num_classes = 66
+data_dir = '/Mapillary/'
+img_height = 600
+img_width = 800
+visualize_while_training = False
 dropout_rate = 0.4
 weight_decay=0.0002
 img_size = (img_width, img_height)
 input_shape = (img_height, img_width, 3)
 batch_size = 2
-epochs = 10000000
+epochs = 1000
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
 else:
@@ -65,5 +65,5 @@ model.fit_generator(
     epochs=epochs,
     callbacks=callbacks,
     validation_data=backend.generate_data(batch_size, validating=True),
-    validation_steps=len(backend.validation_file_list) // batch_size)
+    validation_steps=250)#len(backend.validation_file_list) // batch_size)
     #class_weight=backend.class_weights)

@@ -7,14 +7,14 @@ import numpy as np
 import os, sys, time, string, random, pickle
 import cv2
 import autoseg_models
-from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_accuracy
+from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_accuracy, MAPILLARY_COLORS
 
 os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 train_encoder = True
-num_classes = 34
-data_dir = '/cityscapes_800/'
-img_height = 400
+num_classes = 66
+data_dir = '/Mapillary/'
+img_height = 600
 img_width = 800
 visualize_while_training = True
 dropout_rate = 0.4
@@ -64,8 +64,7 @@ def oneHotToLabel(one_hot):
 
 def makeLabelPretty(label):
     prettyLabel = cv2.cvtColor(label, cv2.COLOR_GRAY2RGB)
-    with open('cityscapes_color_mappings.pickle', 'rb') as f:
-        colors =  pickle.load(f)
+    colors = MAPILLARY_COLORS
 
     for i in range(num_classes):
         prettyLabel[np.where( (label==[i]) )] = colors[i]
@@ -77,11 +76,11 @@ for x,y in backend.generate_data(batch_size=3, validating=True):
     for i in range(len(predictions)):
         ID = getID()
         img = x[i]*128.0+128.0
-        print(x[i])
-        cv2.imshow('Image', img.astype('uint8'))
+        #print(x[i])
+        cv2.imshow('Image', cv2.resize(img.astype('uint8'), (600, 450)))
         cv2.moveWindow('Image', 10, 10)
-        cv2.imshow('Ground Truth', makeLabelPretty( oneHotToLabel(y[i]) ))
+        cv2.imshow('Ground Truth', cv2.resize(makeLabelPretty( oneHotToLabel(y[i])), (600, 450)))
         cv2.moveWindow('Ground Truth', 850, 10)
-        cv2.imshow('Model Output', makeLabelPretty( oneHotToLabel(predictions[i]) ))
+        cv2.imshow('Model Output', cv2.resize(makeLabelPretty( oneHotToLabel(predictions[i])), (600,450)))
         cv2.moveWindow('Model Output', 850, 500)
         cv2.waitKey(5000)
