@@ -5,6 +5,9 @@ import os, random, math, string
 import pickle
 import numpy as np
 import cv2
+from PIL import Image
+
+INPUT_SHAPE = (800, 600)
 
 # Class weights. Classes with weight 0 do not contribute to the loss.
 
@@ -16,6 +19,13 @@ IGNORE_CLASSES = [0, 0, 0, 0, 0, 0, 0,  # ignore 'void' class
                   1, 1, 1,              # 'nature' and 'sky' classes
                   1, 1,                 # 'human' class
                   1, 0, 0, 1, 1, 1]     # ignore 'caravan', 'trailer'
+
+MAPILLARY_COLORS = [[165, 42, 42], [0, 192, 0], [196, 196, 196], [190, 153, 153], [180, 165, 180], [102, 102, 156], [102, 102, 156], [128, 64, 255], [140, 140, 200], [170, 170, 170], [250, 170, 160], [96, 96, 96], [230, 150, 140], [128, 64, 128], [110, 110, 110], [244, 35, 232], [150, 100, 100], [70, 70, 70], [150, 120, 90], [220, 20, 60], [255, 0, 0], [255, 0, 0], [255, 0, 0], [200, 128, 128], [255, 255, 255], [64, 170, 64], [128, 64, 64], [70, 130, 180], [255, 255, 255], [152,
+    251, 152], [107, 142, 35], [0, 170, 30], [255, 255, 128], [250, 0, 30], [0, 0, 0], [220, 220, 220], [170, 170, 170], [222, 40, 40], [100, 170, 30], [40, 40, 40], [33, 33, 33], [170, 170, 170], [0, 0, 142], [170, 170, 170], [210, 170, 100], [153, 153, 153], [128, 128, 128], [0, 0, 142], [250, 170, 30], [192, 192, 192], [220, 220, 0], [180, 165, 180], [119, 11, 32], [0, 0, 142], [0, 60, 100], [0, 0, 142], [0, 0, 90], [0, 0, 230], [0, 80, 100], [128, 64, 64], [0, 0, 110], [0, 0,
+        70], [0, 0, 192], [32, 32, 32], [0, 0, 0], [0, 0, 0]]
+
+print(len(MAPILLARY_COLORS))
+
 
 def label_to_onehot(label, num_classes):
     """Converts labels (e.g. 2) to one-hot vectors (e.g. [0,0,1,0]).
@@ -30,6 +40,7 @@ def one_hot_to_label(one_hot):
 
 def remap_class(arr):
     """Remaps CityScapes classes as explained below."""
+    return arr
 
     arr[arr == 12] = 11 # walls -> buildings
     arr[arr == 13] = 11 # fences -> buildings
@@ -43,13 +54,23 @@ def remap_class(arr):
     arr[arr == 20] = 0
     arr[arr == 21] = 11
     arr[arr == 24] = 0
+    arr[arr == 8] = 7
 
     return arr
+
+def deprettify_mapillary(pretty):
+    print(pretty)
+    label = np.zeros((pretty.shape[0], pretty.shape[1], 1))
+    for i in range(len(MAPILLARY_COLORS)):
+        print(((pretty == [180,130,70]).shape))
+        label[np.where((pretty == MAPILLARY_COLORS[i]))] = i
+    print(label)
+    return label
 
 def pixelwise_crossentropy(target, output):
     """Keras' default crossentropy function wasn't working, not sure why."""
     output = tf.clip_by_value(output, 10e-8, 1.-10e-8)
-    return -tf.reduce_sum(target * IGNORE_CLASSES * tf.log(output))
+    return -tf.reduce_sum(target * tf.log(output))
 
 def class_weighted_pixelwise_crossentropy(target, output):
     """As above. IGNORE_CLASSES is already used in calculating class_weights."""
@@ -72,14 +93,15 @@ class VisualizeResult(Callback):
         self.image_path = image_path
         self.label_path = label_path
         self.validation_file_list = validation_file_list
-        self.colors = None
+        self.colors = MAPILLARY_COLORS
         i = random.choice(self.validation_file_list)
-        self.image = cv2.imread(i[0])
-        cv2.imshow('Sample Image', cv2.resize(self.image, (800, 400)))
+        print(i)
+        self.image = cv2.resize(cv2.imread(i[0]), INPUT_SHAPE)
+        cv2.imshow('Sample Image', cv2.resize(self.image, (600, 450)))
         cv2.moveWindow('Sample Image', 10, 10)
-        self.ground_truth = remap_class(cv2.imread(i[1], 0))
-        self.ground_truth = self.make_label_pretty(self.ground_truth)
-        cv2.imshow('Ground Truth', cv2.resize(self.ground_truth, (800, 400)))
+        self.ground_truth = cv2.resize(cv2.imread(i[1]), INPUT_SHAPE)
+        print(self.ground_truth)
+        cv2.imshow('Ground Truth', cv2.resize(self.ground_truth, (600, 450)))
         cv2.moveWindow('Ground Truth', 850, 10)
         cv2.waitKey(1)
 
@@ -112,17 +134,17 @@ class VisualizeResult(Callback):
         if batch % 10 == 0 or batch < 5:
             seg_result = self.model.predict(np.array([self.image]))
             main = self.make_label_pretty(one_hot_to_label(seg_result.squeeze(0)))
-            cv2.imshow('Segmentation Result', cv2.resize(main, (800, 400)))
+            cv2.imshow('Segmentation Result', cv2.resize(main, (600, 450)))
             cv2.moveWindow('Segmentation Result', 850, 500)
             cv2.waitKey(1)
 
     def on_epoch_end(self, epoch, logs={}):
         """Changes the image used as an example at the end of each epoch."""
         new_img = random.choice(self.validation_file_list)
-        self.image = cv2.imread(new_img[0])
-        self.ground_truth = self.make_label_pretty(remap_class(cv2.imread(new_img[1], 0)))
-        cv2.imshow('Sample Image', cv2.resize(self.image, (800, 400)))
-        cv2.imshow('Ground Truth', cv2.resize(self.ground_truth, (800, 400)))
+        self.image = cv2.resize(cv2.imread(new_img[0]), (800, 600))
+        self.ground_truth = cv2.resize(cv2.imread(new_img[1]), INPUT_SHAPE)
+        cv2.imshow('Sample Image', cv2.resize(self.image, (600, 450)))
+        cv2.imshow('Ground Truth', cv2.resize(self.ground_truth, (600, 450)))
 
     def on_train_end(self, logs={}):
         """Currently does nothing useful, saved here as a TODO."""
@@ -135,10 +157,10 @@ class BackendHandler(object):
         self.num_classes = num_classes
         self.visualize_while_training = visualize_while_training
         self.image_path = self.data_dir + 'images/'
-        self.label_path = self.data_dir + 'labels_fine/'
+        self.label_path = self.data_dir + 'labels/'
         self.cwd_contents = os.listdir(os.getcwd())
-        self.training_file_list = self.get_file_list('train/')
-        self.validation_file_list = self.get_file_list('val/')
+        self.training_file_list = self.get_file_list('training/')
+        self.validation_file_list = self.get_file_list('validation/')
         self.get_class_weights()
 
     def get_file_list(self, category='train/'):
@@ -149,13 +171,12 @@ class BackendHandler(object):
         allfiles = []
         for path, subdirs, files in os.walk(file_dir):
             for f in files:
-                f = f.split('_')[0] + '/' + f
+                #f = f.split('_')[0] + '/' + f
                 allfiles.append(f)
         file_list = []
         for f in allfiles:
             input_output = (self.image_path + category + f,
-                            self.label_path + category + \
-                            f.replace('leftImg8bit', 'gtFine_labelIds'))
+                            self.label_path + category + f.replace('.jpg', '.png'))
             file_list.append(input_output)
         return file_list
 
@@ -192,7 +213,7 @@ class BackendHandler(object):
         else:
             with open('class_weights.pickle', 'rb') as f:
                 self.class_weights = pickle.load(f)
-        print(self.class_weights)
+        #print(self.class_weights)
 
 
     def generate_data(self, batch_size, validating=False,
@@ -215,8 +236,9 @@ class BackendHandler(object):
                     random.shuffle(data)
                 sample = data[i]
                 i += 1
-                image = cv2.imread(sample[0])
-                label = remap_class(cv2.imread(sample[1], 0))
+                image = cv2.resize(cv2.imread(sample[0]), INPUT_SHAPE)
+                label = Image.open(sample[1])
+                label = cv2.resize(np.array(label), INPUT_SHAPE)
 
                 # Data Augmentation
                 if not validating:
@@ -257,6 +279,7 @@ class BackendHandler(object):
                 label_batch.append(one_hot)
             image_batch = np.array(image_batch)
             label_batch = np.array(label_batch)
+
             yield (image_batch, label_batch)
 
     def get_callbacks(self, model_name='test.h5', patience=500, logdir='./logs/default'):
