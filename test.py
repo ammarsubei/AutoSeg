@@ -1,14 +1,9 @@
 import numpy as np
 
-weights = [1,2]
-
-target = np.array([ [[0.0,1.0],[1.0,0.0]],
-                    [[0.0,1.0],[1.0,0.0]]])
-
-output = np.array([ [[0.5,0.5],[0.9,0.1]],
-                    [[0.9,0.1],[0.4,0.6]]])
-
-crossentropy_matrix = -np.sum(target * np.log(output), axis=-1)
-crossentropy = target * weights * np.log(output)
-
-print(crossentropy)
+pretty = [[[1, 1, 1], [2, 2, 2]],
+          [[2, 2, 2], [2, 2, 2]]]
+pretty = np.array(pretty)
+print(pretty.shape)
+label = np.zeros((2,2,1))
+print(label.shape)
+print([1, 1, 1] == [1, 1, 0])
