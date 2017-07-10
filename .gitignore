@@ -39,6 +39,7 @@ coverage.xml
 
 # Custom
 imagenet_train/*
+Mapillary*
 .DS_Store
 CamVid/*
 camvid/*
