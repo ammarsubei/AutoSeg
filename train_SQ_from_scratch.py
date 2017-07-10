@@ -52,7 +52,7 @@ model.compile(loss=pixelwise_crossentropy, optimizer=sgd, metrics=[pixelwise_acc
 plot_model(model, to_file='architecture.png', show_shapes=True, show_layer_names=True)
 
 backend = BackendHandler(data_dir=data_dir, num_classes=num_classes, visualize_while_training=visualize_while_training)
-callbacks = backend.get_callbacks(model_name, patience=250, logdir='./logs/SQ/')
+callbacks = backend.get_callbacks(model_name, patience=250, logdir='./logs/SQRATCH/')
 
 start = time.clock()
 model.evaluate_generator(backend.generate_data(1), 100)

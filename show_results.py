@@ -83,4 +83,12 @@ for x,y in backend.generate_data(batch_size=3, validating=True):
         cv2.moveWindow('Ground Truth', 850, 10)
         cv2.imshow('Model Output', cv2.resize(makeLabelPretty( oneHotToLabel(predictions[i])), (600,450)))
         cv2.moveWindow('Model Output', 850, 500)
-        cv2.waitKey(5000)
+        press = 0xFF & cv2.waitKey(5000)
+        if press == ord('r'):
+            print("Randomizing color scheme.")
+            for i in range(len(MAPILLARY_COLORS)):
+                MAPILLARY_COLORS[i] = [random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)]
+
+        elif press == 27: #Esc
+            sys.exit()
+
