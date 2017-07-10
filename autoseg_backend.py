@@ -39,11 +39,11 @@ def remap_class(arr):
     arr[arr == 27] = 26 # truck -> car
     arr[arr == 28] = 26 # bus -> car
     arr[arr == 32] = 26 # motorcycle -> car
-
+    '''
     arr[arr == 20] = 0
     arr[arr == 21] = 11
     arr[arr == 24] = 0
-
+    '''
     return arr
 
 def pixelwise_crossentropy(target, output):

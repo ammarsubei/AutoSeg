@@ -61,9 +61,10 @@ def makeLabelPretty(label):
 
     return prettyLabel
 
-videogen = skvideo.io.vreader('/home/autobon/AutoSeg/output_5.avi')
+videogen = skvideo.io.vreader('/home/autobon/AutoSeg/output_left.avi')
+videogen_right = skvideo.io.vreader('/home/autobon/AutoSeg/output_right.avi')
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
-out = cv2.VideoWriter('/home/autobon/AutoSeg/segmented_output.avi', fourcc, 20.0, img_size)
+out = cv2.VideoWriter('/home/autobon/AutoSeg/segmented_output_depth.avi', fourcc, 20.0, img_size)
 
 for rgb in videogen:
     if True:

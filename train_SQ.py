@@ -20,7 +20,7 @@ dropout_rate = 0.4
 weight_decay=0.0002
 img_size = (img_width, img_height)
 input_shape = (img_height, img_width, 3)
-batch_size = 1
+batch_size = 2
 epochs = 10000000
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
