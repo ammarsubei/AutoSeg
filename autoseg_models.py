@@ -129,10 +129,12 @@ def get_rn38(input_shape, num_classes, dropout_rate=0.4):
     return model
 
 def get_rn38_classifier(input_shape, num_classes, dropout_rate=0.4):
-    input = Input(input_shape)
-    x = Conv2D(64, (3,3), padding='same', activation='elu', name='conv_i')(input)
+    l = Input(input_shape)
+    r = Input(input_shape)
+    l = Conv2D(64, (3,3), padding='same', activation='elu', name='conv_l')(l)
+    r = Conv2D(64, (3,3), padding='same', activation='elu', name='conv_r')(r)
     #x = standard_residual_unit(x, 64, 'B1')
-    x = MaxPooling2D()(x)
+    x = MaxPooling2D()(concatenate[l,r])
     x = Dropout(dropout_rate)(x)
     x = standard_residual_unit(x, 128, 'B2')
     x = MaxPooling2D()(x)

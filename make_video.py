@@ -69,8 +69,13 @@ out = cv2.VideoWriter('/home/autobon/AutoSeg/segmented_output_depth.avi', fourcc
 for rgb in videogen:
     if True:
         bgr = cv2.resize(rgb[...,::-1], img_size)
+        bgr_right = cv2.resize(next(videogen_right)[...,::-1], img_size)
         bgr_in = (bgr.astype('float') - 128) / 128
-        segmented_frame = makeLabelPretty( oneHotToLabel( model.predict(np.array([bgr_in])).squeeze(0) ) )
+        bgr_in_right = (bgr_right.astype('float') - 128) / 128
+        inputs = [np.expand_dims(bgr_in, 0), np.expand_dims(bgr_in_right, 0)]
+        segmented_frame = model.predict(inputs).squeeze(0)
+        segmented_frame = oneHotToLabel(segmented_frame)
+        segmented_frame = makeLabelPretty(segmented_frame)
         overlay = bgr.copy()
         cv2.addWeighted(segmented_frame, 0.8, bgr, 0.2, 0, overlay)
         out.write(overlay)
