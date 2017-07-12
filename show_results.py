@@ -9,13 +9,13 @@ import cv2
 import autoseg_models
 from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_accuracy, MAPILLARY_COLORS
 
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 train_encoder = True
 num_classes = 66
 data_dir = '/Mapillary/'
-img_height = 600
-img_width = 800
+img_height = 300
+img_width = 400
 visualize_while_training = True
 dropout_rate = 0.4
 weight_decay=0.0002
@@ -27,11 +27,9 @@ epochs = 10000000
 model_name= 'visualized_model.h5'
 
 
-model = autoseg_models.get_SQ(input_shape=input_shape,
+model = autoseg_models.get_rn38(input_shape=input_shape,
                                 num_classes=num_classes,
-                                dropout_rate=dropout_rate,
-                                weight_decay=weight_decay,
-                                batch_norm=True)
+                                dropout_rate=dropout_rate)
 '''
 
 model = autoseg_models.get_rn38(input_shape=input_shape,
@@ -79,9 +77,9 @@ for x,y in backend.generate_data(batch_size=3, validating=True):
         #print(x[i])
         cv2.imshow('Image', cv2.resize(img.astype('uint8'), (600, 450)))
         cv2.moveWindow('Image', 10, 10)
-        cv2.imshow('Ground Truth', cv2.resize(makeLabelPretty( oneHotToLabel(y[i])), (600, 450)))
+        cv2.imshow('Ground Truth', cv2.resize(makeLabelPretty( oneHotToLabel(y[i])), (600, 450))[...,::-1])
         cv2.moveWindow('Ground Truth', 850, 10)
-        cv2.imshow('Model Output', cv2.resize(makeLabelPretty( oneHotToLabel(predictions[i])), (600,450)))
+        cv2.imshow('Model Output', cv2.resize(makeLabelPretty( oneHotToLabel(predictions[i])), (600,450))[...,::-1])
         cv2.moveWindow('Model Output', 850, 500)
         press = 0xFF & cv2.waitKey(5000)
         if press == ord('r'):

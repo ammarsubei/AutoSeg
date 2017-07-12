@@ -11,11 +11,11 @@ from autoseg_backend import BackendHandler, pixelwise_crossentropy, class_weight
 os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 train_encoder = True
-num_classes = 34
-data_dir = '/cityscapes_400/'
-img_height = 200
+num_classes = 66
+data_dir = '/Mapillary/'
+img_height = 300
 img_width = 400
-visualize_while_training = True
+visualize_while_training = False
 dropout_rate = 0.4
 weight_decay=0.0002
 img_size = (img_width, img_height)
@@ -54,7 +54,7 @@ print("Benchmarked at " + str(100 / (end - start)) + " frames per second.")
 
 model.fit_generator(
     backend.generate_data(batch_size),
-    steps_per_epoch=200, #len(backend.training_file_list) // batch_size,
+    steps_per_epoch=1000, #len(backend.training_file_list) // batch_size,
     epochs=epochs,
     callbacks=callbacks,
     validation_data=backend.generate_data(batch_size, validating=True),

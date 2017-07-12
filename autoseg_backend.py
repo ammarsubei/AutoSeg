@@ -7,7 +7,7 @@ import numpy as np
 import cv2
 from PIL import Image
 
-INPUT_SHAPE = (800, 600)
+INPUT_SHAPE = (400, 300)
 
 # Class weights. Classes with weight 0 do not contribute to the loss.
 
@@ -50,11 +50,6 @@ def remap_class(arr):
     arr[arr == 27] = 26 # truck -> car
     arr[arr == 28] = 26 # bus -> car
     arr[arr == 32] = 26 # motorcycle -> car
-
-    arr[arr == 20] = 0
-    arr[arr == 21] = 11
-    arr[arr == 24] = 0
-    arr[arr == 8] = 7
 
     return arr
 
