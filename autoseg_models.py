@@ -74,7 +74,7 @@ def get_SQ(input_shape, num_classes, dropout_rate=0.2, weight_decay=0.0002, batc
     prediction = Conv2D(num_classes, (1,1), padding='same', activation='softmax', name='main', kernel_regularizer=l2(weight_decay))(trans_conv15)
     disparity = Conv2D(1, (1,1), padding='same', activation='sigmoid', name='disparity', kernel_regularizer=l2(weight_decay))(trans_conv15)
 
-    model = Model(inputs=[l, r], outputs=[prediction, disparity])
+    model = Model(inputs=[l, r], outputs=prediction)
 
     return model
 
@@ -101,9 +101,11 @@ def bottleneck_residual_unit(input, num_channels, name='res_unit', dilation_rate
     return a
 
 def get_rn38(input_shape, num_classes, dropout_rate=0.4):
-    input = Input(input_shape)
-    x = Conv2D(64, (3,3), padding='same', activation='elu', name='conv_i')(input)
-    #x = standard_residual_unit(x, 64, 'B1')
+    L = Input(input_shape)
+    R = Input(input_shape)
+    l = Conv2D(64, (3,3), padding='same', activation='elu', name='conv_l')(L)
+    r = Conv2D(64, (3,3), padding='same', activation='elu', name='conv_r')(R)
+    x = standard_residual_unit(concatenate([l,r]), 64, 'B1')
     x = MaxPooling2D()(x)
     x = Dropout(dropout_rate)(x)
     x = standard_residual_unit(x, 128, 'B2')
@@ -122,40 +124,9 @@ def get_rn38(input_shape, num_classes, dropout_rate=0.4):
     x = bottleneck_residual_unit(x, 1024, 'B7', dilation_rate=8)
 
     x = Conv2DTranspose(512, (3,3), padding='same', activation='elu', strides=2, name='trans_conv1')(x)
-    x = Conv2DTranspose(num_classes, (3,3), padding='same', activation='elu', strides=2, name='trans_conv2')(x)
+    x = Conv2DTranspose(num_classes, (3,3), padding='same', activation='elu', strides=2, name='trans_conv2_')(x)
     x = Activation('softmax')(x)
 
-    model = Model(inputs=input, outputs=x)
-
-    return model
-
-def get_rn38_classifier(input_shape, num_classes, dropout_rate=0.4):
-    l = Input(input_shape)
-    r = Input(input_shape)
-    l = Conv2D(64, (3,3), padding='same', activation='elu', name='conv_l')(l)
-    r = Conv2D(64, (3,3), padding='same', activation='elu', name='conv_r')(r)
-    #x = standard_residual_unit(x, 64, 'B1')
-    x = MaxPooling2D()(concatenate[l,r])
-    x = Dropout(dropout_rate)(x)
-    x = standard_residual_unit(x, 128, 'B2')
-    x = MaxPooling2D()(x)
-    x = Dropout(dropout_rate)(x)
-    x = standard_residual_unit(x, 256, 'B3')
-    x = MaxPooling2D()(x)
-    x = Dropout(dropout_rate)(x)
-    x = standard_residual_unit(x, 512, 'B4')#, dilation_rate=2)
-    x = MaxPooling2D()(x)
-    x = Dropout(dropout_rate)(x)
-    x = standard_residual_unit(x, 512, 'B5', double_second=True)#, dilation_rate=4)
-    x = MaxPooling2D()(x)
-    x = Dropout(dropout_rate)(x)
-    x = bottleneck_residual_unit(x, 512, 'B6')#, dilation_rate=8)
-    x = bottleneck_residual_unit(x, 1024, 'B7')#, dilation_rate=8)
-
-    x = GlobalAveragePooling2D()(x)
-    x = Dense(1000)(x)
-    #x = Activation('softmax')(x)
-
-    model = Model(inputs=input, outputs=x)
+    model = Model(inputs=[L,R], outputs=x)
 
     return model

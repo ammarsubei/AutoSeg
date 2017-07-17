@@ -7,14 +7,15 @@ import numpy as np
 import os, sys, time
 import autoseg_models
 from autoseg_backend import BackendHandler, pixelwise_crossentropy, class_weighted_pixelwise_crossentropy, pixelwise_accuracy
+from keras import losses
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 train_encoder = True
 num_classes = 34
-data_dir = '/cityscapes_orig/'
-img_height = 1024
-img_width = 2048
+data_dir = '/cityscapes_1024/'
+img_height = 512
+img_width = 1024
 visualize_while_training = False
 dropout_rate = 0.4
 weight_decay=0.0002
@@ -48,7 +49,7 @@ if model_name in os.listdir(os.getcwd()):
             #print(layer.name + ": " + str(layer.trainable))
 
 sgd = keras.optimizers.SGD(lr=1e-8, momentum=0.9, decay=1e-6)
-model.compile(loss=pixelwise_crossentropy, optimizer=sgd, metrics=[pixelwise_accuracy])
+model.compile(loss=[pixelwise_crossentropy, losses.mean_squared_error], optimizer=sgd, metrics=[pixelwise_accuracy], loss_weights=[1, 100000])
 plot_model(model, to_file='architecture.png', show_shapes=True, show_layer_names=True)
 
 backend = BackendHandler(data_dir=data_dir, num_classes=num_classes, visualize_while_training=visualize_while_training)

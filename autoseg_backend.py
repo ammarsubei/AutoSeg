@@ -214,7 +214,6 @@ class BackendHandler(object):
             image_batch = []
             image_batch_right = []
             label_batch = []
-            disparity_batch = []
             for batch in range(batch_size):
                 if i == len(data):
                     i = 0
@@ -224,7 +223,6 @@ class BackendHandler(object):
                 image = cv2.imread(sample[0])
                 image_right = cv2.imread(sample[1])
                 label = remap_class(cv2.imread(sample[2], 0))
-                disparity = (cv2.imread(sample[3], 0) - 1.) / 256
 
                 '''
                 # Data Augmentation
@@ -266,12 +264,10 @@ class BackendHandler(object):
                 image_batch.append((image.astype(float) - 128) / 128)
                 image_batch_right.append((image_right.astype(float) - 128) / 128)
                 label_batch.append(one_hot)
-                disparity_batch.append(label)
             image_batch = np.array(image_batch)
             image_batch_right = np.array(image_batch_right)
             label_batch = np.array(label_batch)
-            disparity_batch = np.array(disparity_batch)
-            yield ([image_batch, image_batch_right], [label_batch, disparity_batch])
+            yield ([image_batch, image_batch_right], label_batch)
 
     def get_callbacks(self, model_name='test.h5', patience=500, logdir='./logs/default'):
         """Returns a standard set of callbacks.
