@@ -72,8 +72,9 @@ def get_SQ(input_shape, num_classes, dropout_rate=0.2, weight_decay=0.0002, batc
         trans_conv15 = BatchNormalization()(trans_conv15)
 
     prediction = Conv2D(num_classes, (1,1), padding='same', activation='softmax', name='main', kernel_regularizer=l2(weight_decay))(trans_conv15)
+    disparity = Conv2D(1, (1,1), padding='same', activation='sigmoid', name='disparity', kernel_regularizer=l2(weight_decay))(trans_conv15)
 
-    model = Model(inputs=[l, r], outputs=prediction)
+    model = Model(inputs=[l, r], outputs=[prediction, disparity])
 
     return model
 

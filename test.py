@@ -1,14 +1,7 @@
 import numpy as np
+import cv2
 
-weights = [1,2]
-
-target = np.array([ [[0.0,1.0],[1.0,0.0]],
-                    [[0.0,1.0],[1.0,0.0]]])
-
-output = np.array([ [[0.5,0.5],[0.9,0.1]],
-                    [[0.9,0.1],[0.4,0.6]]])
-
-crossentropy_matrix = -np.sum(target * np.log(output), axis=-1)
-crossentropy = target * weights * np.log(output)
-
-print(crossentropy)
+img = cv2.imread('cityscapes_orig/disparity/train/aachen/aachen_000017_000019_disparity.png', 0)
+print(img)
+cv2.imshow('Hi', img)
+cv2.waitKey(5000)

@@ -136,6 +136,7 @@ class BackendHandler(object):
         self.visualize_while_training = visualize_while_training
         self.image_path = self.data_dir + 'images_left/'
         self.label_path = self.data_dir + 'labels_fine/'
+        self.disparity_path = self.data_dir + 'disparity/'
         self.cwd_contents = os.listdir(os.getcwd())
         self.training_file_list = self.get_file_list('train/')
         self.validation_file_list = self.get_file_list('val/')
@@ -157,7 +158,8 @@ class BackendHandler(object):
             input_output = (self.image_path + category + f,
                             (self.image_path + category + f).replace('left', 'right'),
                             self.label_path + category + \
-                            f.replace('leftImg8bit', 'gtFine_labelIds'))
+                            f.replace('leftImg8bit', 'gtFine_labelIds'),
+                            self.disparity_path + category + f.replace('leftImg8bit', 'disparity'))
             file_list.append(input_output)
         return file_list
 
@@ -212,6 +214,7 @@ class BackendHandler(object):
             image_batch = []
             image_batch_right = []
             label_batch = []
+            disparity_batch = []
             for batch in range(batch_size):
                 if i == len(data):
                     i = 0
@@ -221,6 +224,7 @@ class BackendHandler(object):
                 image = cv2.imread(sample[0])
                 image_right = cv2.imread(sample[1])
                 label = remap_class(cv2.imread(sample[2], 0))
+                disparity = (cv2.imread(sample[3], 0) - 1.) / 256
 
                 '''
                 # Data Augmentation
@@ -262,10 +266,12 @@ class BackendHandler(object):
                 image_batch.append((image.astype(float) - 128) / 128)
                 image_batch_right.append((image_right.astype(float) - 128) / 128)
                 label_batch.append(one_hot)
+                disparity_batch.append(label)
             image_batch = np.array(image_batch)
             image_batch_right = np.array(image_batch_right)
             label_batch = np.array(label_batch)
-            yield ([image_batch, image_batch_right], label_batch)
+            disparity_batch = np.array(disparity_batch)
+            yield ([image_batch, image_batch_right], [label_batch, disparity_batch])
 
     def get_callbacks(self, model_name='test.h5', patience=500, logdir='./logs/default'):
         """Returns a standard set of callbacks.
