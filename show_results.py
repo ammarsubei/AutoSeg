@@ -9,13 +9,13 @@ import cv2
 import autoseg_models
 from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_accuracy
 
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 train_encoder = True
 num_classes = 34
-data_dir = '/cityscapes_1024/'
-img_height = 512
-img_width = 1024
+data_dir = '/cityscapes_800/'
+img_height = 400
+img_width = 800
 visualize_while_training = False
 dropout_rate = 0.4
 weight_decay=0.0002
@@ -25,7 +25,6 @@ input_shape = (img_height, img_width, 3)
 batch_size = 1
 epochs = 10000000
 model_name= 'visualized_model.h5'
-
 
 model = autoseg_models.get_SQ(input_shape=input_shape,
                                 num_classes=num_classes,
@@ -79,10 +78,8 @@ for x,y in backend.generate_data(batch_size=3, validating=True):
         img = x[0][i]*128.0+128.0
         cv2.imshow('Image', img.astype('uint8'))
         cv2.moveWindow('Image', 10, 10)
-        #cv2.imshow('Ground Truth', makeLabelPretty( oneHotToLabel(y[1][i]) ))
-        cv2.imshow('Ground Truth', y[1][i]*2)
+        cv2.imshow('Ground Truth', makeLabelPretty( oneHotToLabel(y[i]) ))
         cv2.moveWindow('Ground Truth', 850, 10)
-        #cv2.imshow('Model Output', makeLabelPretty( oneHotToLabel(predictions[1][i]) ))
-        cv2.imshow('Model Output', ((predictions[1][i]*255 + 1)*2).astype('uint8'))
+        cv2.imshow('Model Output', makeLabelPretty( oneHotToLabel(predictions[i]) ))
         cv2.moveWindow('Model Output', 850, 500)
         cv2.waitKey(5000)

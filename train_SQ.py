@@ -49,7 +49,7 @@ if model_name in os.listdir(os.getcwd()):
             #print(layer.name + ": " + str(layer.trainable))
 
 sgd = keras.optimizers.SGD(lr=1e-8, momentum=0.9, decay=1e-6)
-model.compile(loss=[pixelwise_crossentropy, losses.mean_squared_error], optimizer=sgd, metrics=[pixelwise_accuracy], loss_weights=[1, 100000])
+model.compile(loss=pixelwise_crossentropy, optimizer=sgd, metrics=[pixelwise_accuracy])
 plot_model(model, to_file='architecture.png', show_shapes=True, show_layer_names=True)
 
 backend = BackendHandler(data_dir=data_dir, num_classes=num_classes, visualize_while_training=visualize_while_training)
