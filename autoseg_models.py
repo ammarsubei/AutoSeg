@@ -34,39 +34,39 @@ def addBypassRefinementModule(high, low, num_filters, weight_decay, name='bypass
         b = BatchNormalization()(b)
     return b
 
-def get_SQ(input_shape, num_classes, dropout_rate=0.2, weight_decay=0.0002, batch_norm=True):
+def get_SQ(input_shape, num_classes, dropout_rate=0.2, weight_decay=0.0002, batch_norm=True, scale=1):
     l = Input(input_shape)
     r = Input(input_shape)
-    convL = Conv2D(64, (3,3), padding='same', activation='elu', name='conv1_L', kernel_regularizer=l2(weight_decay))(l)
-    convR = Conv2D(64, (3,3), padding='same', activation='elu', name='conv1_R', kernel_regularizer=l2(weight_decay))(r)
+    convL = Conv2D(64*scale, (3,3), padding='same', activation='elu', name='conv1_L', kernel_regularizer=l2(weight_decay))(l)
+    convR = Conv2D(64*scale, (3,3), padding='same', activation='elu', name='conv1_R', kernel_regularizer=l2(weight_decay))(r)
     convI = concatenate([convL, convR])
 
     pool1 = MaxPooling2D(2)(convI)
-    fire1_1 = addFireModule(pool1, 16, 64, weight_decay, name='fire2_', batch_norm=batch_norm)
-    fire1_2 = add([fire1_1, addFireModule(fire1_1, 16, 64, weight_decay, name='fire3', batch_norm=batch_norm)])
+    fire1_1 = addFireModule(pool1, 16*scale, 64*scale, weight_decay, name='fire2_', batch_norm=batch_norm)
+    fire1_2 = add([fire1_1, addFireModule(fire1_1, 16*scale, 64*scale, weight_decay, name='fire3', batch_norm=batch_norm)])
 
     pool2 = MaxPooling2D(2)(fire1_2)
-    fire2_1 = addFireModule(pool2, 32, 128, weight_decay, name='fire4', batch_norm=batch_norm)
-    fire2_2 = add([fire2_1, addFireModule(fire2_1, 32, 128, weight_decay, name='fire5', batch_norm=batch_norm)])
+    fire2_1 = addFireModule(pool2, 32*scale, 128*scale, weight_decay, name='fire4', batch_norm=batch_norm)
+    fire2_2 = add([fire2_1, addFireModule(fire2_1, 32*scale, 128*scale, weight_decay, name='fire5', batch_norm=batch_norm)])
 
     pool3 = MaxPooling2D(2)(fire2_2)
-    fire3_1 = addFireModule(pool3, 48, 192, weight_decay, name='fire6', batch_norm=batch_norm)
-    fire3_2 = add([fire3_1, addFireModule(fire3_1, 48, 192, weight_decay, name='fire7', batch_norm = batch_norm)])
-    fire3_3 = addFireModule(fire3_2, 64, 256, weight_decay, name='fire8', batch_norm=batch_norm)
-    fire3_4 = add([fire3_3, addFireModule(fire3_3, 64, 256, weight_decay, name='fire9', batch_norm=batch_norm)])
+    fire3_1 = addFireModule(pool3, 48*scale, 192*scale, weight_decay, name='fire6', batch_norm=batch_norm)
+    fire3_2 = add([fire3_1, addFireModule(fire3_1, 48*scale, 192*scale, weight_decay, name='fire7', batch_norm = batch_norm)])
+    fire3_3 = addFireModule(fire3_2, 64*scale, 256*scale, weight_decay, name='fire8', batch_norm=batch_norm)
+    fire3_4 = add([fire3_3, addFireModule(fire3_3, 64*scale, 256*scale, weight_decay, name='fire9', batch_norm=batch_norm)])
 
     pool4 = Dropout(dropout_rate)(fire3_4)
 
-    pdc = addParallelDilatedConvolution(pool4, 512, weight_decay, name='parallel_dilated_convolution', batch_norm=batch_norm)
+    pdc = addParallelDilatedConvolution(pool4, 512*scale, weight_decay, name='parallel_dilated_convolution', batch_norm=batch_norm)
 
-    ref10 = addBypassRefinementModule(pdc, pool3, 256, weight_decay, name='bypass10', dropout_rate=dropout_rate, batch_norm=batch_norm)
-    trans_conv11 = Conv2DTranspose(256, (3,3), padding='same', activation='elu', strides=2, name='trans_conv11', kernel_regularizer=l2(weight_decay))(Dropout(dropout_rate)(ref10))
+    ref10 = addBypassRefinementModule(pdc, pool3, 256*scale, weight_decay, name='bypass10', dropout_rate=dropout_rate, batch_norm=batch_norm)
+    trans_conv11 = Conv2DTranspose(256*scale, (3,3), padding='same', activation='elu', strides=2, name='trans_conv11', kernel_regularizer=l2(weight_decay))(Dropout(dropout_rate)(ref10))
 
-    ref12 = addBypassRefinementModule(trans_conv11, pool2, 128, weight_decay, name='bypass12', dropout_rate=dropout_rate, batch_norm=batch_norm)
-    trans_conv13 = Conv2DTranspose(128, (3,3), padding='same', activation='elu', strides=2, name='trans_conv13', kernel_regularizer=l2(weight_decay))(Dropout(dropout_rate)(ref12))
+    ref12 = addBypassRefinementModule(trans_conv11, pool2, 128*scale, weight_decay, name='bypass12', dropout_rate=dropout_rate, batch_norm=batch_norm)
+    trans_conv13 = Conv2DTranspose(128*scale, (3,3), padding='same', activation='elu', strides=2, name='trans_conv13', kernel_regularizer=l2(weight_decay))(Dropout(dropout_rate)(ref12))
 
-    ref14 = addBypassRefinementModule(trans_conv13, pool1, 64, weight_decay, name='bypass14_', dropout_rate=dropout_rate, batch_norm=batch_norm)
-    trans_conv15 = Conv2DTranspose(64, (3,3), padding='same', activation='elu', strides=2, name='trans_conv15', kernel_regularizer=l2(weight_decay))(Dropout(dropout_rate)(ref14))
+    ref14 = addBypassRefinementModule(trans_conv13, pool1, 64*scale, weight_decay, name='bypass14_', dropout_rate=dropout_rate, batch_norm=batch_norm)
+    trans_conv15 = Conv2DTranspose(64*scale, (3,3), padding='same', activation='elu', strides=2, name='trans_conv15', kernel_regularizer=l2(weight_decay))(Dropout(dropout_rate)(ref14))
 
     if batch_norm:
         trans_conv15 = BatchNormalization()(trans_conv15)
@@ -131,3 +131,58 @@ def get_rn38(input_shape, num_classes, dropout_rate=0.4):
     model = Model(inputs=[L,R], outputs=x)
 
     return model
+
+def dense_block(input, k, num_layers, name='DB', dropout_rate=0.2, weight_decay=1e-4):
+    x = input
+    c = x
+    layer_outputs = []
+    for l in range(num_layers):
+        x = Conv2D(k, (3,3), padding='same', activation='selu', name=name+'/layer'+str(l+1), kernel_regularizer=l2(weight_decay))(c)
+        x = Dropout(dropout_rate)(x)
+        c = concatenate([c, x])
+        layer_outputs.append(x)
+    return concatenate(layer_outputs)
+
+def transition_down(x, m, name='TD', dropout_rate=0.2, weight_decay=1e-4):
+    x = Conv2D(m, (1,1), padding='same', activation='selu', name=name+'/conv', kernel_regularizer=l2(weight_decay))(x)
+    x = Dropout(dropout_rate)(x)
+    x = MaxPooling2D()(x)
+    return x
+
+def transition_up(x, m, name='TU', weight_decay=1e-4):
+    return Conv2DTranspose(m, (3,3), padding='same', strides=2, name=name, kernel_regularizer=l2(weight_decay))(x)
+
+def get_dense103(input_shape, num_classes, k=16, dropout_rate=0.2, weight_decay=1e-4):
+    L = Input(input_shape)
+    R = Input(input_shape)
+    l = Conv2D(48, (3,3), padding='same', activation='selu', name='conv_L', kernel_regularizer=l2(weight_decay))(L)
+    r = Conv2D(48, (3,3), padding='same', activation='selu', name='conv_R', kernel_regularizer=l2(weight_decay))(R)
+    x = concatenate([L,R])
+
+    DB1 = concatenate([dense_block(x, k, 4, name='DB1', dropout_rate=dropout_rate), x])
+    x = transition_down(DB1, 112, name='TD1', dropout_rate=dropout_rate)
+    DB2 = concatenate([dense_block(x, k, 5, name='DB2', dropout_rate=dropout_rate), x])
+    x = transition_down(DB2, 192, name='TD2', dropout_rate=dropout_rate)
+    DB3 = concatenate([dense_block(x, k, 7, name='DB3', dropout_rate=dropout_rate), x])
+    x = transition_down(DB3, 304, name='TD3', dropout_rate=dropout_rate)
+    DB4 = concatenate([dense_block(x, k, 10, name='DB4', dropout_rate=dropout_rate), x])
+    x = transition_down(DB4, 464, name='TD4', dropout_rate=dropout_rate)
+    DB5 = concatenate([dense_block(x, k, 12, name='DB5', dropout_rate=dropout_rate), x])
+    x = transition_down(DB5, 656, name='TD5', dropout_rate=dropout_rate)
+
+    x = dense_block(x, k, 15, name='DB6', dropout_rate=dropout_rate)
+
+    x = transition_up(x, 1072, name='TU7')
+    x = concatenate([dense_block(x, k, 12, name='DB7', dropout_rate=dropout_rate), DB5])
+    x = transition_up(x, 800, name='TU8')
+    x = concatenate([dense_block(x, k, 10, name='DB8', dropout_rate=dropout_rate), DB4])
+    x = transition_up(x, 560, name='TU9')
+    x = concatenate([dense_block(x, k, 7, name='DB9', dropout_rate=dropout_rate), DB3])
+    x = transition_up(x, 368, name='TU10')
+    x = concatenate([dense_block(x, k, 5, name='DB10', dropout_rate=dropout_rate), DB2])
+    x = transition_up(x, 256, name='TU11')
+    x = concatenate([dense_block(x, k, 4, name='DB11', dropout_rate=dropout_rate), DB1])
+
+    x = Conv2D(num_classes, (1,1), padding='same', activation='softmax', name='main')(x)
+
+    return Model(inputs=[L, R], outputs=x)

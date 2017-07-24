@@ -9,13 +9,13 @@ import cv2
 import autoseg_models
 from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_accuracy
 
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 train_encoder = True
 num_classes = 34
-data_dir = '/cityscapes_800/'
-img_height = 400
-img_width = 800
+data_dir = '/cityscapes_768/'
+img_height = 384
+img_width = 768
 visualize_while_training = False
 dropout_rate = 0.4
 weight_decay=0.0002
@@ -26,6 +26,7 @@ batch_size = 1
 epochs = 10000000
 model_name= 'visualized_model.h5'
 
+'''
 model = autoseg_models.get_SQ(input_shape=input_shape,
                                 num_classes=num_classes,
                                 dropout_rate=dropout_rate,
@@ -33,9 +34,9 @@ model = autoseg_models.get_SQ(input_shape=input_shape,
                                 batch_norm=True)
 '''
 
-model = autoseg_models.get_rn38(input_shape=input_shape,
+model = autoseg_models.get_dense103(input_shape=input_shape,
                                 num_classes=num_classes)
-'''
+
 
 model.load_weights(sys.argv[1], by_name=True)
 if not train_encoder:

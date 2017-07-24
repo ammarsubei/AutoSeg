@@ -13,9 +13,9 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 train_encoder = True
 num_classes = 34
-data_dir = '/cityscapes_1024/'
-img_height = 512
-img_width = 1024
+data_dir = '/cityscapes_800/'
+img_height = 400
+img_width = 800
 visualize_while_training = False
 dropout_rate = 0.4
 weight_decay=0.0002
@@ -32,7 +32,8 @@ model = autoseg_models.get_SQ(input_shape=input_shape,
                               num_classes=num_classes,
                               dropout_rate=dropout_rate,
                               weight_decay=weight_decay,
-                              batch_norm=True)
+                              batch_norm=True,
+                              scale=2)
 '''
 model = autoseg_models.get_rn50(input_shape=input_shape,
                                 num_classes=num_classes)
