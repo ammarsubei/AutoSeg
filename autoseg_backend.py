@@ -39,11 +39,11 @@ def remap_class(arr):
     arr[arr == 27] = 26 # truck -> car
     arr[arr == 28] = 26 # bus -> car
     arr[arr == 32] = 26 # motorcycle -> car
-
+    '''
     arr[arr == 20] = 0
     arr[arr == 21] = 11
     arr[arr == 24] = 0
-
+    '''
     return arr
 
 def pixelwise_crossentropy(target, output):
@@ -136,6 +136,7 @@ class BackendHandler(object):
         self.visualize_while_training = visualize_while_training
         self.image_path = self.data_dir + 'images_left/'
         self.label_path = self.data_dir + 'labels_fine/'
+        self.disparity_path = self.data_dir + 'disparity/'
         self.cwd_contents = os.listdir(os.getcwd())
         self.training_file_list = self.get_file_list('train/')
         self.validation_file_list = self.get_file_list('val/')
@@ -151,11 +152,14 @@ class BackendHandler(object):
             for f in files:
                 f = f.split('_')[0] + '/' + f
                 allfiles.append(f)
+        allfiles.sort()
         file_list = []
         for f in allfiles:
             input_output = (self.image_path + category + f,
+                            (self.image_path + category + f).replace('left', 'right'),
                             self.label_path + category + \
-                            f.replace('leftImg8bit', 'gtFine_labelIds'))
+                            f.replace('leftImg8bit', 'gtFine_labelIds'),
+                            self.disparity_path + category + f.replace('leftImg8bit', 'disparity'))
             file_list.append(input_output)
         return file_list
 
@@ -208,6 +212,7 @@ class BackendHandler(object):
         i = 0
         while True:
             image_batch = []
+            image_batch_right = []
             label_batch = []
             for batch in range(batch_size):
                 if i == len(data):
@@ -216,8 +221,10 @@ class BackendHandler(object):
                 sample = data[i]
                 i += 1
                 image = cv2.imread(sample[0])
-                label = remap_class(cv2.imread(sample[1], 0))
+                image_right = cv2.imread(sample[1])
+                label = remap_class(cv2.imread(sample[2], 0))
 
+                '''
                 # Data Augmentation
                 if not validating:
                     # Horizontal flip.
@@ -252,12 +259,15 @@ class BackendHandler(object):
                         image = cv2.warpAffine(image, M, (cols, rows))
                         label = cv2.warpAffine(label, M, (cols, rows))
 
+                '''
                 one_hot = label_to_onehot(label, self.num_classes)
                 image_batch.append((image.astype(float) - 128) / 128)
+                image_batch_right.append((image_right.astype(float) - 128) / 128)
                 label_batch.append(one_hot)
             image_batch = np.array(image_batch)
+            image_batch_right = np.array(image_batch_right)
             label_batch = np.array(label_batch)
-            yield (image_batch, label_batch)
+            yield ([image_batch, image_batch_right], label_batch)
 
     def get_callbacks(self, model_name='test.h5', patience=500, logdir='./logs/default'):
         """Returns a standard set of callbacks.

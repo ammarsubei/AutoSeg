@@ -13,10 +13,10 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 train_encoder = True
 num_classes = 34
-data_dir = '/cityscapes_800/'
-img_height = 400
-img_width = 800
-visualize_while_training = True
+data_dir = '/cityscapes_768/'
+img_height = 384
+img_width = 768
+visualize_while_training = False
 dropout_rate = 0.4
 weight_decay=0.0002
 img_size = (img_width, img_height)
@@ -34,7 +34,7 @@ model = autoseg_models.get_SQ(input_shape=input_shape,
                                 batch_norm=True)
 '''
 
-model = autoseg_models.get_rn38(input_shape=input_shape,
+model = autoseg_models.get_dense103(input_shape=input_shape,
                                 num_classes=num_classes)
 
 model.load_weights(sys.argv[1], by_name=True)
@@ -75,8 +75,7 @@ for x,y in backend.generate_data(batch_size=3, validating=True):
     predictions = model.predict_on_batch(x)
     for i in range(len(predictions)):
         ID = getID()
-        img = x[i]*128.0+128.0
-        print(x[i])
+        img = x[0][i]*128.0+128.0
         cv2.imshow('Image', img.astype('uint8'))
         cv2.moveWindow('Image', 10, 10)
         cv2.imshow('Ground Truth', makeLabelPretty( oneHotToLabel(y[i]) ))
