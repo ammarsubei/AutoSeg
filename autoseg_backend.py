@@ -134,7 +134,7 @@ class BackendHandler(object):
         self.data_dir = os.getcwd() + data_dir
         self.num_classes = num_classes
         self.visualize_while_training = visualize_while_training
-        self.image_path = self.data_dir + 'images/'
+        self.image_path = self.data_dir + 'images_left/'
         self.label_path = self.data_dir + 'labels_fine/'
         self.cwd_contents = os.listdir(os.getcwd())
         self.training_file_list = self.get_file_list('train/')
