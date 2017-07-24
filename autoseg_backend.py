@@ -16,10 +16,12 @@ class Dataset(object):
                  validation_input_dirs, validation_output_dirs):
         self.name = name
         self.num_classes = num_classes
-        self.training_inputs = self.get_file_list(training_input_dirs)
-        self.training_outputs = self.get_file_list(training_output_dirs)
-        self.validation_inputs = self.get_file_list(validation_input_dirs)
-        self.validation_outputs = self.get_file_list(validation_output_dirs)
+        training_inputs = self.get_file_list(training_input_dirs)
+        training_outputs = self.get_file_list(training_output_dirs)
+        validation_inputs = self.get_file_list(validation_input_dirs)
+        validation_outputs = self.get_file_list(validation_output_dirs)
+        self.training_data = (training_inputs, training_outputs)
+        self.validation_data = (validation_inputs, validation_outputs)
 
     def get_file_list(self, directories):
         """
@@ -31,7 +33,7 @@ class Dataset(object):
             contents = []
             for path, subdirs, files in os.walk(directory):
                 for f in files:
-                    contents.append(os.path.join(path,f))
+                    contents.append(os.path.join(path, f))
             contents.sort()
             file_list.append(contents)
 
