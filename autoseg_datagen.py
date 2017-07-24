@@ -4,39 +4,11 @@ import os
 import numpy as np
 import cv2
 
-class BackendHandler(object):
+class Datagen(object):
     """Handles data generation and hides callback creation."""
-    def __init__(self, data_dir, num_classes, visualize_while_training=False):
-        self.data_dir = os.getcwd() + data_dir
-        self.num_classes = num_classes
-        self.visualize_while_training = visualize_while_training
-        self.image_path = self.data_dir + 'images_left/'
-        self.label_path = self.data_dir + 'labels_fine/'
-        self.cwd_contents = os.listdir(os.getcwd())
-        self.training_file_list = self.get_file_list('train/')
-        self.validation_file_list = self.get_file_list('val/')
-        self.get_class_weights()
+    def __init__(self, dataset):
+        self.dataset = dataset
 
-    def get_file_list(self, category='train/'):
-        """Recursively get raw images and annotations in given dir.
-            Return as tuple where first element is the path to the image
-            and the second element is the path to the corresponding annotation."""
-        file_dir = self.image_path + category
-        allfiles = []
-        for path, subdirs, files in os.walk(file_dir):
-            for f in files:
-                f = f.split('_')[0] + '/' + f
-                allfiles.append(f)
-        allfiles.sort()
-        file_list = []
-        for f in allfiles:
-            input_output = (self.image_path + category + f,
-                            (self.image_path + category + f).replace('left', 'right'),
-                            self.label_path + category + \
-                            f.replace('leftImg8bit', 'gtFine_labelIds'),
-                            self.disparity_path + category + f.replace('leftImg8bit', 'disparity'))
-            file_list.append(input_output)
-        return file_list
 
     def generate_data(self, batch_size, validating=False,
                       horizontal_flip=True, vertical_flip=False,

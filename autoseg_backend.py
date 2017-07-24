@@ -1,4 +1,4 @@
-from keras.callbacks import Callback, TensorBoard, ModelCheckpoint, EarlyStopping
+from keras.callbacks import TensorBoard, ModelCheckpoint
 from keras import backend as K
 import tensorflow as tf
 import os, random, math, string
@@ -7,22 +7,35 @@ import numpy as np
 import cv2
 from enum import Enum
 
-class Dataset:
-    def __init__(self, name, num_classes, ignore_classes, data_dir, directory_structure):
+class Dataset(object):
+    """
+    Contains the parameters of a particular dataset, noteably the file lists.
+    """
+    def __init__(self, name, num_classes,
+                 training_input_dirs, training_output_dirs,
+                 validation_input_dirs, validation_output_dirs):
         self.name = name
         self.num_classes = num_classes
-        self.ignore_classes = ignore_classes
-        self.data_dir = data_dir
-        self.directory_structure = directory_structure
+        self.training_inputs = self.get_file_list(training_input_dirs)
+        self.training_outputs = self.get_file_list(training_output_dirs)
+        self.validation_inputs = self.get_file_list(validation_input_dirs)
+        self.validation_outputs = self.get_file_list(validation_output_dirs)
 
-IGNORE_CLASSES = [0, 0, 0, 0, 0, 0, 0,  # ignore 'void' class
-                  1, 1, 0, 0,           # ignore 'parking', 'rail track'
-                  1, 1, 1, 0, 0, 0,     # ignore 'guard rail', 'bridge', 'tunnel'
-                  1, 0,                 # ignore 'polegroup'
-                  1, 1, 1, 1,           # 'object' class
-                  1, 1, 1,              # 'nature' and 'sky' classes
-                  1, 1,                 # 'human' class
-                  1, 0, 0, 1, 1, 1]     # ignore 'caravan', 'trailer'
+    def get_file_list(self, directories):
+        """
+        For each directory in a list, recursively find all files in it.
+        Return a list of lists of files of the same length as directories.
+        """
+        file_list = []
+        for directory in directories:
+            contents = []
+            for path, subdirs, files in os.walk(directory):
+                for f in files:
+                    contents.append(os.path.join(path,f))
+            contents.sort()
+            file_list.append(contents)
+
+        return file_list
 
 def label_to_onehot(label, num_classes):
     """Converts labels (e.g. 2) to one-hot vectors (e.g. [0,0,1,0]).
@@ -47,23 +60,23 @@ def pixelwise_accuracy(y_true, y_pred):
                          K.argmax(y_pred, axis=2)),
                          K.floatx()))
 
-    def get_callbacks(self, model_name='test.h5', patience=500, logdir='./logs/default'):
-        """Returns a standard set of callbacks.
-            Kept here mainly to avoid clutter in main.py"""
-        checkpoint = ModelCheckpoint(
-            model_name,
-            monitor='val_loss',
-            verbose=0,
-            save_best_only=True,
-            save_weights_only=True)
+def get_callbacks(self, model_name='test.h5', patience=500, logdir='./logs/default'):
+    """Returns a standard set of callbacks.
+        Kept here mainly to avoid clutter in main.py"""
+    checkpoint = ModelCheckpoint(
+        model_name,
+        monitor='val_loss',
+        verbose=0,
+        save_best_only=True,
+        save_weights_only=True)
 
-        tb = TensorBoard(
-            log_dir=logdir,
-            histogram_freq=1,
-            write_graph=True,
-            write_grads=True,
-            write_images=True)
+    tb = TensorBoard(
+        log_dir=logdir,
+        histogram_freq=1,
+        write_graph=True,
+        write_grads=True,
+        write_images=True)
 
-        early = EarlyStopping(monitor='val_loss', patience=patience, verbose=1)
+    early = EarlyStopping(monitor='val_loss', patience=patience, verbose=1)
 
-        return [checkpoint, tb]
+    return [checkpoint, tb]
