@@ -5,8 +5,15 @@ import os, random, math, string
 import pickle
 import numpy as np
 import cv2
+from enum import Enum
 
-# Class weights. Classes with weight 0 do not contribute to the loss.
+class Dataset:
+    def __init__(self, name, num_classes, ignore_classes, data_dir, directory_structure):
+        self.name = name
+        self.num_classes = num_classes
+        self.ignore_classes = ignore_classes
+        self.data_dir = data_dir
+        self.directory_structure = directory_structure
 
 IGNORE_CLASSES = [0, 0, 0, 0, 0, 0, 0,  # ignore 'void' class
                   1, 1, 0, 0,           # ignore 'parking', 'rail track'
@@ -28,35 +35,10 @@ def one_hot_to_label(one_hot):
     Accepts and returns a numpy array."""
     return one_hot.argmax(2).astype('uint8')
 
-def remap_class(arr):
-    """Remaps CityScapes classes as explained below."""
-
-    arr[arr == 12] = 11 # walls -> buildings
-    arr[arr == 13] = 11 # fences -> buildings
-
-    arr[arr == 25] = 24 # cyclists -> people
-
-    arr[arr == 27] = 26 # truck -> car
-    arr[arr == 28] = 26 # bus -> car
-    arr[arr == 32] = 26 # motorcycle -> car
-    '''
-    arr[arr == 20] = 0
-    arr[arr == 21] = 11
-    arr[arr == 24] = 0
-    '''
-    return arr
-
 def pixelwise_crossentropy(target, output):
     """Keras' default crossentropy function wasn't working, not sure why."""
     output = tf.clip_by_value(output, 10e-8, 1.-10e-8)
     return -tf.reduce_sum(target * IGNORE_CLASSES * tf.log(output))
-
-def class_weighted_pixelwise_crossentropy(target, output):
-    """As above. IGNORE_CLASSES is already used in calculating class_weights."""
-    output = tf.clip_by_value(output, 10e-8, 1.-10e-8)
-    with open('class_weights.pickle', 'rb') as f:
-        weights = pickle.load(f)
-    return -tf.reduce_sum(target * weights * tf.log(output))
 
 def pixelwise_accuracy(y_true, y_pred):
     """Same as Keras' default accuracy function, but with axis=-1 changed to axis=2.
@@ -64,69 +46,6 @@ def pixelwise_accuracy(y_true, y_pred):
     return K.mean(K.cast(K.equal(K.argmax(y_true, axis=2),
                           K.argmax(y_pred, axis=2)),
                   K.floatx()))
-
-class VisualizeResult(Callback):
-    """Custom callback that shows the model's prediction on a sample image during training."""
-    def __init__(self, num_classes, image_path, label_path, validation_file_list):
-        self.num_classes = num_classes
-        self.image_path = image_path
-        self.label_path = label_path
-        self.validation_file_list = validation_file_list
-        self.colors = None
-        i = random.choice(self.validation_file_list)
-        self.image = cv2.imread(i[0])
-        cv2.imshow('Sample Image', cv2.resize(self.image, (800, 400)))
-        cv2.moveWindow('Sample Image', 10, 10)
-        self.ground_truth = remap_class(cv2.imread(i[1], 0))
-        self.ground_truth = self.make_label_pretty(self.ground_truth)
-        cv2.imshow('Ground Truth', cv2.resize(self.ground_truth, (800, 400)))
-        cv2.moveWindow('Ground Truth', 850, 10)
-        cv2.waitKey(1)
-
-    # Accepts and returns a numpy array.
-    def make_label_pretty(self, label):
-        """Maps integer labels to RGB color values, for visualization."""
-        pretty_label = cv2.cvtColor(label, cv2.COLOR_GRAY2RGB)
-        if self.colors is None:
-            # Saved as example.
-            '''
-            self.colors = [
-            [0,0,0],        # 0: void
-            [128,64,128],   # 1: road
-            [  0,  0,142],  # 3: vehicle
-            [220, 20, 60],  # 2: person
-            ]
-            '''
-            with open('cityscapes_color_mappings.pickle', 'rb') as f:
-                self.colors = pickle.load(f)
-
-            assert self.num_classes <= len(self.colors)
-
-        for i in range(self.num_classes):
-            pretty_label[np.where((label == [i]))] = self.colors[i]
-
-        return pretty_label
-
-    def on_batch_end(self, batch, logs={}):
-        """Updates the displayed prediction after every 10th batch."""
-        if batch % 10 == 0 or batch < 5:
-            seg_result = self.model.predict(np.array([self.image]))
-            main = self.make_label_pretty(one_hot_to_label(seg_result.squeeze(0)))
-            cv2.imshow('Segmentation Result', cv2.resize(main, (800, 400)))
-            cv2.moveWindow('Segmentation Result', 850, 500)
-            cv2.waitKey(1)
-
-    def on_epoch_end(self, epoch, logs={}):
-        """Changes the image used as an example at the end of each epoch."""
-        new_img = random.choice(self.validation_file_list)
-        self.image = cv2.imread(new_img[0])
-        self.ground_truth = self.make_label_pretty(remap_class(cv2.imread(new_img[1], 0)))
-        cv2.imshow('Sample Image', cv2.resize(self.image, (800, 400)))
-        cv2.imshow('Ground Truth', cv2.resize(self.ground_truth, (800, 400)))
-
-    def on_train_end(self, logs={}):
-        """Currently does nothing useful, saved here as a TODO."""
-        print("Training ended!")
 
 class BackendHandler(object):
     """Handles data generation and hides callback creation."""
@@ -162,42 +81,6 @@ class BackendHandler(object):
                             self.disparity_path + category + f.replace('leftImg8bit', 'disparity'))
             file_list.append(input_output)
         return file_list
-
-    def get_class_weights(self):
-        """Iterates over the entire dataset and for each class calculates the
-            instances of that class divided by the total number of instances.
-            Since this is time-consuming for large datasets, save the result
-            to a pickle file for reuse."""
-        if 'class_weights.pickle' not in self.cwd_contents:
-            file_list = self.training_file_list + self.validation_file_list
-            print("Calculating class weights for " + str(len(file_list)) + \
-                  " images, this may take a while...")
-            classcounts = [1]*self.num_classes
-            count = 0
-            for f in file_list:
-                lbl = cv2.imread(f[1], 0)
-                show = lbl*int(255/self.num_classes)
-                cv2.putText(show, str(count) + '/' + str(len(file_list)),
-                            (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
-                cv2.imshow('Processing...', show)
-                cv2.waitKey(1)
-                for i in range(self.num_classes):
-                    classcounts[i] += len(np.where(lbl == i)[0])
-                count += 1
-            total = sum(classcounts)
-            class_weights = [0]*self.num_classes
-            for i in range(self.num_classes):
-                class_weights[i] = IGNORE_CLASSES[i] * total / classcounts[i]
-            self.class_weights = [100 * float(w) / max(class_weights) for w in class_weights]
-            cv2.destroyAllWindows()
-            cv2.waitKey(1)
-            with open('class_weights.pickle', 'wb') as f:
-                pickle.dump(self.class_weights, f, protocol=0)
-        else:
-            with open('class_weights.pickle', 'rb') as f:
-                self.class_weights = pickle.load(f)
-        print(self.class_weights)
-
 
     def generate_data(self, batch_size, validating=False,
                       horizontal_flip=True, vertical_flip=False,
@@ -288,9 +171,4 @@ class BackendHandler(object):
 
         early = EarlyStopping(monitor='val_loss', patience=patience, verbose=1)
 
-        if self.visualize_while_training:
-            vis = VisualizeResult(self.num_classes, self.image_path,
-                                  self.label_path, self.validation_file_list)
-            return [checkpoint, tb, vis]
-        else:
-            return [checkpoint, tb]
+        return [checkpoint, tb]
