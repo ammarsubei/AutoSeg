@@ -26,7 +26,7 @@ import autoseg_models
 from autoseg_datagen import generate_data
 from autoseg_backend import get_callbacks
 from autoseg_backend import pixelwise_crossentropy, pixelwise_accuracy
-from autoseg_backend import cityscapes, cityscapes_stereo, mapillary
+from autoseg_backend import cityscapes_stereo
 
 # If you have multiple GPUs, you can use this environment variable to choose
 # which one the model should train on. Numbering starts at 0.

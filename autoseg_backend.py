@@ -49,13 +49,32 @@ def get_file_list(directories):
     file_list = []
     for directory in directories:
         contents = []
-        for path, subdirs, files in os.walk(directory):
+        for path, subdirs, files in os.walk(os.getcwd() + directory):
             for f in files:
                 contents.append(os.path.join(path, f))
         contents.sort()
         file_list.append(contents)
 
     return file_list
+
+def merge_file_lists(input_files, output_files):
+    inputs = []
+    for i in range(len(input_files[0])):
+        inp = []
+        for j in range(len(input_files)):
+            inp.append(input_files[j][i])
+        inputs.append(inp)
+    outputs = []
+    for i in range(len(output_files[0])):
+        outp = []
+        for j in range(len(output_files)):
+            outp.append(output_files[j][i])
+        outputs.append(outp)
+
+    data = []
+    for i in range(len(inputs[0])):
+        data.append((inputs[i], outputs[i]))
+    return data
 
 class Dataset(object):
     """
@@ -67,24 +86,20 @@ class Dataset(object):
         self.name = name
         self.num_classes = num_classes
         self.colors = colors
-        training_inputs = get_file_list(input_dirs[0])
-        training_outputs = get_file_list(output_dirs[0])
-        validation_inputs = get_file_list(input_dirs[1])
-        validation_outputs = get_file_list(output_dirs[1])
 
-        self.training_data = []
-        for i in range(len(training_inputs)):
-            self.training_data.append(training_inputs[i], training_outputs[i])
+        training_input_files = get_file_list(input_dirs[0])
+        training_output_files = get_file_list(output_dirs[0])
+        self.training_data = merge_file_lists(training_input_files, training_output_files)
 
-        self.validation_data = []
-        for i in range(len(validation_inputs)):
-            self.validation_data.append(validation_inputs[i], validation_outputs[i])
-
+        validation_input_files = get_file_list(input_dirs[1])
+        validation_output_files = get_file_list(output_dirs[1])
+        self.validation_data = merge_file_lists(validation_input_files, validation_output_files)
+'''
 cityscapes = Dataset('Cityscapes', 34,
-                     [['/cityscapes/images_left/train'],
-                      ['/cityscapes/images_left/val']],
-                     [['/cityscapes/labels_fine/train'],
-                      ['/cityscapes/labels_fine/val']],
+                     [['/Cityscapes/images_left/train'],
+                      ['/Cityscapes/images_left/val']],
+                     [['/Cityscapes/labels_fine/train'],
+                      ['/Cityscapes/labels_fine/val']],
                      [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
                       [0, 74, 111], [81, 0, 81], [128, 64, 128], [232, 35, 244],
                       [160, 170, 250], [140, 150, 230], [70, 70, 70],
@@ -95,14 +110,14 @@ cityscapes = Dataset('Cityscapes', 34,
                       [60, 20, 220], [0, 0, 255], [142, 0, 0], [70, 0, 0],
                       [100, 60, 0], [90, 0, 0], [110, 0, 0], [100, 80, 0],
                       [230, 0, 0], [32, 11, 119]])
-
+'''
 cityscapes_stereo = Dataset('Cityscapes Stereo', 34,
-                            [['/cityscapes/images_left/train',
-                              '/cityscapes/images_right/train'],
-                             ['/cityscapes/images_left/val',
-                              '/cityscapes/images_right/val']],
-                            [['/cityscapes/labels_fine/train'],
-                             ['/cityscapes/labels_fine/val']],
+                            [['/Cityscapes/images_left/train',
+                              '/Cityscapes/images_right/train'],
+                             ['/Cityscapes/images_left/val',
+                              '/Cityscapes/images_right/val']],
+                            [['/Cityscapes/labels_fine/train'],
+                             ['/Cityscapes/labels_fine/val']],
                             [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
                              [0, 74, 111], [81, 0, 81], [128, 64, 128], [232, 35, 244],
                              [160, 170, 250], [140, 150, 230], [70, 70, 70],
@@ -113,7 +128,7 @@ cityscapes_stereo = Dataset('Cityscapes Stereo', 34,
                              [60, 20, 220], [0, 0, 255], [142, 0, 0], [70, 0, 0],
                              [100, 60, 0], [90, 0, 0], [110, 0, 0], [100, 80, 0],
                              [230, 0, 0], [32, 11, 119]])
-
+'''
 mapillary = Dataset('Mapillary', 66,
                     [['/Mapillary/training/images'],
                      ['/Mapillary/validation/images']],
@@ -141,3 +156,5 @@ mapillary = Dataset('Mapillary', 66,
                      [0, 0, 230], [0, 80, 100], [128, 64, 64],
                      [0, 0, 110], [0, 0, 70], [0, 0, 192], [32, 32, 32],
                      [0, 0, 0], [0, 0, 0]])
+'''
+print("Datasets loaded!")
