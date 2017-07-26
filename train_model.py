@@ -10,6 +10,9 @@ saved to, e.g. "model.h5"
 details on expected directory structure.
 - The only current flag is -n, which tells the script to ignore any pretrained
 weights found and train the model from scratch.
+
+It is recommended to leave this script untouched, and create a copy of it for
+each separate model being trained.
 """
 
 import os
@@ -65,16 +68,29 @@ if "-n" not in sys.argv:
         print("FYI: Specified behavior is to load weights, but no \
         weights found. Initializing weights from scratch.")
 
+# Yet more hyperparameters.
 sgd = keras.optimizers.SGD(lr=1e-8, momentum=0.9, decay=1e-3)
-model.compile(loss=pixelwise_crossentropy, optimizer=sgd, metrics=[pixelwise_accuracy])
-plot_model(model, to_file='architecture.png', show_shapes=True, show_layer_names=True)
-callbacks = get_callbacks(model_name, patience=250, logdir='./logs/SQ/')
+model.compile(loss=pixelwise_crossentropy,
+              optimizer=sgd,
+              metrics=[pixelwise_accuracy])
+plot_model(model,
+           to_file='architecture.png',
+           show_shapes=True,
+           show_layer_names=True)
+           
+# Default callbacks:
+# ModelCheckpoint (save model with lowest val_loss)
+# TensorBoard (save metric logs to ./logs/whatever/)
+callbacks = get_callbacks(model_name, logdir='./logs/DEFAULT/')
 
+# Benchmark the model to determine if it is able to run in real-time.
 start = time.clock()
 model.evaluate_generator(generate_data(dataset.training_data, 1, dataset.num_classes), 100)
 end = time.clock()
-print("Benchmarked at " + str(100 / (end - start)) + " frames per second.")
+print("Benchmarked at " + str(100 / (end - start)) + " frames per second on \
+       images of size" + str(img_size) + ".")
 
+# Train the model!
 model.fit_generator(
     generate_data(dataset.training_data, batch_size, dataset.num_classes),
     steps_per_epoch=500, #len(dataset.training_data) // batch_size,
