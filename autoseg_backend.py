@@ -72,7 +72,7 @@ def pixelwise_accuracy(y_true, y_pred):
                                  K.argmax(y_pred, axis=2)),
                          K.floatx()))
 
-def get_callbacks(model_name='test.h5', patience=500, logdir='./logs/default'):
+def get_callbacks(model_name='test.h5', logdir='./logs/DEFAULT'):
     """
     Returns a standard set of callbacks.
     Kept here mainly to avoid clutter in train_model.py
