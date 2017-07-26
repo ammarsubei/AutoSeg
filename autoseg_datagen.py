@@ -3,6 +3,7 @@
 import random
 import numpy as np
 import cv2
+from PIL import Image
 
 def label_to_onehot(label, num_classes):
     """Converts labels (e.g. 2) to one-hot vectors (e.g. [0,0,1,0]).
@@ -15,7 +16,7 @@ def one_hot_to_label(one_hot):
     Accepts and returns a numpy array."""
     return one_hot.argmax(2).astype('uint8')
 
-def generate_data(data, batch_size, num_classes, augment_data=False):
+def generate_data(dataset, data, batch_size, num_classes, augment_data=False):
     """Replaces Keras' native ImageDataGenerator."""
     random.shuffle(data)
 
@@ -31,12 +32,17 @@ def generate_data(data, batch_size, num_classes, augment_data=False):
             i += 1
 
             inputs = []
+
             for inp in sample[0]:
                 inputs.append((cv2.imread(inp).astype(float) - 128) / 128)
 
             outputs = []
-            for outp in sample[1]:
-                outputs.append(label_to_onehot(cv2.imread(outp, 0), num_classes))
+            if dataset == 'Mapillary':
+                for outp in sample[1]:
+                    outputs.append(label_to_onehot(Image.open(outp), num_classes))
+            else:
+                for outp in sample[1]:
+                    outputs.append(label_to_onehot(cv2.imread(outp, 0), num_classes))
 
             input_batch.append(inputs)
             output_batch.append(outputs)
