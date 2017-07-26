@@ -7,7 +7,7 @@ import numpy as np
 import cv2
 from PIL import Image
 
-INPUT_SHAPE = (400, 300)
+INPUT_SHAPE = (384, 512)
 
 # Class weights. Classes with weight 0 do not contribute to the loss.
 

@@ -9,13 +9,13 @@ import cv2
 import autoseg_models
 from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_accuracy, MAPILLARY_COLORS
 
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 train_encoder = True
 num_classes = 66
 data_dir = '/Mapillary/'
-img_height = 300
-img_width = 400
+img_height = 512
+img_width = 384
 visualize_while_training = True
 dropout_rate = 0.4
 weight_decay=0.0002
@@ -27,14 +27,11 @@ epochs = 10000000
 model_name= 'visualized_model.h5'
 
 
-model = autoseg_models.get_rn38(input_shape=input_shape,
-                                num_classes=num_classes,
-                                dropout_rate=dropout_rate)
-'''
-
-model = autoseg_models.get_rn38(input_shape=input_shape,
-                                num_classes=num_classes)
-'''
+model = autoseg_models.get_SQ(input_shape=input_shape,
+                              num_classes=num_classes,
+                              dropout_rate=dropout_rate,
+                              weight_decay=weight_decay,
+                              batch_norm=True)
 
 model.load_weights(sys.argv[1], by_name=True)
 if not train_encoder:
