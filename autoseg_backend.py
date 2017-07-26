@@ -5,7 +5,6 @@ from keras import backend as K
 import tensorflow as tf
 import cv2
 
-
 def pixelwise_crossentropy(target, output):
     """
     Keras' default crossentropy function wasn't working, not sure why.
@@ -67,13 +66,19 @@ class Dataset(object):
                  colors):
         self.name = name
         self.num_classes = num_classes
+        self.colors = colors
         training_inputs = get_file_list(input_dirs[0])
         training_outputs = get_file_list(output_dirs[0])
         validation_inputs = get_file_list(input_dirs[1])
         validation_outputs = get_file_list(output_dirs[1])
-        self.training_data = (training_inputs, training_outputs)
-        self.validation_data = (validation_inputs, validation_outputs)
-        self.colors = colors
+
+        self.training_data = []
+        for i in range(len(training_inputs)):
+            self.training_data.append(training_inputs[i], training_outputs[i])
+
+        self.validation_data = []
+        for i in range(len(validation_inputs)):
+            self.validation_data.append(validation_inputs[i], validation_outputs[i])
 
 cityscapes = Dataset('Cityscapes', 34,
                      [['/cityscapes/images_left/train'],
