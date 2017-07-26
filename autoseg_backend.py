@@ -81,8 +81,7 @@ def get_callbacks(model_name='test.h5', patience=500, logdir='./logs/default'):
         model_name,
         monitor='val_loss',
         verbose=0,
-        save_best_only=True,
-        save_weights_only=True)
+        save_best_only=True)
 
     tb = TensorBoard(
         log_dir=logdir,
