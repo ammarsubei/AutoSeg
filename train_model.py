@@ -65,8 +65,7 @@ if "-n" not in sys.argv:
                            different shape.")
 
     else:
-        print("FYI: Specified behavior is to load weights, but no \
-        weights found. Initializing weights from scratch.")
+        print("FYI: Specified behavior is to load weights, but no weights found. Initializing weights from scratch.")
 
 # Yet more hyperparameters.
 sgd = keras.optimizers.SGD(lr=1e-8, momentum=0.9, decay=1e-3)
