@@ -77,7 +77,7 @@ plot_model(model,
            to_file='architecture.png',
            show_shapes=True,
            show_layer_names=True)
-           
+
 # Default callbacks:
 # ModelCheckpoint (save model with lowest val_loss)
 # TensorBoard (save metric logs to ./logs/whatever/)
@@ -85,17 +85,22 @@ callbacks = get_callbacks(model_name, logdir='./logs/DEFAULT/')
 
 # Benchmark the model to determine if it is able to run in real-time.
 start = time.clock()
-model.evaluate_generator(generate_data(dataset.training_data, 1, dataset.num_classes), 100)
+model.evaluate_generator(generate_data(dataset.name,
+                                       dataset.training_data, 1,
+                                       dataset.num_classes), 100)
 end = time.clock()
 print("Benchmarked at " + str(100 / (end - start)) + " frames per second on \
        images of size" + str(img_size) + ".")
 
 # Train the model!
 model.fit_generator(
-    generate_data(dataset.training_data, batch_size, dataset.num_classes),
+    generate_data(dataset.name,
+                  dataset.training_data, batch_size,
+                  dataset.num_classes),
     steps_per_epoch=500, #len(dataset.training_data) // batch_size,
     epochs=epochs,
     callbacks=callbacks,
-    validation_data=generate_data(dataset.validation_data, batch_size,
+    validation_data=generate_data(dataset.name,
+                                  dataset.validation_data, batch_size,
                                   dataset.num_classes),
     validation_steps=len(dataset.validation_data) // batch_size)
