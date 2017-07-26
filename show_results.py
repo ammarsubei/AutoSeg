@@ -9,7 +9,7 @@ import cv2
 import autoseg_models
 from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_accuracy
 
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 train_encoder = True
 num_classes = 34
@@ -26,16 +26,11 @@ batch_size = 1
 epochs = 10000000
 model_name= 'visualized_model.h5'
 
-'''
 model = autoseg_models.get_SQ(input_shape=input_shape,
                                 num_classes=num_classes,
                                 dropout_rate=dropout_rate,
                                 weight_decay=weight_decay,
                                 batch_norm=True)
-'''
-
-model = autoseg_models.get_rn38(input_shape=input_shape,
-                                num_classes=num_classes)
 
 model.load_weights(sys.argv[1], by_name=True)
 if not train_encoder:
@@ -65,6 +60,7 @@ def makeLabelPretty(label):
     prettyLabel = cv2.cvtColor(label, cv2.COLOR_GRAY2RGB)
     with open('cityscapes_color_mappings.pickle', 'rb') as f:
         colors =  pickle.load(f)
+        print(colors)
 
     for i in range(num_classes):
         prettyLabel[np.where( (label==[i]) )] = colors[i]
