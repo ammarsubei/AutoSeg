@@ -10,16 +10,35 @@ class Dataset(object):
     Contains the parameters of a particular dataset, noteably the file lists.
     """
     def __init__(self, name, num_classes,
-                 training_input_dirs, training_output_dirs,
-                 validation_input_dirs, validation_output_dirs):
+                 input_dirs, output_dirs):
         self.name = name
         self.num_classes = num_classes
-        training_inputs = get_file_list(training_input_dirs)
-        training_outputs = get_file_list(training_output_dirs)
-        validation_inputs = get_file_list(validation_input_dirs)
-        validation_outputs = get_file_list(validation_output_dirs)
+        training_inputs = get_file_list(input_dirs[0])
+        training_outputs = get_file_list(output_dirs[0])
+        validation_inputs = get_file_list(input_dirs[1])
+        validation_outputs = get_file_list(output_dirs[1])
         self.training_data = (training_inputs, training_outputs)
         self.validation_data = (validation_inputs, validation_outputs)
+
+cityscapes = Dataset('Cityscapes', 34,
+                     [['/cityscapes/images_left/train'],
+                      ['/cityscapes/images_left/val']],
+                     [['/cityscapes/labels_fine/train'],
+                      ['/cityscapes/labels_fine/val']])
+
+cityscapes_stereo = Dataset('Cityscapes Stereo', 34,
+                            [['/cityscapes/images_left/train',
+                              '/cityscapes/images_right/train'],
+                             ['/cityscapes/images_left/val',
+                              '/cityscapes/images_right/val']],
+                            [['/cityscapes/labels_fine/train'],
+                             ['/cityscapes/labels_fine/val']])
+
+mapillary = Dataset('Mapillary', 66,
+                    [['/Mapillary/training/images'],
+                     ['/Mapillary/validation/images']],
+                    [['/Mapillary/training/labels'],
+                     ['/Mapillary/validation/labels']])
 
 def get_file_list(directories):
     """
