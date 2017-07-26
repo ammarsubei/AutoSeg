@@ -43,7 +43,7 @@ Mapillary*
 .DS_Store
 CamVid/*
 camvid/*
-cityscapes*
+Cityscapes*
 Mapillary*
 *.h5
 *logs/*
