@@ -15,13 +15,13 @@ weights found and train the model from scratch.
 import os
 import sys
 import time
-from enum import Enum
 import keras
 from keras import backend as K
 from keras.models import load_model
 from keras.utils import plot_model
 import autoseg_models
-from autoseg_backend import BackendHandler, pixelwise_crossentropy, pixelwise_accuracy, Datasets
+from autoseg_datagen import generate_data
+from autoseg_backend import pixelwise_crossentropy, pixelwise_accuracy
 
 # If you have multiple GPUs, you can use this environment variable to choose
 # which one the model should train on. Numbering starts at 0.
@@ -37,15 +37,7 @@ batch_size = 1
 epochs = 10000000
 
 
-if dataset == Datasets.CAMVID:
-    num_classes = 32
-elif dataset == Datasets.CITYSCAPES or dataset == Datasets.CITYSCAPES_STEREO:
-    num_classes = 34
-elif dataset == Datasets.MAPILLARY:
-    num_classes = 66
-else:
-    num_classes = None
-    # throw an error of some kind
+
 
 # The method called here should return a keras.models.Model object, which
 # specifies the architecture.
