@@ -44,6 +44,7 @@ Mapillary*
 CamVid/*
 camvid/*
 cityscapes*
+Mapillary*
 *.h5
 *logs/*
 __MACOSX/*

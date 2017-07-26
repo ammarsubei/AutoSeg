@@ -16,13 +16,13 @@ train_encoder = True
 num_classes = 34
 data_dir = '/cityscapes_800/'
 img_height = 720
-img_width = 1280
+IMG_HEIGHT = 1280
 visualize_while_training = True
 dropout_rate = 0.4
 weight_decay=0.0002
-img_size = (img_width, img_height)
+img_size = (IMG_HEIGHT, img_height)
 mask_size = img_size
-input_shape = (img_height, img_width, 3)
+input_shape = (img_height, IMG_HEIGHT, 3)
 batch_size = 3
 epochs = 10000000
 model_name= 'visualized_model.h5'
@@ -61,15 +61,21 @@ def makeLabelPretty(label):
 
     return prettyLabel
 
-videogen = skvideo.io.vreader('/home/autobon/AutoSeg/output_5.avi')
+videogen = skvideo.io.vreader('/home/autobon/AutoSeg/output_left.avi')
+videogen_right = skvideo.io.vreader('/home/autobon/AutoSeg/output_right.avi')
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
-out = cv2.VideoWriter('/home/autobon/AutoSeg/segmented_output.avi', fourcc, 20.0, img_size)
+out = cv2.VideoWriter('/home/autobon/AutoSeg/segmented_output_depth.avi', fourcc, 20.0, img_size)
 
 for rgb in videogen:
     if True:
         bgr = cv2.resize(rgb[...,::-1], img_size)
+        bgr_right = cv2.resize(next(videogen_right)[...,::-1], img_size)
         bgr_in = (bgr.astype('float') - 128) / 128
-        segmented_frame = makeLabelPretty( oneHotToLabel( model.predict(np.array([bgr_in])).squeeze(0) ) )
+        bgr_in_right = (bgr_right.astype('float') - 128) / 128
+        inputs = [np.expand_dims(bgr_in, 0), np.expand_dims(bgr_in_right, 0)]
+        segmented_frame = model.predict(inputs).squeeze(0)
+        segmented_frame = oneHotToLabel(segmented_frame)
+        segmented_frame = makeLabelPretty(segmented_frame)
         overlay = bgr.copy()
         cv2.addWeighted(segmented_frame, 0.8, bgr, 0.2, 0, overlay)
         out.write(overlay)
