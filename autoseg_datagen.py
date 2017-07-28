@@ -16,7 +16,43 @@ def one_hot_to_label(one_hot):
     Accepts and returns a numpy array."""
     return one_hot.argmax(2).astype('uint8')
 
-def generate_data(dataset, data, batch_size, num_classes, augment_data=False):
+ def get_file_list(directories):
+     """
+     For each directory in a list, recursively find all files in it.
+     Return a list of lists of files of the same length as directories.
+     """
+     file_list = []
+     for directory in directories:
+         contents = []
+         for path, subdirs, files in os.walk(os.getcwd() + directory):
+             for f in files:
+                 contents.append(os.path.join(path, f))
+         contents.sort()
+         file_list.append(contents)
+
+     return file_list
+
+ def merge_file_lists(input_files, output_files):
+     inputs = []
+     for i in range(len(input_files[0])):
+         inp = []
+         for j in range(len(input_files)):
+             inp.append(input_files[j][i])
+         inputs.append(inp)
+     outputs = []
+     for i in range(len(output_files[0])):
+         outp = []
+         for j in range(len(output_files)):
+             outp.append(output_files[j][i])
+         outputs.append(outp)
+
+     data = []
+     for i in range(len(inputs[0])):
+         data.append((inputs[i], outputs[i]))
+     return data
+
+
+def generate_cityscapes_data(dataset, data, batch_size, num_classes, augment_data=False):
     """Replaces Keras' native ImageDataGenerator."""
     random.shuffle(data)
 
