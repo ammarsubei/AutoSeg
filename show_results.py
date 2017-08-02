@@ -13,9 +13,9 @@ os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 train_encoder = True
 num_classes = 34
-data_dir = '/cityscapes_768/'
-img_height = 384
-img_width = 768
+data_dir = '/cityscapes_1024/'
+img_height = 512
+img_width = 1024
 visualize_while_training = False
 dropout_rate = 0.4
 weight_decay=0.0002
@@ -26,7 +26,6 @@ batch_size = 1
 epochs = 10000000
 model_name= 'visualized_model.h5'
 
-'''
 model = autoseg_models.get_SQ(input_shape=input_shape,
                                 num_classes=num_classes,
                                 dropout_rate=dropout_rate,
@@ -36,6 +35,7 @@ model = autoseg_models.get_SQ(input_shape=input_shape,
 
 model = autoseg_models.get_dense103(input_shape=input_shape,
                                 num_classes=num_classes)
+'''
 
 
 model.load_weights(sys.argv[1], by_name=True)
@@ -72,15 +72,21 @@ def makeLabelPretty(label):
 
     return prettyLabel
 
-for x,y in backend.generate_data(batch_size=3, validating=True):
+for x,y in backend.generate_data(batch_size=3, validating=False):
     predictions = model.predict_on_batch(x)
     for i in range(len(predictions)):
         ID = getID()
         img = x[0][i]*128.0+128.0
-        cv2.imshow('Image', img.astype('uint8'))
+        img = img.astype('uint8')
+        cv2.imshow('Image', img)
         cv2.moveWindow('Image', 10, 10)
         cv2.imshow('Ground Truth', makeLabelPretty( oneHotToLabel(y[i]) ))
         cv2.moveWindow('Ground Truth', 850, 10)
-        cv2.imshow('Model Output', makeLabelPretty( oneHotToLabel(predictions[i]) ))
-        cv2.moveWindow('Model Output', 850, 500)
-        cv2.waitKey(5000)
+        output = makeLabelPretty( oneHotToLabel(predictions[i]) )
+        overlay = img.copy()
+        cv2.addWeighted(output, 0.7, img, 0.3, 0, overlay)
+        cv2.imshow('Model Output', overlay)
+        cv2.moveWindow('Model Output', 10, 10)
+        #cv2.moveWindow('Model Output', 850, 500)
+        press = 0xFF & cv2.waitKey(1)
+        cv2.imwrite('demo/' + getID() + '.png', overlay)
