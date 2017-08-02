@@ -1,5 +1,6 @@
 """Module docstring"""
 
+import os
 import random
 import numpy as np
 import cv2
@@ -16,7 +17,7 @@ def one_hot_to_label(one_hot):
     Accepts and returns a numpy array."""
     return one_hot.argmax(2).astype('uint8')
 
- def get_file_list(directories):
+def get_file_list(directories):
      """
      For each directory in a list, recursively find all files in it.
      Return a list of lists of files of the same length as directories.
@@ -26,13 +27,14 @@ def one_hot_to_label(one_hot):
          contents = []
          for path, subdirs, files in os.walk(os.getcwd() + directory):
              for f in files:
-                 contents.append(os.path.join(path, f))
+                 if directory.find('labels_fine') == -1 or f.find('labelIds') != -1:
+                    contents.append(os.path.join(path, f))
          contents.sort()
          file_list.append(contents)
 
      return file_list
 
- def merge_file_lists(input_files, output_files):
+def merge_file_lists(input_files, output_files):
      inputs = []
      for i in range(len(input_files[0])):
          inp = []
@@ -51,10 +53,26 @@ def one_hot_to_label(one_hot):
          data.append((inputs[i], outputs[i]))
      return data
 
+#def get_random_crop(img, size):
 
-def generate_cityscapes_data(dataset, data, batch_size, num_classes, augment_data=False):
+
+
+def generate_cityscapes_stereo_data(batch_size, augment_data=False, validating=True):
     """Replaces Keras' native ImageDataGenerator."""
+    if not validating:
+        traininginput_files = get_file_list(['/cityscapes_768/images_left/train',
+                                             '/cityscapes_768/images_right/train'])
+        training_output_files = get_file_list(['/cityscapes_768/labels_fine/train'])
+        data = merge_file_lists(training_input_files, training_output_files)
+    else:
+        validation_input_files = get_file_list(['/cityscapes_768/images_left/val',
+                                                '/cityscapes_768/images_right/val'])
+        validation_output_files = get_file_list(['/cityscapes_768/labels_fine/val'])
+        data = merge_file_lists(validation_input_files, validation_output_files)
+
+
     random.shuffle(data)
+    print(data)
 
     i = 0
     while True:
@@ -68,22 +86,16 @@ def generate_cityscapes_data(dataset, data, batch_size, num_classes, augment_dat
             i += 1
 
             inputs = []
-
             for inp in sample[0]:
                 inputs.append((cv2.imread(inp).astype(float) - 128) / 128)
 
             outputs = []
-            if dataset == 'Mapillary':
-                for outp in sample[1]:
-                    outputs.append(label_to_onehot(Image.open(outp), num_classes))
-            else:
-                for outp in sample[1]:
-                    outputs.append(label_to_onehot(cv2.imread(outp, 0), num_classes))
+            for outp in sample[1]:
+                outputs.append(label_to_onehot(cv2.imread(outp, 0), 34))
 
             input_batch.append(inputs)
+            print(inputs)
             output_batch.append(outputs)
 
 
-        input_batch = np.array(input_batch)
-        output_batch = np.array(output_batch)
         yield (input_batch, output_batch)

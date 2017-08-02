@@ -76,24 +76,32 @@ def merge_file_lists(input_files, output_files):
         data.append((inputs[i], outputs[i]))
     return data
 
-class Dataset(object):
+class Cityscapes(object):
     """
     Contains the parameters of a particular dataset, noteably the file lists.
     """
-    def __init__(self, name, num_classes,
-                 input_dirs, output_dirs,
-                 colors):
-        self.name = name
-        self.num_classes = num_classes
-        self.colors = colors
+    def __init__():
+        self.num_classes = 34
+        self.colors = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
+                       [0, 74, 111], [81, 0, 81], [128, 64, 128], [232, 35, 244],
+                       [160, 170, 250], [140, 150, 230], [70, 70, 70],
+                       [156, 102, 102], [153, 153, 190], [180, 165, 180],
+                       [100, 100, 150], [90, 120, 150], [153, 153, 153],
+                       [153, 153, 153], [30, 170, 250], [0, 220, 220],
+                       [35, 142, 107], [152, 251, 152], [180, 130, 70],
+                       [60, 20, 220], [0, 0, 255], [142, 0, 0], [70, 0, 0],
+                       [100, 60, 0], [90, 0, 0], [110, 0, 0], [100, 80, 0],
+                       [230, 0, 0], [32, 11, 119]]
 
-        training_input_files = get_file_list(input_dirs[0])
-        training_output_files = get_file_list(output_dirs[0])
-        self.training_data = merge_file_lists(training_input_files, training_output_files)
+    def create_and_pickle_data():
+        """
 
-        validation_input_files = get_file_list(input_dirs[1])
-        validation_output_files = get_file_list(output_dirs[1])
-        self.validation_data = merge_file_lists(validation_input_files, validation_output_files)
+        """
+
+
+
+
+
 '''
 cityscapes = Dataset('Cityscapes', 34,
                      [['/Cityscapes/images_left/train'],
@@ -157,4 +165,3 @@ mapillary = Dataset('Mapillary', 66,
                      [0, 0, 110], [0, 0, 70], [0, 0, 192], [32, 32, 32],
                      [0, 0, 0], [0, 0, 0]])
 '''
-print("Datasets loaded!")

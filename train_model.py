@@ -23,10 +23,9 @@ from keras import backend as K
 from keras.models import load_model
 from keras.utils import plot_model
 import autoseg_models
-from autoseg_datagen import generate_data
+from autoseg_datagen import *
 from autoseg_backend import get_callbacks
 from autoseg_backend import pixelwise_crossentropy, pixelwise_accuracy
-from autoseg_backend import cityscapes_stereo
 
 # If you have multiple GPUs, you can use this environment variable to choose
 # which one the model should train on. Numbering starts at 0.
@@ -35,7 +34,6 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 model_name = sys.argv[1]
 # Choose which dataset to train on here.
 # Dataset params are defined in autoseg_backend.py
-dataset = cityscapes_stereo
 img_height = 384
 img_width = 768
 img_size = (img_width, img_height)
@@ -47,7 +45,7 @@ epochs = 10000000
 # specifies the architecture.
 # Note that this method is required even if you are loading weights from a
 # pretrained model.
-model = autoseg_models.get_dense103(input_shape, dataset.num_classes)
+model = autoseg_models.get_dense103(input_shape, 34)
 
 if "-n" not in sys.argv:
     if model_name in os.listdir(os.getcwd()):
@@ -84,22 +82,16 @@ callbacks = get_callbacks(model_name, logdir='./logs/DEFAULT/')
 
 # Benchmark the model to determine if it is able to run in real-time.
 start = time.clock()
-model.evaluate_generator(generate_data(dataset.name,
-                                       dataset.training_data, 1,
-                                       dataset.num_classes), 100)
+model.evaluate_generator(generate_cityscapes_stereo_data(1), 100)
 end = time.clock()
 print("Benchmarked at " + str(100 / (end - start)) + " frames per second on \
        images of size" + str(img_size) + ".")
 
 # Train the model!
 model.fit_generator(
-    generate_data(dataset.name,
-                  dataset.training_data, batch_size,
-                  dataset.num_classes),
+    generate_cityscapes_stereo_data(1),
     steps_per_epoch=500, #len(dataset.training_data) // batch_size,
     epochs=epochs,
     callbacks=callbacks,
-    validation_data=generate_data(dataset.name,
-                                  dataset.validation_data, batch_size,
-                                  dataset.num_classes),
-    validation_steps=len(dataset.validation_data) // batch_size)
+    validation_data=generate_cityscapes_stereo_data(1, True),
+    validation_steps=500)
