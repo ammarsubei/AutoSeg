@@ -13,9 +13,9 @@ os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 train_encoder = True
 num_classes = 66
-data_dir = '/Mapillary/'
-img_height = 512
-img_width = 384
+data_dir = '/mapillary/'
+img_height = 512*2
+img_width = 384*2
 visualize_while_training = True
 dropout_rate = 0.4
 weight_decay=0.0002

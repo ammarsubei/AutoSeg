@@ -42,8 +42,10 @@ imagenet_train/*
 .DS_Store
 CamVid/*
 camvid/*
+Cityscapes*
 cityscapes*
 Mapillary*
+mapillary*
 *.h5
 *logs/*
 __MACOSX/*
