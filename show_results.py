@@ -14,8 +14,8 @@ os.environ["CUDA_VISIBLE_DEVICES"]="1"
 train_encoder = True
 num_classes = 66
 data_dir = '/mapillary/'
-img_height = 512*2
-img_width = 384*2
+img_height = 384*2
+img_width = 512*2
 visualize_while_training = True
 dropout_rate = 0.4
 weight_decay=0.0002
@@ -69,21 +69,20 @@ def makeLabelPretty(label):
 for x,y in backend.generate_data(batch_size=3, validating=True):
     predictions = model.predict_on_batch(x)
     for i in range(len(predictions)):
-        ID = getID()
-        img = x[i]*128.0+128.0
-        #print(x[i])
-        cv2.imshow('Image', cv2.resize(img.astype('uint8'), (600, 450)))
-        cv2.moveWindow('Image', 10, 10)
-        cv2.imshow('Ground Truth', cv2.resize(makeLabelPretty( oneHotToLabel(y[i])), (600, 450))[...,::-1])
-        cv2.moveWindow('Ground Truth', 850, 10)
-        cv2.imshow('Model Output', cv2.resize(makeLabelPretty( oneHotToLabel(predictions[i])), (600,450))[...,::-1])
-        cv2.moveWindow('Model Output', 850, 500)
-        press = 0xFF & cv2.waitKey(5000)
-        if press == ord('r'):
-            print("Randomizing color scheme.")
-            for i in range(len(MAPILLARY_COLORS)):
-                MAPILLARY_COLORS[i] = [random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)]
-
-        elif press == 27: #Esc
-            sys.exit()
+         img = x[i]*128.0+128.0
+         img = img.astype('uint8')
+         cv2.imshow('Image', img)
+         cv2.moveWindow('Image', 10, 10)
+         cv2.imshow('Ground Truth', makeLabelPretty( oneHotToLabel(y[i]) ))
+         cv2.moveWindow('Ground Truth', 850, 10)
+         output = makeLabelPretty( oneHotToLabel(predictions[i]) )[...,::-1]
+         print(img.shape)
+         print(output.shape)
+         overlay = img.copy()
+         cv2.addWeighted(output, 0.7, img, 0.3, 0, overlay)
+         cv2.imshow('Model Output', overlay)
+         cv2.moveWindow('Model Output', 10, 10)
+         #cv2.moveWindow('Model Output', 850, 500)
+         press = 0xFF & cv2.waitKey(1)
+         cv2.imwrite('demo/' + getID() + '.png', overlay)
 
