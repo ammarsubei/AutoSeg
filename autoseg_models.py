@@ -36,6 +36,47 @@ def addBypassRefinementModule(high, low, num_filters, weight_decay, name='bypass
 
 def get_SQ(input_shape, num_classes, dropout_rate=0.2, weight_decay=0.0002, batch_norm=True, scale=1):
     l = Input(input_shape)
+    convL = Conv2D(64*scale, (3,3), padding='same', activation='elu', name='conv1_L', kernel_regularizer=l2(weight_decay))(l)
+
+    pool1 = MaxPooling2D(2)(convL)
+    fire1_1 = addFireModule(pool1, 16*scale, 64*scale, weight_decay, name='fire2_', batch_norm=batch_norm)
+    fire1_2 = add([fire1_1, addFireModule(fire1_1, 16*scale, 64*scale, weight_decay, name='fire3', batch_norm=batch_norm)])
+
+    pool2 = MaxPooling2D(2)(fire1_2)
+    fire2_1 = addFireModule(pool2, 32*scale, 128*scale, weight_decay, name='fire4', batch_norm=batch_norm)
+    fire2_2 = add([fire2_1, addFireModule(fire2_1, 32*scale, 128*scale, weight_decay, name='fire5', batch_norm=batch_norm)])
+
+    pool3 = MaxPooling2D(2)(fire2_2)
+    fire3_1 = addFireModule(pool3, 48*scale, 192*scale, weight_decay, name='fire6', batch_norm=batch_norm)
+    fire3_2 = add([fire3_1, addFireModule(fire3_1, 48*scale, 192*scale, weight_decay, name='fire7', batch_norm = batch_norm)])
+    fire3_3 = addFireModule(fire3_2, 64*scale, 256*scale, weight_decay, name='fire8', batch_norm=batch_norm)
+    fire3_4 = add([fire3_3, addFireModule(fire3_3, 64*scale, 256*scale, weight_decay, name='fire9', batch_norm=batch_norm)])
+
+    pool4 = Dropout(dropout_rate)(fire3_4)
+
+    pdc = addParallelDilatedConvolution(pool4, 512*scale, weight_decay, name='parallel_dilated_convolution', batch_norm=batch_norm)
+
+    ref10 = addBypassRefinementModule(pdc, pool3, 256*scale, weight_decay, name='bypass10', dropout_rate=dropout_rate, batch_norm=batch_norm)
+    trans_conv11 = Conv2DTranspose(256*scale, (3,3), padding='same', activation='elu', strides=2, name='trans_conv11', kernel_regularizer=l2(weight_decay))(Dropout(dropout_rate)(ref10))
+
+    ref12 = addBypassRefinementModule(trans_conv11, pool2, 128*scale, weight_decay, name='bypass12', dropout_rate=dropout_rate, batch_norm=batch_norm)
+    trans_conv13 = Conv2DTranspose(128*scale, (3,3), padding='same', activation='elu', strides=2, name='trans_conv13', kernel_regularizer=l2(weight_decay))(Dropout(dropout_rate)(ref12))
+
+    ref14 = addBypassRefinementModule(trans_conv13, pool1, 64*scale, weight_decay, name='bypass14_', dropout_rate=dropout_rate, batch_norm=batch_norm)
+    trans_conv15 = Conv2DTranspose(64*scale, (3,3), padding='same', activation='elu', strides=2, name='trans_conv15', kernel_regularizer=l2(weight_decay))(Dropout(dropout_rate)(ref14))
+
+    if batch_norm:
+        trans_conv15 = BatchNormalization()(trans_conv15)
+
+    prediction = Conv2D(num_classes, (1,1), padding='same', activation='softmax', name='main', kernel_regularizer=l2(weight_decay))(trans_conv15)
+    disparity = Conv2D(1, (1,1), padding='same', activation='sigmoid', name='disparity', kernel_regularizer=l2(weight_decay))(trans_conv15)
+
+    model = Model(inputs=l, outputs=prediction)
+
+    return model
+
+def get_SQ_stereo(input_shape, num_classes, dropout_rate=0.2, weight_decay=0.0002, batch_norm=True, scale=1):
+    l = Input(input_shape)
     r = Input(input_shape)
     convL = Conv2D(64*scale, (3,3), padding='same', activation='elu', name='conv1_L', kernel_regularizer=l2(weight_decay))(l)
     convR = Conv2D(64*scale, (3,3), padding='same', activation='elu', name='conv1_R', kernel_regularizer=l2(weight_decay))(r)

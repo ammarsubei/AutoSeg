@@ -80,7 +80,7 @@ class Cityscapes(object):
     """
     Contains the parameters of a particular dataset, noteably the file lists.
     """
-    def __init__():
+    def __init__(self):
         self.num_classes = 34
         self.colors = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
                        [0, 74, 111], [81, 0, 81], [128, 64, 128], [232, 35, 244],
@@ -92,76 +92,55 @@ class Cityscapes(object):
                        [60, 20, 220], [0, 0, 255], [142, 0, 0], [70, 0, 0],
                        [100, 60, 0], [90, 0, 0], [110, 0, 0], [100, 80, 0],
                        [230, 0, 0], [32, 11, 119]]
+        self.data_dir = 'Cityscapes/'
 
-    def create_and_pickle_data():
+    def generate_data(self, batch_size, augment_data=False, validating=True):
         """
-
+        Replaces Keras' native ImageDataGenerator.
         """
+        print(10)
+        if not validating:
+            training_input_files = get_file_list(['/cityscapes_768/images_left/train',
+                                                 '/cityscapes_768/images_right/train'])
+            training_output_files = get_file_list(['/cityscapes_768/labels_fine/train'])
+            data = merge_file_lists(training_input_files, training_output_files)
+        else:
+            validation_input_files = get_file_list(['/cityscapes_768/images_left/val',
+                                                    '/cityscapes_768/images_right/val'])
+            validation_output_files = get_file_list(['/cityscapes_768/labels_fine/val'])
+            data = merge_file_lists(validation_input_files, validation_output_files)
 
 
+        random.shuffle(data)
+        print(data)
+
+        i = 0
+        while True:
+            input_batch = []
+            output_batch = []
+            for b in range(batch_size):
+                if i == len(data):
+                    i = 0
+                    random.shuffle(data)
+                sample = data[i]
+                i += 1
+
+                inputs = []
+                for inp in sample[0]:
+                    inputs.append((cv2.imread(inp).astype(float) - 128) / 128)
+
+                outputs = []
+                for outp in sample[1]:
+                    outputs.append(label_to_onehot(cv2.imread(outp, 0), 34))
+
+                input_batch.append(inputs)
+                print(inputs)
+                print(outputs)
+                output_batch.append(outputs)
 
 
+            yield (input_batch, output_batch)
 
-'''
-cityscapes = Dataset('Cityscapes', 34,
-                     [['/Cityscapes/images_left/train'],
-                      ['/Cityscapes/images_left/val']],
-                     [['/Cityscapes/labels_fine/train'],
-                      ['/Cityscapes/labels_fine/val']],
-                     [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
-                      [0, 74, 111], [81, 0, 81], [128, 64, 128], [232, 35, 244],
-                      [160, 170, 250], [140, 150, 230], [70, 70, 70],
-                      [156, 102, 102], [153, 153, 190], [180, 165, 180],
-                      [100, 100, 150], [90, 120, 150], [153, 153, 153],
-                      [153, 153, 153], [30, 170, 250], [0, 220, 220],
-                      [35, 142, 107], [152, 251, 152], [180, 130, 70],
-                      [60, 20, 220], [0, 0, 255], [142, 0, 0], [70, 0, 0],
-                      [100, 60, 0], [90, 0, 0], [110, 0, 0], [100, 80, 0],
-                      [230, 0, 0], [32, 11, 119]])
-'''
-cityscapes_stereo = Dataset('Cityscapes Stereo', 34,
-                            [['/Cityscapes/images_left/train',
-                              '/Cityscapes/images_right/train'],
-                             ['/Cityscapes/images_left/val',
-                              '/Cityscapes/images_right/val']],
-                            [['/Cityscapes/labels_fine/train'],
-                             ['/Cityscapes/labels_fine/val']],
-                            [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
-                             [0, 74, 111], [81, 0, 81], [128, 64, 128], [232, 35, 244],
-                             [160, 170, 250], [140, 150, 230], [70, 70, 70],
-                             [156, 102, 102], [153, 153, 190], [180, 165, 180],
-                             [100, 100, 150], [90, 120, 150], [153, 153, 153],
-                             [153, 153, 153], [30, 170, 250], [0, 220, 220],
-                             [35, 142, 107], [152, 251, 152], [180, 130, 70],
-                             [60, 20, 220], [0, 0, 255], [142, 0, 0], [70, 0, 0],
-                             [100, 60, 0], [90, 0, 0], [110, 0, 0], [100, 80, 0],
-                             [230, 0, 0], [32, 11, 119]])
-'''
-mapillary = Dataset('Mapillary', 66,
-                    [['/Mapillary/training/images'],
-                     ['/Mapillary/validation/images']],
-                    [['/Mapillary/training/labels'],
-                     ['/Mapillary/validation/labels']],
-                    [[165, 42, 42], [0, 192, 0], [196, 196, 196],
-                     [190, 153, 153], [180, 165, 180], [102, 102, 156],
-                     [102, 102, 156], [128, 64, 255], [140, 140, 200],
-                     [170, 170, 170], [250, 170, 160], [96, 96, 96],
-                     [230, 150, 140], [128, 64, 128], [110, 110, 110],
-                     [244, 35, 232], [150, 100, 100], [70, 70, 70],
-                     [150, 120, 90], [220, 20, 60], [255, 0, 0],
-                     [255, 0, 0], [255, 0, 0], [200, 128, 128],
-                     [255, 255, 255], [64, 170, 64], [128, 64, 64],
-                     [70, 130, 180], [255, 255, 255], [152, 251, 152],
-                     [107, 142, 35], [0, 170, 30], [255, 255, 128],
-                     [250, 0, 30], [0, 0, 0], [220, 220, 220],
-                     [170, 170, 170], [222, 40, 40], [100, 170, 30],
-                     [40, 40, 40], [33, 33, 33], [170, 170, 170],
-                     [0, 0, 142], [170, 170, 170], [210, 170, 100],
-                     [153, 153, 153], [128, 128, 128], [0, 0, 142],
-                     [250, 170, 30], [192, 192, 192], [220, 220, 0],
-                     [180, 165, 180], [119, 11, 32], [0, 0, 142],
-                     [0, 60, 100], [0, 0, 142], [0, 0, 90],
-                     [0, 0, 230], [0, 80, 100], [128, 64, 64],
-                     [0, 0, 110], [0, 0, 70], [0, 0, 192], [32, 32, 32],
-                     [0, 0, 0], [0, 0, 0]])
-'''
+if __name__ == "__main__":
+    cityscapes = Cityscapes()
+    cityscapes.generate_data(10)

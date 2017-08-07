@@ -45,7 +45,7 @@ epochs = 10000000
 # specifies the architecture.
 # Note that this method is required even if you are loading weights from a
 # pretrained model.
-model = autoseg_models.get_dense103(input_shape, 34)
+model = autoseg_models.get_SQ(input_shape, 34)
 
 if "-n" not in sys.argv:
     if model_name in os.listdir(os.getcwd()):
@@ -82,14 +82,14 @@ callbacks = get_callbacks(model_name, logdir='./logs/DEFAULT/')
 
 # Benchmark the model to determine if it is able to run in real-time.
 start = time.clock()
-model.evaluate_generator(generate_cityscapes_stereo_data(1), 100)
+model.evaluate_generator(generate_cityscapes_data(1), 100)
 end = time.clock()
 print("Benchmarked at " + str(100 / (end - start)) + " frames per second on \
        images of size" + str(img_size) + ".")
 
 # Train the model!
 model.fit_generator(
-    generate_cityscapes_stereo_data(1),
+    generate_cityscapes_data(1),
     steps_per_epoch=500, #len(dataset.training_data) // batch_size,
     epochs=epochs,
     callbacks=callbacks,

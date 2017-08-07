@@ -57,22 +57,19 @@ def merge_file_lists(input_files, output_files):
 
 
 
-def generate_cityscapes_stereo_data(batch_size, augment_data=False, validating=True):
+def generate_cityscapes_data(batch_size, augment_data=False, validating=True):
     """Replaces Keras' native ImageDataGenerator."""
     if not validating:
-        traininginput_files = get_file_list(['/cityscapes_768/images_left/train',
-                                             '/cityscapes_768/images_right/train'])
+        training_input_files = get_file_list(['/cityscapes_768/images_left/train'])
         training_output_files = get_file_list(['/cityscapes_768/labels_fine/train'])
         data = merge_file_lists(training_input_files, training_output_files)
     else:
-        validation_input_files = get_file_list(['/cityscapes_768/images_left/val',
-                                                '/cityscapes_768/images_right/val'])
+        validation_input_files = get_file_list(['/cityscapes_768/images_left/val'])
         validation_output_files = get_file_list(['/cityscapes_768/labels_fine/val'])
         data = merge_file_lists(validation_input_files, validation_output_files)
 
 
     random.shuffle(data)
-    print(data)
 
     i = 0
     while True:
@@ -98,4 +95,4 @@ def generate_cityscapes_stereo_data(batch_size, augment_data=False, validating=T
             output_batch.append(outputs)
 
 
-        yield (input_batch, output_batch)
+        yield (np.array(input_batch), np.array(output_batch))
