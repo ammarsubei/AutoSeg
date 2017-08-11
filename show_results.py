@@ -81,8 +81,8 @@ for x,y in backend.generate_data(batch_size=3, validating=True):
          overlay = img.copy()
          cv2.addWeighted(output, 0.7, img, 0.3, 0, overlay)
          cv2.imshow('Model Output', overlay)
-         cv2.moveWindow('Model Output', 10, 10)
+         cv2.moveWindow('Model Output', 850, 10)
          #cv2.moveWindow('Model Output', 850, 500)
-         press = 0xFF & cv2.waitKey(1)
-         cv2.imwrite('demo/' + getID() + '.png', overlay)
+         press = 0xFF & cv2.waitKey(5000)
+         #cv2.imwrite('demo/' + getID() + '.png', overlay)
 

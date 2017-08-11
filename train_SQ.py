@@ -11,16 +11,16 @@ from autoseg_backend import BackendHandler, pixelwise_crossentropy, class_weight
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 train_encoder = True
-num_classes = 66
-data_dir = '/Mapillary/'
-img_height = 600
-img_width = 800
+num_classes = 22
+data_dir = '/mapillary/'
+img_height = 720
+img_width = 1280
 visualize_while_training = False
 dropout_rate = 0.4
 weight_decay=0.0002
 img_size = (img_width, img_height)
 input_shape = (img_height, img_width, 3)
-batch_size = 2
+batch_size = 1
 epochs = 1000
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
