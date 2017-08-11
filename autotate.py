@@ -7,7 +7,6 @@ import numpy as np
 import os, sys, time
 import autoseg_models
 import cv2
-from autoseg_backend import BackendHandler, pixelwise_crossentropy, class_weighted_pixelwise_crossentropy, pixelwise_accuracy
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
