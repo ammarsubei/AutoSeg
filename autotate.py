@@ -37,6 +37,7 @@ if model_name in os.listdir(os.getcwd()):
             break
 
 img = (cv2.resize(cv2.imread(sys.argv[1]), img_size).astype('float32') - 256.0) / 256.0
+print(img)
 filename = sys.argv[1].split('/')[-1]
 save_dir = sys.argv[2]
 
@@ -77,7 +78,9 @@ def makeLabelPretty(label):
 
 
 output = model.predict(np.array([img])).squeeze(0)
+print(output)
 gray = oneHotToLabel(output).astype('uint8')
+print(gray)
 color = makeLabelPretty(gray)[...,::-1]
 
 cv2.imwrite(save_dir + 'gray_' + filename, gray)
