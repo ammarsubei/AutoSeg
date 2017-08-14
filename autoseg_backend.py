@@ -7,7 +7,7 @@ import numpy as np
 import cv2
 from PIL import Image
 
-INPUT_SHAPE = (1280, 720)
+INPUT_SHAPE = (1024, 768)
 
 # Class weights. Classes with weight 0 do not contribute to the loss.
 
@@ -232,8 +232,7 @@ class BackendHandler(object):
                 sample = data[i]
                 i += 1
                 image = cv2.resize(cv2.imread(sample[0]), INPUT_SHAPE)
-                label = Image.open(sample[1])
-                label = cv2.resize(np.array(label), INPUT_SHAPE)
+                label = cv2.resize(cv2.imread(sample[1],0), INPUT_SHAPE)
 
                 # Data Augmentation
                 if not validating:

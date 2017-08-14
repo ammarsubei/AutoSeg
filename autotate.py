@@ -8,7 +8,7 @@ import os, sys, time
 import autoseg_models
 import cv2
 
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 num_classes = 22
 data_dir = '/mapillary/'
@@ -36,7 +36,7 @@ if model_name in os.listdir(os.getcwd()):
         if layer.name == "concatenate_8":
             break
 
-img = cv2.resize(cv2.imread(sys.argv[1]), img_size)
+img = (cv2.resize(cv2.imread(sys.argv[1]), img_size) - 256.0) / 256.0
 filename = sys.argv[1].split('/')[-1]
 save_dir = sys.argv[2]
 
@@ -77,7 +77,7 @@ def makeLabelPretty(label):
 
 
 output = model.predict(np.array([img])).squeeze(0)
-gray = oneHotToLabel(output)
+gray = oneHotToLabel(output).astype('uint8')
 color = makeLabelPretty(gray)
 
 cv2.imwrite(save_dir + 'gray_' + filename, gray)
