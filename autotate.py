@@ -8,7 +8,7 @@ import os, sys, time
 import autoseg_models
 import cv2
 
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"]=""
 
 num_classes = 22
 data_dir = '/mapillary/'
@@ -36,7 +36,7 @@ if model_name in os.listdir(os.getcwd()):
         if layer.name == "concatenate_8":
             break
 
-img = (cv2.resize(cv2.imread(sys.argv[1]), img_size) - 256.0) / 256.0
+img = (cv2.resize(cv2.imread(sys.argv[1]), img_size).astype('float32') - 256.0) / 256.0
 filename = sys.argv[1].split('/')[-1]
 save_dir = sys.argv[2]
 
