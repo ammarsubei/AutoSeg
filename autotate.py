@@ -78,7 +78,7 @@ def makeLabelPretty(label):
 
 output = model.predict(np.array([img])).squeeze(0)
 gray = oneHotToLabel(output).astype('uint8')
-color = makeLabelPretty(gray)
+color = makeLabelPretty(gray)[...,::-1]
 
 cv2.imwrite(save_dir + 'gray_' + filename, gray)
 cv2.imwrite(save_dir + 'color_' + filename, color)
