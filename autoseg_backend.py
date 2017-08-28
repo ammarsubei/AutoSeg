@@ -5,6 +5,17 @@ from keras import backend as K
 import tensorflow as tf
 import cv2
 
+def label_to_onehot(label, num_classes):
+    """Converts labels (e.g. 2) to one-hot vectors (e.g. [0,0,1,0]).
+    Accepts and returns a numpy array."""
+    return np.eye(num_classes)[label]
+
+# Accepts and returns a numpy array.
+def one_hot_to_label(one_hot):
+    """Converts one-hot vectors (e.g. [0,0,1,0]) to labels (e.g. 2).
+    Accepts and returns a numpy array."""
+    return one_hot.argmax(2).astype('uint8')
+
 def pixelwise_crossentropy(target, output):
     """
     Keras' default crossentropy function wasn't working, not sure why.
@@ -41,106 +52,102 @@ def get_callbacks(model_name='test.h5', logdir='./logs/DEFAULT'):
 
     return [checkpoint, tb]
 
-def get_file_list(directories):
-    """
-    For each directory in a list, recursively find all files in it.
-    Return a list of lists of files of the same length as directories.
-    """
-    file_list = []
-    for directory in directories:
-        contents = []
-        for path, subdirs, files in os.walk(os.getcwd() + directory):
-            for f in files:
-                contents.append(os.path.join(path, f))
-        contents.sort()
-        file_list.append(contents)
+def generate_mapillary_data(self, batch_size, validating=False,
+                      horizontal_flip=True, vertical_flip=False,
+                      adjust_brightness=0.1, rotate=5, zoom=0.1):
+    """Replaces Keras' native ImageDataGenerator."""
+    if validating:
+        data = self.validation_file_list
+    else:
+        data = self.training_file_list
+    random.shuffle(data)
 
-    return file_list
+    i = 0
+    while True:
+        image_batch = []
+        label_batch = []
+        for batch in range(batch_size):
+            if i == len(data):
+                i = 0
+                random.shuffle(data)
+            sample = data[i]
+            i += 1
+            image = cv2.resize(cv2.imread(sample[0]), INPUT_SHAPE)
+            label = Image.open(sample[1])
+            label = cv2.resize(np.array(label), INPUT_SHAPE)
 
-def merge_file_lists(input_files, output_files):
-    inputs = []
-    for i in range(len(input_files[0])):
-        inp = []
-        for j in range(len(input_files)):
-            inp.append(input_files[j][i])
-        inputs.append(inp)
-    outputs = []
-    for i in range(len(output_files[0])):
-        outp = []
-        for j in range(len(output_files)):
-            outp.append(output_files[j][i])
-        outputs.append(outp)
+            # Data Augmentation
+            if not validating:
+                # Horizontal flip.
+                if horizontal_flip and random.randint(0, 1):
+                    cv2.flip(image, 1)
+                    cv2.flip(label, 1)
+                # Vertical flip.
+                if vertical_flip and random.randint(0, 1):
+                    cv2.flip(image, 0)
+                    cv2.flip(label, 0)
+                # Randomly make image brighter or darker.
+                if adjust_brightness:
+                    factor = 1 + abs(random.gauss(mu=0, sigma=adjust_brightness))
+                    if random.randint(0, 1):
+                        factor = 1 / factor
+                    image = 255*((image/255)**factor)
+                    image = np.array(image, dtype='uint8')
+                # Randomly rotate image within a certain range.
+                if rotate:
+                    angle = random.gauss(mu=0, sigma=rotate)
+                else:
+                    angle = 0
+                # Randomly zoom image.
+                if zoom:
+                    scale = random.gauss(mu=1, sigma=zoom)
+                else:
+                    scale = 1
+                # Apply rotation/zoom calculated above.
+                if rotate or zoom:
+                    rows, cols = label.shape
+                    M = cv2.getRotationMatrix2D((cols/2, rows/2), angle, scale)
+                    image = cv2.warpAffine(image, M, (cols, rows))
+                    label = cv2.warpAffine(label, M, (cols, rows))
 
-    data = []
-    for i in range(len(inputs[0])):
-        data.append((inputs[i], outputs[i]))
-    return data
+            one_hot = label_to_onehot(label, self.num_classes)
+            image_batch.append((image.astype(float) - 128) / 128)
+            label_batch.append(one_hot)
+        image_batch = np.array(image_batch)
+        label_batch = np.array(label_batch)
 
-class Cityscapes(object):
-    """
-    Contains the parameters of a particular dataset, noteably the file lists.
-    """
-    def __init__(self):
-        self.num_classes = 34
-        self.colors = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
-                       [0, 74, 111], [81, 0, 81], [128, 64, 128], [232, 35, 244],
-                       [160, 170, 250], [140, 150, 230], [70, 70, 70],
-                       [156, 102, 102], [153, 153, 190], [180, 165, 180],
-                       [100, 100, 150], [90, 120, 150], [153, 153, 153],
-                       [153, 153, 153], [30, 170, 250], [0, 220, 220],
-                       [35, 142, 107], [152, 251, 152], [180, 130, 70],
-                       [60, 20, 220], [0, 0, 255], [142, 0, 0], [70, 0, 0],
-                       [100, 60, 0], [90, 0, 0], [110, 0, 0], [100, 80, 0],
-                       [230, 0, 0], [32, 11, 119]]
-        self.data_dir = 'Cityscapes/'
+        yield (image_batch, label_batch)
 
-    def generate_data(self, batch_size, augment_data=False, validating=True):
-        """
-        Replaces Keras' native ImageDataGenerator.
-        """
-        print(10)
-        if not validating:
-            training_input_files = get_file_list(['/cityscapes_768/images_left/train',
-                                                 '/cityscapes_768/images_right/train'])
-            training_output_files = get_file_list(['/cityscapes_768/labels_fine/train'])
-            data = merge_file_lists(training_input_files, training_output_files)
-        else:
-            validation_input_files = get_file_list(['/cityscapes_768/images_left/val',
-                                                    '/cityscapes_768/images_right/val'])
-            validation_output_files = get_file_list(['/cityscapes_768/labels_fine/val'])
-            data = merge_file_lists(validation_input_files, validation_output_files)
+def generate_cityscapes_stereo_data(self, batch_size, validating=False,
+                      horizontal_flip=True, vertical_flip=False,
+                      adjust_brightness=0.1, rotate=5, zoom=0.1):
+    """Replaces Keras' native ImageDataGenerator."""
+    if validating:
+        data = self.validation_file_list
+    else:
+        data = self.training_file_list
+    random.shuffle(data)
 
-
-        random.shuffle(data)
-        print(data)
-
-        i = 0
-        while True:
-            input_batch = []
-            output_batch = []
-            for b in range(batch_size):
-                if i == len(data):
-                    i = 0
-                    random.shuffle(data)
-                sample = data[i]
-                i += 1
-
-                inputs = []
-                for inp in sample[0]:
-                    inputs.append((cv2.imread(inp).astype(float) - 128) / 128)
-
-                outputs = []
-                for outp in sample[1]:
-                    outputs.append(label_to_onehot(cv2.imread(outp, 0), 34))
-
-                input_batch.append(inputs)
-                print(inputs)
-                print(outputs)
-                output_batch.append(outputs)
-
-
-            yield (input_batch, output_batch)
-
-if __name__ == "__main__":
-    cityscapes = Cityscapes()
-    cityscapes.generate_data(10)
+    i = 0
+    while True:
+        image_batch = []
+        image_batch_right = []
+        label_batch = []
+        for batch in range(batch_size):
+            if i == len(data):
+                i = 0
+                random.shuffle(data)
+            sample = data[i]
+            i += 1
+            image = cv2.imread(sample[0])
+            image_right = cv2.imread(sample[1])
+            label = remap_class(cv2.imread(sample[2], 0))
+            # No data augmentation.
+            one_hot = label_to_onehot(label, self.num_classes)
+            image_batch.append((image.astype(float) - 128) / 128)
+            image_batch_right.append((image_right.astype(float) - 128) / 128)
+            label_batch.append(one_hot)
+        image_batch = np.array(image_batch)
+        image_batch_right = np.array(image_batch_right)
+        label_batch = np.array(label_batch)
+        yield ([image_batch, image_batch_right], label_batch)
