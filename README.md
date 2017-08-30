@@ -35,4 +35,4 @@ This script defines the architecture for various models, including SQ. Make chan
 Defines various backends such as image data generation. Well-commented.
 
 ## show_results.py
-Run this script when a potential investor is coming over. Runs inference and shows the results. Works mostly the same as train_SQ.py Usage: python show_results.py WEIGHTS.h5
+Run this script when a potential investor is coming over. Runs inference and shows the results. Under the hood, works mostly the same as train_SQ.py Usage: python show_results.py WEIGHTS.h5
