@@ -46,7 +46,6 @@ Cityscapes*
 cityscapes*
 Mapillary*
 mapillary*
-*.h5
 *logs/*
 __MACOSX/*
 *.png
